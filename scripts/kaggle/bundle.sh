@@ -9,6 +9,6 @@ rm -rf "$out/tree"
 mkdir -p "$out/tree"
 git archive --prefix=dentabridge/ HEAD | tar -x -C "$out/tree"
 git rev-parse --short HEAD > "$out/tree/dentabridge/COMMIT"
-tar -czf "$out/dentabridge-code.tar.gz" -C "$out/tree" dentabridge
+COPYFILE_DISABLE=1 tar -czf "$out/dentabridge-code.tar.gz" -C "$out/tree" dentabridge
 rm -rf "$out/tree"
 echo "$out/dentabridge-code.tar.gz ($(du -h "$out/dentabridge-code.tar.gz" | cut -f1))"

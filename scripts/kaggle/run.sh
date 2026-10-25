@@ -52,9 +52,11 @@ PY
 }
 
 stage_data() {
+  if "$PY" -m dentabridge_ml.data verify >/dev/null 2>&1; then echo "data already in place"; return; fi
   "$PY" -m dentabridge_ml.data fetch "${SOURCES[@]}"
   "$PY" -m dentabridge_ml.data extract "${SOURCES[@]}"
   "$PY" -m dentabridge_ml.data verify
+  rm -rf "$DENTABRIDGE_DATA_ROOT/raw"  # the archives: the session disk is finite
 }
 
 stage_smoke() {

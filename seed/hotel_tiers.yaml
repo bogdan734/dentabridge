@@ -1,0 +1,6 @@
+# Hand-set hotel prices per room and night in USD (low, middle, high) by city tier.
+# They are estimates for a demo, not quotes: the quote shows them with the ESTIMATE chip.
+tiers:
+  budget:   {low: 35,  mid: 50,  high: 80}
+  standard: {low: 60,  mid: 90,  high: 140}
+  premium:  {low: 110, mid: 170, high: 260}

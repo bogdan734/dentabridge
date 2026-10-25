@@ -5,10 +5,12 @@ only the codes being asked about, so a baseline cannot answer about anything els
 """
 
 import base64
+import io
 import time
 from typing import Any
 
 import httpx
+from PIL import Image
 
 from dentabridge_core import (
     ASSESSABLE,
@@ -19,7 +21,7 @@ from dentabridge_core import (
     VisionOutput,
 )
 from dentabridge_ml.serving.parse import ReleaseConfig, parse_output
-from dentabridge_ml.targets.prompt import build_prompt
+from dentabridge_ml.targets.prompt import build_prompt, fit_image
 
 MAX_NEW_TOKENS = 700
 _REGION = {
@@ -60,11 +62,23 @@ class OllamaVisionBackend:
         model: str,
         release: ReleaseConfig,
         client: httpx.AsyncClient | None = None,
+        image_max_px: int | None = None,
     ) -> None:
         self.model = ModelInfo(model_id=model, version="ollama", backend="ollama")
         self._url = f"{base_url.rstrip('/')}/api/chat"
         self._release = release
         self._client = client or httpx.AsyncClient(timeout=httpx.Timeout(30.0, read=600.0))
+        self._image_max_px = image_max_px  # the size the tuned model was trained on; None = as is
+
+    def _payload(self, image: SanitisedImage) -> str:
+        data = image.data
+        if self._image_max_px is not None:
+            with Image.open(io.BytesIO(data)) as opened:
+                fitted = fit_image(opened.convert("RGB"), self._image_max_px)
+            buffer = io.BytesIO()
+            fitted.save(buffer, "JPEG", quality=90)
+            data = buffer.getvalue()
+        return base64.b64encode(data).decode("ascii")
 
     async def analyse(self, image: SanitisedImage, modality: Modality) -> VisionOutput:
         asked = self._release.assessed & ASSESSABLE[modality]
@@ -77,7 +91,7 @@ class OllamaVisionBackend:
                 {
                     "role": "user",
                     "content": build_prompt(asked, modality),
-                    "images": [base64.b64encode(image.data).decode("ascii")],
+                    "images": [self._payload(image)],
                 }
             ],
         }

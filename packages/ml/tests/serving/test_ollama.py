@@ -1,10 +1,12 @@
 import asyncio
 import base64
+import io
 import json
 from typing import Any
 
 import httpx
 import pytest
+from PIL import Image
 
 from dentabridge_core import FindingCode, SanitisedImage
 from dentabridge_ml.serving.ollama import OllamaVisionBackend, answer_schema
@@ -21,7 +23,9 @@ ANSWER = {
 }
 
 
-def _backend(content: str, seen: list[dict[str, Any]], status: int = 200) -> OllamaVisionBackend:
+def _backend(
+    content: str, seen: list[dict[str, Any]], status: int = 200, image_max_px: int | None = None
+) -> OllamaVisionBackend:
     def handler(request: httpx.Request) -> httpx.Response:
         seen.append(json.loads(request.content))
         if status != 200:
@@ -29,7 +33,9 @@ def _backend(content: str, seen: list[dict[str, Any]], status: int = 200) -> Oll
         return httpx.Response(200, json={"message": {"role": "assistant", "content": content}})
 
     client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
-    return OllamaVisionBackend("http://ollama.test:11434/", "qwen3-vl:4b", RELEASE, client)
+    return OllamaVisionBackend(
+        "http://ollama.test:11434/", "qwen3-vl:4b", RELEASE, client, image_max_px=image_max_px
+    )
 
 
 def test_ollama_request_shape() -> None:
@@ -65,3 +71,14 @@ def test_a_bad_answer_is_a_parse_error_and_a_server_error_is_not_hidden() -> Non
 def test_backend_reports_its_identity() -> None:
     backend = _backend("{}", [])
     assert (backend.model.model_id, backend.model.backend) == ("qwen3-vl:4b", "ollama")
+
+
+def test_the_picture_is_fitted_to_the_size_the_model_was_trained_on() -> None:
+    buffer = io.BytesIO()
+    Image.new("RGB", (200, 100), (90, 20, 20)).save(buffer, "JPEG")
+    big = SanitisedImage(data=buffer.getvalue(), width=200, height=100, sha256="b" * 64)
+    seen: list[dict[str, Any]] = []
+    asyncio.run(_backend(json.dumps(ANSWER), seen, image_max_px=64).analyse(big, "intraoral_photo"))
+    sent = base64.b64decode(seen[0]["messages"][0]["images"][0])
+    with Image.open(io.BytesIO(sent)) as image:
+        assert image.size == (64, 32)

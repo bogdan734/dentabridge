@@ -111,7 +111,14 @@ def train(cfg: TrainConfig, train_file: Path, root: Path, out: Path, resume: boo
     out.mkdir(parents=True, exist_ok=True)
     (out / "train_config.json").write_text(cfg.model_dump_json(indent=2), encoding="utf-8")
     trainer = make_trainer(
-        load_model(cfg), load_processor(cfg.base_id), cfg, read_sft(train_file), root, out
+        load_model(cfg),
+        load_processor(cfg.base_id),
+        cfg,
+        read_sft(train_file),
+        root,
+        out,
+        amp=cfg.device
+        != "mps",  # Trainer's mixed precision is CUDA/ROCm only; MPS loads fp16 weights
     )
     has_checkpoint = any(out.glob("checkpoint-*"))
     trainer.train(resume_from_checkpoint=True if resume and has_checkpoint else None)

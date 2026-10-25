@@ -1,0 +1,18 @@
+# ML1 on the M3 Max (36 GB): twenty LoRA steps, only to get a merged model whose serving route can
+# be tested. This is not a quality run. Run from the repository root (base_id is a local path).
+base_id = "data/models/Qwen3-VL-4B-Instruct"
+device = "mps"
+quant = "none"
+dtype = "fp16"
+image_max_px = 336
+lora_r = 8
+lora_alpha = 8
+train_vision = false
+lr = 2e-4
+epochs = 1
+max_steps = 20
+batch_size = 1
+grad_accum = 2
+gradient_checkpointing = true
+save_every = 10
+seed = 0

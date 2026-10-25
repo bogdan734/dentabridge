@@ -1,0 +1,58 @@
+# Rules for dentabridge_core.policy.claims. Single-quoted strings are regex literals.
+# A banned pattern matches anywhere. A verdict pattern only counts in a sentence that has no
+# hedge word, so "you may have a cavity" passes and "you have a cavity" does not.
+# docs_allowlist: exact sentences the docs profile accepts although they name what is banned
+# ("it is not a diagnosis"). The patient profile has no allowlist.
+
+[en]
+hedge = '\b(?:may|might|could|possibly|possible|perhaps|appears?|seems?|suggest\w*|looks?\s+like|cannot\s+rule\s+out|can.?t\s+rule\s+out|not\s+rule\s+out|potential\w*|probabl\w*|if|whether)\b'
+verdict = [
+  '\byou\s+(?:have|has|suffer\s+from|are\s+suffering\s+from|got)\b[^.!?\n]{0,40}?\b(?:caries|cavit(?:y|ies)|decay\w*|gingivitis|gum\s+disease|periodontitis|abscess\w*|infection\w*|ulcer\w*|calculus|tartar|plaque|lesion\w*|cancer)\b',
+  '\byour\s+(?:tooth|teeth|gums?|mouth)\b[^.!?\n]{0,40}?\b(?:has|have|is|are|shows?)\b[^.!?\n]{0,30}?\b(?:caries|cavit(?:y|ies)|decay\w*|gingivitis|gum\s+disease|periodontitis|abscess\w*|infection\w*|ulcer\w*|calculus|tartar|plaque|lesion\w*|cancer|infected|inflamed|decayed)\b',
+  '\b(?:this|it|that)\s+is\s+(?:a|an)\s+(?:cavity|caries|decay|gingivitis|infection|abscess|ulcer)\b',
+]
+banned = [
+  { id = "claim.diagnosis", pattern = '\bdiagnos\w*' },
+  { id = "claim.detects_disease", pattern = '\bdetects?\s+(?:the\s+|any\s+)?(?:diseases?|conditions?|cancer)\b' },
+  { id = "claim.clinical_grade", pattern = '\b(?:clinical|medical)[- ]grade\b' },
+  { id = "claim.regulatory", pattern = '\b(?:FDA|CE|MHRA|HIPAA|GDPR)\b[^.!?\n]{0,40}\b(?:approved|cleared|certified|compliant|compliance|registered|authori[sz]ed)\b' },
+  { id = "claim.regulatory", pattern = '\b(?:approved|cleared|certified|compliant|authori[sz]ed)\b[^.!?\n]{0,40}\b(?:FDA|CE|MHRA|HIPAA|GDPR)\b' },
+  { id = "claim.replaces_dentist", pattern = '\b(?:replaces?|substitutes?\s+for|instead\s+of)\s+(?:your\s+|a\s+|the\s+)?(?:dentist|doctor|physician)s?\b' },
+  { id = "claim.guarantee", pattern = '\bguarant\w*' },
+  { id = "claim.cure", pattern = '\b(?:cures?|cured|curing|curative)\b' },
+  { id = "claim.accuracy", pattern = '\b(?:100\s?%|perfectly|fully)\s+accurate\b' },
+]
+docs_allowlist = [
+  "It is not a diagnosis, not medical advice and not a substitute for a dentist.",
+  "Do not use it for diagnosis, treatment or emergencies.",
+  "It does not diagnose disease and does not replace your dentist.",
+  "It has not been cleared or approved by the FDA, an EU notified body or the MHRA.",
+  "It makes no claim of FDA, CE, MHRA, HIPAA or GDPR compliance.",
+]
+
+[ru]
+hedge = '\b(?:возможн\w*|может|могут|могло|вероятн\w*|похож\w*|выгляд\w*|нельзя\s+исключить|не\s+исключ\w*|предполож\w*|если|вдруг)\b'
+verdict = [
+  '\bу\s+вас\b[^.!?\n]{0,40}?\b(?:кариес\w*|кариоз\w*|гингивит\w*|пародонтит\w*|абсцесс\w*|инфекци\w*|язв\w*|налёт\w*|налет\w*|зубн\w+\s+камн\w*|воспалени\w*)\b',
+  '\bвы\s+(?:больны|страдаете)\b',
+  '\bваш\w*\s+(?:зуб\w*|дёсн\w*|десн\w*)\b[^.!?\n]{0,40}?\b(?:поражен\w*|больн\w*|воспален\w*|кариозн\w*|инфицирован\w*)\b',
+  '\bэто\s+(?:кариес|гингивит|инфекци\w*|абсцесс|язва)\b',
+]
+banned = [
+  { id = "claim.diagnosis", pattern = '\bдиагноз\w*|\bдиагностир\w*|\bдиагностик\w*|\bдиагностическ\w*' },
+  { id = "claim.detects_disease", pattern = '\b(?:выявля|обнаружива|определя)\w*\s+(?:любы\w+\s+)?(?:заболевани|болезн)\w*' },
+  { id = "claim.clinical_grade", pattern = '\bклиническ\w+\s+(?:уров|точност|качеств)\w*' },
+  { id = "claim.regulatory", pattern = '\b(?:FDA|CE|MHRA|HIPAA|GDPR)\b[^.!?\n]{0,40}\b(?:одобр|сертифиц|соответств|разреш|лицензи)\w*' },
+  { id = "claim.regulatory", pattern = '\b(?:одобр|сертифиц|соответств|разреш|лицензи)\w*[^.!?\n]{0,40}\b(?:FDA|CE|MHRA|HIPAA|GDPR)\b' },
+  { id = "claim.replaces_dentist", pattern = '\b(?:заменя|замена|вместо)\w*\s+(?:вашего\s+|ваш\w+\s+|вашей\s+)?(?:стоматолог|врач|доктор)\w*' },
+  { id = "claim.guarantee", pattern = '\bгаранти\w*' },
+  { id = "claim.cure", pattern = '\b(?:излеч|вылеч|исцел)\w*|\bлечит\b' },
+  { id = "claim.accuracy", pattern = '\b100\s?%\s+точн\w*' },
+]
+docs_allowlist = [
+  "Это не диагноз, не медицинская консультация и не замена стоматологу.",
+  "Не используйте его для диагностики, лечения или в экстренных случаях.",
+  "Он не ставит диагноз и не заменяет вашего стоматолога.",
+  "Он не одобрен и не сертифицирован FDA, нотифицированным органом ЕС или MHRA.",
+  "Он не заявляет о соответствии требованиям FDA, CE, MHRA, HIPAA или GDPR.",
+]

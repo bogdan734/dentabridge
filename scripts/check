@@ -26,4 +26,7 @@ step uv run ruff check .
 step uv run ruff format --check .
 step uv run mypy
 step uv run pytest -q -m "not slow and not gpu and not network"
-# ---- F2 (claims linter) adds its step here: step uv run dentabridge-lint --profile P --locale L PATH...
+for locale in en ru; do
+  step uv run dentabridge-lint --profile patient --locale "$locale" \
+    "packages/core/src/dentabridge_core/i18n/$locale.json"
+done

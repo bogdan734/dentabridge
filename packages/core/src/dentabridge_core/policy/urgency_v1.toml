@@ -1,0 +1,33 @@
+# Demo urgency table, version v1. The first enabled rule that matches wins.
+# Not clinically reviewed: review_status stays "illustrative_not_clinically_reviewed" until a
+# dentist's review record in docs/clinical-review/ names the sha256 of this exact file.
+version = "v1"
+
+[[rule]]
+id = "R0"
+level = "retake_photo"
+quality = "unusable"
+
+[[rule]]
+id = "R1"
+level = "prompt"
+enabled = false  # waits for ML2 to confirm that AlphaDent caries subtypes encode severity
+code = "caries"
+status = "possible"
+subtype_in = []
+
+[[rule]]
+id = "R2"
+level = "soon"
+code = "caries"
+status = "possible"
+
+[[rule]]
+id = "R3"
+level = "soon"
+code = "gingivitis"
+status = "possible"
+
+[[rule]]
+id = "R9"
+level = "routine"

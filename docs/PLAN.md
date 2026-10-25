@@ -163,7 +163,7 @@ Invariants the validators enforce at construction (a violation raises Validation
 - Tests: test_schema_snapshots_match (model_json_schema == committed file); test_price_range_rejects_disorder; test_analysis_requires_every_catalog_code; test_disclosure_fields_literal_true; test_fakes_satisfy_ports (isinstance on the protocols).
 - Verify: `uv run pytest packages/core -q`
 ### F2 Claims linter [L] WS00 M1 (deps F1)
-- Files: dentabridge_core/policy/{claims.py, claims_rules.yaml, lint_cli.py}; tests/policy/corpus/{en,ru}_{pass,fail}.txt.
+- Files: dentabridge_core/policy/{claims.py, claims_rules.toml, lint_cli.py}; tests/policy/corpus/{en,ru}_{pass,fail}.txt.
 - Signatures: `lint(text: str, locale: Literal["en","ru"], profile: Literal["patient","docs"]) -> tuple[Violation, ...]`; `Violation(rule_id: str, start: int, end: int, excerpt: str)`. CLI `dentabridge-lint --profile P --locale L PATH...` lints .json values and .md text and exits 1 on any violation.
 - Rules:
   - banned claims: diagnos*, detects disease, clinical-grade, FDA/CE/MHRA/HIPAA approved/cleared/compliant, replaces your dentist, guarantee, cure (plus RU equivalents);
@@ -171,12 +171,12 @@ Invariants the validators enforce at construction (a violation raises Validation
   - the docs profile allowlists exact disclaimer sentences only.
 - Tests: test_fail_corpus_every_line_flagged; test_pass_corpus_clean; test_disclaimer_allowed_only_in_docs_profile; test_cli_exit_codes.
 ### F3 Urgency rule table and review record [S] WS00 M1 (deps F1)
-- Files: policy/{urgency.py, urgency_v1.yaml}; docs/clinical-review/README.md. Review record schema: reviewer_name, qualification, registration, reviewed_on, table_sha256, verdicts{rule_id: agree|change|remove, comment}, statement.
-- Signatures: `load_table(path: Path) -> UrgencyTable`; `evaluate(findings: Sequence[Finding], quality: Literal["ok","unusable"], table: UrgencyTable) -> UrgencyHint`; `review_status(table_path: Path, reviews_dir: Path) -> Literal["illustrative_not_clinically_reviewed","reviewed"]`.
+- Files: policy/{urgency.py, urgency_v1.toml}; docs/clinical-review/README.md. Review record schema: reviewer_name, qualification, registration, reviewed_on, table_sha256, verdicts{rule_id: agree|change|remove, comment}, statement.
+- Signatures: `load_table(path: Path, reviews_dir: Path | None = None) -> UrgencyTable`; `evaluate(findings: Sequence[Finding], quality: Literal["ok","unusable"], table: UrgencyTable) -> UrgencyHint`; `review_status(table_path: Path, reviews_dir: Path) -> Literal["illustrative_not_clinically_reviewed","reviewed"]`.
 - Tests: test_every_status_combination_hits_one_rule (exhaustive 3^5 × 2); test_adding_possible_never_lowers_level; test_reviewed_only_when_sha_matches; test_illustrative_by_default.
 ### F4 Patient text renderer [S] WS00 M1 (deps F2, F3)
 - Files: policy/render.py; i18n/{en,ru}.json (finding × status, urgency levels, banner, disclaimers, ai_disclosure, estimate footer, chips, consent text v1).
-- Signatures: `render_patient_text(findings: Sequence[Finding], urgency: UrgencyHint, locale: Literal["en","ru"]) -> PatientText`; `guard_note(note: str | None) -> tuple[str | None, Literal["absent","passed","rejected"]]`; `texts(locale: str) -> Mapping[str, str]` (feeds /meta).
+- Signatures: `render_patient_text(findings: Sequence[Finding], urgency: UrgencyHint, locale: Literal["en","ru"], modality: Modality = "intraoral_photo") -> PatientText`; `guard_note(note: str | None) -> tuple[str | None, Literal["absent","passed","rejected"]]`; `texts(locale: str) -> Mapping[str, str]` (feeds /meta).
 - Tests: test_keys_identical_across_locales; test_every_rendering_passes_patient_lint (hypothesis over finding combinations × locale); test_see_dentist_always_present; test_note_with_verdict_rejected.
 - Verify (F2-F4): `uv run pytest packages/core/tests/policy -q && uv run dentabridge-lint --profile patient --locale ru packages/core/src/dentabridge_core/i18n/ru.json`
 ### ML1 Ollama round-trip pilot [L] WS01 M1 (deps F0; first ML task)

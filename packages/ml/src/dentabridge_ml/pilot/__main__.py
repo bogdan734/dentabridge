@@ -51,7 +51,10 @@ def _import(args: argparse.Namespace) -> int:
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "Modelfile"
         path.write_text(modelfile(args.like, args.merged), encoding="utf-8")
-        subprocess.run(["ollama", "create", args.name, "-f", str(path)], check=True)
+        command = ["ollama", "create", args.name, "-f", str(path)]
+        if args.quantize:
+            command += ["--quantize", args.quantize]
+        subprocess.run(command, check=True)
     return 0
 
 
@@ -118,17 +121,27 @@ def _compare(args: argparse.Namespace) -> int:
     )
     expected = asyncio.run(_answers(reference, images))
     del reference
-    ollama = OllamaVisionBackend(
-        OLLAMA_URL, args.name, research_release(), image_max_px=args.image_max_px
-    )
-    got = asyncio.run(_answers(ollama, images))
+
+    def served(constrain: bool) -> OllamaVisionBackend:
+        return OllamaVisionBackend(
+            OLLAMA_URL,
+            args.name,
+            research_release(),
+            image_max_px=args.image_max_px,
+            constrain=constrain,
+        )
+
+    # free decoding runs the same computation as the reference, so it measures the import; the
+    # schema-constrained run is how the model is served, so it gives the valid-JSON rate
+    free = asyncio.run(_answers(served(constrain=False), images))
+    constrained = asyncio.run(_answers(served(constrain=True), images))
 
     version = httpx.get(f"{OLLAMA_URL}/api/version", timeout=10.0).json()["version"]
     report = RoundtripReport(
         path=args.route,
         vision_ok=sees_images(args.name),
-        json_valid_rate=valid_rate(got),
-        agreement=agreement(expected, got),
+        json_valid_rate=valid_rate(constrained),
+        agreement=agreement(expected, free),
         logprobs_available=has_logprobs(args.name),
         ollama_version=version,
     )

@@ -10,6 +10,16 @@ dependencies = [
     "pillow>=11",
 ]
 
+[project.optional-dependencies]
+# Training, the Ollama round-trip pilot and local inference. CI and the gate do not install it.
+train = [
+    "torch>=2.8",
+    "torchvision>=0.23",
+    "transformers>=4.57",
+    "peft>=0.17",
+    "accelerate>=1.10",
+]
+
 [build-system]
 requires = ["uv_build>=0.11.19,<0.12.0"]
 build-backend = "uv_build"

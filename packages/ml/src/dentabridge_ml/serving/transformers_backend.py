@@ -33,6 +33,13 @@ def pick_device() -> str:
     return "mps" if torch.backends.mps.is_available() else "cpu"
 
 
+def dtype_for(device: str, capability: tuple[int, int] | None) -> torch.dtype:
+    """bf16 where the hardware runs it natively (Ampere and later, Apple, CPU), else fp16."""
+    if device == "cuda" and capability is not None and capability[0] < 8:
+        return torch.float16
+    return torch.bfloat16
+
+
 class _StatusProbs(LogitsProcessor):  # type: ignore[misc]  # transformers is Any for mypy
     """Records, at every step and for every row, the probability of the two status tokens."""
 
@@ -51,13 +58,16 @@ class TransformersVisionBackend:
         model_dir: str,
         release: ReleaseConfig,
         image_max_px: int,
-        dtype: torch.dtype = torch.bfloat16,
+        dtype: torch.dtype | None = None,
         device: str | None = None,
     ) -> None:
         self.model = ModelInfo(model_id=model_dir, version="local", backend="transformers")
         self._release = release
         self._image_max_px = image_max_px
         self._device = device or pick_device()
+        if dtype is None:
+            capability = torch.cuda.get_device_capability() if self._device == "cuda" else None
+            dtype = dtype_for(self._device, capability)
         self._processor: Any = AutoProcessor.from_pretrained(model_dir)
         self._processor.tokenizer.padding_side = "left"  # generation continues from the right edge
         self._net: Any = Qwen3VLForConditionalGeneration.from_pretrained(model_dir, dtype=dtype)

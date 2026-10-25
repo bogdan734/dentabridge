@@ -1,4 +1,4 @@
-.PHONY: data data-lock data-verify splits eval-val eval-test
+.PHONY: data data-lock data-verify splits eval-val eval-test kaggle-bundle
 
 # DATA_SOURCES limits the run, e.g. `make data DATA_SOURCES=aku_caries`; empty means every published source.
 DATA_SOURCES ?=
@@ -26,3 +26,6 @@ eval-val: ## Score the validation split with BACKEND; results land in docs/resul
 
 eval-test: ## Score the test split ONCE per chosen model (logged in docs/results/ml/test-access.log)
 	uv run python -m dentabridge_ml.eval run --backend $(BACKEND) --split test --final --access-log docs/results/ml/test-access.log --image-max-px $(IMAGE_PX) --out-dir docs/results/ml/runs/$(RUN)
+
+kaggle-bundle: ## Pack HEAD into var/kaggle/dentabridge-code.tar.gz (upload it as a private Kaggle dataset)
+	scripts/kaggle/bundle.sh

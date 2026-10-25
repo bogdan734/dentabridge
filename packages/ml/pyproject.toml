@@ -19,6 +19,8 @@ train = [
     "peft>=0.17",
     "accelerate>=1.10",
 ]
+# llama.cpp's converter imports sentencepiece before it falls back to the BPE vocabulary of Qwen.
+gguf = ["sentencepiece>=0.2"]
 
 [build-system]
 requires = ["uv_build>=0.11.19,<0.12.0"]

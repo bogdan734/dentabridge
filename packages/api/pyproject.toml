@@ -3,7 +3,20 @@ name = "dentabridge-api"
 version = "0.1.0"
 description = "HTTP service for analyses, quotes, bookings and calls"
 requires-python = ">=3.13,<3.14"
-dependencies = ["dentabridge-core", "dentabridge-pricing"]
+dependencies = [
+    "dentabridge-core",
+    "dentabridge-ml",
+    "dentabridge-pricing",
+    "alembic>=1.14",
+    "fastapi>=0.115",
+    "httpx>=0.28",
+    "pillow>=11",
+    "pydantic-settings>=2.7",
+    "python-multipart>=0.0.20",
+    "pyyaml>=6",
+    "sqlalchemy>=2.0",
+    "uvicorn>=0.34",
+]
 
 [build-system]
 requires = ["uv_build>=0.11.19,<0.12.0"]
@@ -11,4 +24,5 @@ build-backend = "uv_build"
 
 [tool.uv.sources]
 dentabridge-core = { workspace = true }
+dentabridge-ml = { workspace = true }
 dentabridge-pricing = { workspace = true }

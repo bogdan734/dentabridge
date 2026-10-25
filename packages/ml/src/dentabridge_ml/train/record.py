@@ -36,5 +36,5 @@ def make_record(
         steps=int(summary["step"]),
         train_seconds=summary["train_runtime"],
         samples_per_second=summary["train_samples_per_second"],
-        final_loss=losses[-1] if losses else None,
+        final_loss=losses[-1] if losses else summary.get("train_loss"),
     )

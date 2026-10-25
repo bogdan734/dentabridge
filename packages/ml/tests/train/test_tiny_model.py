@@ -254,3 +254,21 @@ def test_merged_directory_has_the_base_checkpoint_layout(tmp_path: Path) -> None
     assert merged_layout.keys() == base_layout.keys()
     assert {k: v[0] for k, v in merged_layout.items()} == {k: v[0] for k, v in base_layout.items()}
     assert not any("lora" in k for k in merged_layout)
+
+
+def test_merged_directory_keeps_the_original_config_and_processor_files(tmp_path: Path) -> None:
+    """Ollama's converter reads the hub checkpoint's own files (preprocessor_config.json...), not
+    whatever the installed transformers would write today."""
+    processor = load_processor(str(MODEL_DIR))
+    base = _tiny_model()
+    base.save_pretrained(tmp_path / "base")
+    processor.save_pretrained(tmp_path / "base")
+    (tmp_path / "base" / "preprocessor_config.json").write_text('{"from": "the hub"}')
+    tuned = attach_lora(base, _config())
+    tuned.save_pretrained(tmp_path / "adapter")
+    merged = merge_adapter(
+        str(tmp_path / "base"), tmp_path / "adapter", tmp_path / "merged", "fp16"
+    )
+    assert (merged / "preprocessor_config.json").read_text() == '{"from": "the hub"}'
+    assert (merged / "config.json").read_text() == (tmp_path / "base" / "config.json").read_text()
+    assert (merged / "model.safetensors").stat().st_size > 0

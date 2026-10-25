@@ -33,3 +33,8 @@ def test_config_digest_is_stable_and_follows_every_field() -> None:
 def test_a_run_that_never_finished_has_no_record() -> None:
     with pytest.raises(ValueError, match="final summary"):
         make_record(CFG, 1, [{"loss": 3.1, "step": 5.0}], "c", "h")
+
+
+def test_a_run_shorter_than_the_logging_interval_reports_its_mean_loss() -> None:
+    record = make_record(CFG, 1, [{**SUMMARY, "step": 4.0}], "c", "h")
+    assert record.final_loss == 2.9

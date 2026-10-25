@@ -1,0 +1,17 @@
+# Data in packages/pricing/data, with where it came from and why it may be redistributed.
+
+[[source]]
+component = "airports_*.csv.gz"
+origin = "OurAirports, https://ourairports.com/data/ (airports.csv)"
+licence = "Public domain (the OurAirports data is released into the public domain)"
+used = "airports with scheduled passenger service and an IATA code: name, city, country, coordinates"
+verified_on = "2026-10-25"
+status = "shipped"
+
+[[source]]
+component = "fx_*.json"
+origin = "European Central Bank euro foreign exchange reference rates, via https://api.frankfurter.dev (quoted against USD)"
+licence = "ECB data may be reused with the source acknowledged; Frankfurter is an open-source API"
+used = "converting estimates between the currencies the snapshot holds; RUB has no ECB reference rate and is not offered"
+verified_on = "2026-10-25"
+status = "shipped"

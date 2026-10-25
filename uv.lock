@@ -333,10 +333,14 @@ version = "0.1.0"
 source = { editable = "packages/pricing" }
 dependencies = [
     { name = "dentabridge-core" },
+    { name = "pyyaml" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "dentabridge-core", editable = "packages/core" }]
+requires-dist = [
+    { name = "dentabridge-core", editable = "packages/core" },
+    { name = "pyyaml", specifier = ">=6" },
+]
 
 [[package]]
 name = "dentabridge-voice"

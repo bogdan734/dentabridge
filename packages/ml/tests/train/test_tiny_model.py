@@ -8,7 +8,6 @@ import asyncio
 import json
 import math
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -182,9 +181,8 @@ def test_backend_parses_only_the_newly_generated_tokens_and_scores_each_status(
         "findings": [{"code": "caries", "status": "possible", "regions": []}],
     }
     tokenizer = backend._processor.tokenizer
-    ids = tokenizer(
-        json.dumps(answer, separators=(",", ":")), add_special_tokens=False, return_tensors="pt"
-    )
+    text = json.dumps(answer, separators=(",", ":"))
+    ids = tokenizer(text, add_special_tokens=False, return_tensors="pt")
     possible_id, not_id = backend._ids
     vocab = backend._net.config.text_config.vocab_size
     steps = []
@@ -198,8 +196,10 @@ def test_backend_parses_only_the_newly_generated_tokens_and_scores_each_status(
 
     def fake_generate(**inputs: Any) -> Any:
         seen.update(inputs)
-        sequences = torch.cat([inputs["input_ids"], ids["input_ids"]], dim=1)
-        return SimpleNamespace(sequences=sequences, logits=tuple(steps))
+        for step in steps:  # what generate() does: show every step's logits to the processors
+            for processor in inputs["logits_processor"]:
+                processor(None, step)
+        return torch.cat([inputs["input_ids"], ids["input_ids"]], dim=1)
 
     monkeypatch.setattr(backend._net, "generate", fake_generate)
     output = asyncio.run(backend.analyse(_photo(tmp_path), "intraoral_photo"))
@@ -209,6 +209,17 @@ def test_backend_parses_only_the_newly_generated_tokens_and_scores_each_status(
     assert seen["do_sample"] is False
     assert seen["max_new_tokens"] == 700
     assert (seen["input_ids"] == IMAGE_TOKEN).any(), "the picture reached the model"
+
+
+def test_a_batch_of_differently_sized_pictures_is_padded_on_the_left(tmp_path: Path) -> None:
+    backend = _backend(tmp_path)
+    Image.new("RGB", (96, 64), (10, 90, 120)).save(tmp_path / "wide.jpg")
+    Image.new("RGB", (40, 120), (200, 90, 20)).save(tmp_path / "tall.jpg")
+    images = [sanitise(tmp_path / "wide.jpg"), sanitise(tmp_path / "tall.jpg")]
+    results = asyncio.run(backend.analyse_many(images, "intraoral_photo"))
+    assert len(results) == 2
+    assert all(isinstance(r, ParseError) for r in results), "a random model writes no JSON"
+    assert backend._processor.tokenizer.padding_side == "left"
 
 
 def test_backend_generates_end_to_end_and_reports_unparseable_text(tmp_path: Path) -> None:

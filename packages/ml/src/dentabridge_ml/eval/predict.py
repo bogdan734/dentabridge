@@ -11,11 +11,12 @@ import subprocess
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Protocol, runtime_checkable
 
 from PIL import Image, ImageOps
 from pydantic import BaseModel, ConfigDict
 
-from dentabridge_core import SanitisedImage, VisionBackend, VisionOutput
+from dentabridge_core import Modality, SanitisedImage, VisionBackend, VisionOutput
 from dentabridge_ml.data.records import ImageRecord
 from dentabridge_ml.data.sources import SOURCES
 from dentabridge_ml.serving.parse import ParseError, ReleaseConfig
@@ -30,6 +31,15 @@ class PredictionRow(BaseModel):
     record_id: str
     output: VisionOutput | None = None
     error: str | None = None  # a ParseError: the model did not answer in the agreed format
+
+
+@runtime_checkable
+class BatchVisionBackend(VisionBackend, Protocol):
+    """A backend that answers several pictures in one forward pass (GPU evaluation)."""
+
+    async def analyse_many(
+        self, images: Sequence[SanitisedImage], modality: Modality
+    ) -> list[VisionOutput | ParseError]: ...
 
 
 def research_release() -> ReleaseConfig:
@@ -59,6 +69,13 @@ def _commit() -> str:
     return result.stdout.strip() or "unknown"
 
 
+async def _answer(backend: VisionBackend, image: SanitisedImage) -> VisionOutput | ParseError:
+    try:
+        return await backend.analyse(image, "intraoral_photo")
+    except ParseError as error:
+        return error
+
+
 async def predict(
     backend: VisionBackend,
     records: Sequence[ImageRecord],
@@ -67,7 +84,10 @@ async def predict(
     out: Path,
     final: bool = False,
     access_log: Path | None = None,
+    batch_size: int = 1,
 ) -> Path:
+    if batch_size > 1 and not isinstance(backend, BatchVisionBackend):
+        raise TypeError("batch_size > 1 needs a backend with analyse_many")
     if any(e.split == "test" for e in entries):
         if not final:
             raise PermissionError("the test split is read once, with final=True")
@@ -78,16 +98,20 @@ async def predict(
         with access_log.open("a", encoding="utf-8") as log:
             log.write(line)
     wanted = {e.record_id for e in entries}
+    chosen = [r for r in records if r.record_id in wanted]
     rows: list[PredictionRow] = []
-    for record in records:
-        if record.record_id not in wanted:
-            continue
-        image = sanitise(root / record.source / record.path)
-        try:
-            output = await backend.analyse(image, "intraoral_photo")
-            rows.append(PredictionRow(record_id=record.record_id, output=output))
-        except ParseError as error:
-            rows.append(PredictionRow(record_id=record.record_id, error=str(error)))
+    for start in range(0, len(chosen), batch_size):
+        chunk = chosen[start : start + batch_size]
+        images = [sanitise(root / r.source / r.path) for r in chunk]
+        if isinstance(backend, BatchVisionBackend) and batch_size > 1:
+            results = await backend.analyse_many(images, "intraoral_photo")
+        else:
+            results = [await _answer(backend, image) for image in images]
+        for record, result in zip(chunk, results, strict=True):
+            if isinstance(result, ParseError):
+                rows.append(PredictionRow(record_id=record.record_id, error=str(result)))
+            else:
+                rows.append(PredictionRow(record_id=record.record_id, output=result))
     out.write_text("".join(r.model_dump_json() + "\n" for r in rows), encoding="utf-8")
     return out
 

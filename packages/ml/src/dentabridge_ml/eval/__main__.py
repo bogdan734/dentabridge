@@ -31,6 +31,7 @@ def _run(args: argparse.Namespace) -> int:
             predictions,
             final=args.final,
             access_log=args.access_log,
+            batch_size=args.batch_size,
         )
     )
     result = build_result(
@@ -53,6 +54,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     run.add_argument("--image-max-px", type=int, default=None)
     run.add_argument(
         "--limit", type=int, default=None, help="first N images; val only (smoke runs)"
+    )
+    run.add_argument(
+        "--batch-size", type=int, default=1, help="pictures per forward pass (transformers)"
     )
     run.add_argument("--final", action="store_true", help="read the test split, once, and log it")
     run.add_argument("--access-log", type=Path, default=None)

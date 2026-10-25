@@ -158,3 +158,46 @@ def test_sanitise_is_upright_bounded_and_metadata_free(tmp_path: Path) -> None:
 
     assert not Image.open(BytesIO(clean.data)).getexif()
     assert clean == sanitise(path)
+
+
+class BatchBackend:
+    """Answers in batches, remembering how big each batch was."""
+
+    model = ModelInfo(model_id="batched", version="0", backend="fixture")
+
+    def __init__(self, answers: dict[str, VisionOutput | None]) -> None:
+        self._answers = answers
+        self.batches: list[int] = []
+
+    async def analyse(self, image, modality):  # type: ignore[no-untyped-def]
+        raise AssertionError("a batch backend is called in batches")
+
+    async def analyse_many(self, images, modality):  # type: ignore[no-untyped-def]
+        self.batches.append(len(images))
+        return [self._answers[i.sha256] or ParseError("not the agreed JSON") for i in images]
+
+
+def test_batches_give_the_same_rows_as_one_at_a_time(tmp_path: Path) -> None:
+    records, entries = _world(tmp_path)
+    one_by_one = _backend(tmp_path, records)
+    batched = BatchBackend(one_by_one._answers)
+    asyncio.run(predict(one_by_one, records, entries, tmp_path, tmp_path / "a.jsonl"))
+    asyncio.run(predict(batched, records, entries, tmp_path, tmp_path / "b.jsonl", batch_size=3))
+    assert batched.batches == [3, 3, 2]
+    assert (tmp_path / "a.jsonl").read_text() == (tmp_path / "b.jsonl").read_text()
+    assert read_predictions(tmp_path / "b.jsonl")[7].error is not None
+
+
+def test_a_batch_size_needs_a_backend_that_batches(tmp_path: Path) -> None:
+    records, entries = _world(tmp_path)
+    with pytest.raises(TypeError, match="analyse_many"):
+        asyncio.run(
+            predict(
+                _backend(tmp_path, records),
+                records,
+                entries,
+                tmp_path,
+                tmp_path / "x",
+                batch_size=4,
+            )
+        )

@@ -1,5 +1,8 @@
 # Virtual root: no [project] table, so uv installs every member of packages/*.
 # requires-python lives in each member; .python-version pins 3.13 for the workspace.
+[tool.uv]
+required-version = ">=0.11.19,<0.12"
+
 [tool.uv.workspace]
 members = ["packages/*"]
 
@@ -23,11 +26,21 @@ select = ["E", "F", "I", "B", "UP", "SIM", "RUF", "PT", "C4"]
 
 [tool.mypy]
 strict = true
-files = ["packages/*/src", "tests"]
+files = ["packages/*/src", "packages/*/tests", "tests"]
+# explicit bases let two packages each own tests/conftest.py without a "duplicate module" error
+explicit_package_bases = true
+mypy_path = [
+  "packages/core/src",
+  "packages/ml/src",
+  "packages/api/src",
+  "packages/pricing/src",
+  "packages/voice/src",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "packages"]
-addopts = "--strict-markers"
+# importlib mode: packages may reuse test file names and conftest.py without collisions
+addopts = "--strict-markers --import-mode=importlib"
 markers = [
   "slow: long-running test, excluded from scripts/check",
   "gpu: needs a GPU, excluded from scripts/check",

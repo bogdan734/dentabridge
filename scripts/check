@@ -4,7 +4,9 @@
 set -eu
 cd "$(dirname "$0")/.."
 
-# A stale uv.lock must fail the gate instead of being re-locked silently.
+# A stale uv.lock must fail the gate instead of being re-locked silently. UV_FROZEN would
+# conflict with UV_LOCKED, so a caller's shell setting is dropped.
+unset UV_FROZEN
 export UV_LOCKED=1
 
 log=$(mktemp "${TMPDIR:-/tmp}/check.XXXXXX")
@@ -19,6 +21,7 @@ step() {
   fi
 }
 
+step uv lock --check
 step uv run ruff check .
 step uv run ruff format --check .
 step uv run mypy

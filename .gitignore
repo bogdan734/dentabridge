@@ -4,15 +4,22 @@
 private/
 var/
 .env
+.env.*
+!.env.example
 .work/
+.claude/worktrees/
 runs/
 wandb/
 
-# Model weights
+# Model weights and training output
 *.gguf
 *.safetensors
 *.pt
+*.pth
+*.bin
+*.ckpt
 *.onnx
+checkpoint-*/
 
 # Python
 .venv/

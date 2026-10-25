@@ -17,6 +17,8 @@ Contracts, the path-ownership table and the task list: `docs/PLAN.md`. Per-works
 
 ## Conventions
 - Contract changes only through the lead (see docs/workstreams/00-foundation.md).
+- ruff, mypy and pytest config is root-owned (lead). An untyped third-party import gets an inline `# type: ignore[import-untyped]  # reason`; any config change is a request to the lead.
+- Make targets are unique across `mk/*.mk` (a test enforces it). On a collision the later workstream renames its target with its own prefix (`ml-`, `api-`, `voice-`).
 - No AGPL/GPL imports in-process; GPL tools such as Piper run as separate services over HTTP.
 - Datasets are never committed (`/data/`, `private/`, `var/` are gitignored).
 - Private project names never appear in the repo.

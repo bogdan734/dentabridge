@@ -2,7 +2,7 @@
 name = "dentabridge-pricing"
 version = "0.1.0"
 description = "Offline fare estimator, hotel ranges and quote assembly"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<3.14"
 dependencies = ["dentabridge-core"]
 
 [build-system]

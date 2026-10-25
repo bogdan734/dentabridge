@@ -93,6 +93,8 @@ def test_run_writes_predictions_result_and_table(world: Path) -> None:
     assert len(rows) == 4
     assert SplitResult.read(out / "val.json").n_images == 4
     assert (out / "val.md").read_text().startswith("# fixed on val")
+    assert "# fixed on val [source=aku_caries]" in (out / "val.by-source.md").read_text()
+    assert "[view=unknown]" in (out / "val.by-view.md").read_text()
 
 
 def test_limit_keeps_a_smoke_run_small(world: Path) -> None:

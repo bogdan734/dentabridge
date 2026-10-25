@@ -10,6 +10,7 @@ from dentabridge_ml.data.sources import default_root
 from dentabridge_ml.eval.predict import predict, read_predictions, research_release
 from dentabridge_ml.eval.report import build_result
 from dentabridge_ml.eval.results import render_markdown
+from dentabridge_ml.eval.slices import slice_results
 from dentabridge_ml.serving import load_vision_backend
 from dentabridge_ml.splits.build import MANIFEST_DIR
 from dentabridge_ml.splits.manifest import read_entries
@@ -34,9 +35,13 @@ def _run(args: argparse.Namespace) -> int:
             batch_size=args.batch_size,
         )
     )
-    result = build_result(
-        backend.model.model_id, args.split, records, entries, read_predictions(predictions)
-    )
+    rows = read_predictions(predictions)
+    model_id = backend.model.model_id
+    result = build_result(model_id, args.split, records, entries, rows)
+    for by in ("source", "view"):
+        sliced = slice_results(model_id, args.split, records, entries, rows, by=by)
+        text = "\n".join(render_markdown(part) for part in sliced.values())
+        (args.out_dir / f"{args.split}.by-{by}.md").write_text(text, encoding="utf-8")
     result.write(args.out_dir / f"{args.split}.json")
     table = render_markdown(result)
     (args.out_dir / f"{args.split}.md").write_text(table, encoding="utf-8")

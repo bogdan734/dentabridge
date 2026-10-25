@@ -7,7 +7,7 @@ were looked at once.
 
 import hashlib
 import io
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Protocol, runtime_checkable
@@ -17,7 +17,7 @@ from pydantic import BaseModel, ConfigDict
 
 from dentabridge_core import Modality, SanitisedImage, VisionBackend, VisionOutput
 from dentabridge_ml.data.records import ImageRecord
-from dentabridge_ml.data.sources import SOURCES
+from dentabridge_ml.data.sources import SOURCES, SourceId
 from dentabridge_ml.provenance import git_commit
 from dentabridge_ml.serving.parse import ParseError, ReleaseConfig
 from dentabridge_ml.splits.manifest import SplitEntry
@@ -42,10 +42,10 @@ class BatchVisionBackend(VisionBackend, Protocol):
     ) -> list[VisionOutput | ParseError]: ...
 
 
-def research_release() -> ReleaseConfig:
-    """Research runs let the model judge every code a published source labels; the release gate
-    later decides which of them may ship."""
-    covered = frozenset().union(*(s.coverage for s in SOURCES.values() if s.published))
+def research_release(sources: Iterable[SourceId]) -> ReleaseConfig:
+    """Research runs let the model judge every code the given sources label, no more: the prompt
+    must match what training taught. The release gate later decides which codes may ship."""
+    covered = frozenset().union(*(SOURCES[s].coverage for s in sources if SOURCES[s].published))
     return ReleaseConfig(assessed=covered)
 
 

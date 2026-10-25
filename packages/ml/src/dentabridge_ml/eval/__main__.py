@@ -27,7 +27,8 @@ def _run(args: argparse.Namespace) -> int:
     entries = _spread(read_entries(args.manifests, args.split), args.limit)
     sources = sorted({e.source for e in entries})
     records = {r.record_id: r for s in sources for r in load_records(s, args.root)}
-    backend = load_vision_backend(args.backend, research_release(), args.image_max_px)
+    release = research_release({e.source for e in entries})
+    backend = load_vision_backend(args.backend, release, args.image_max_px)
     args.out_dir.mkdir(parents=True, exist_ok=True)
     predictions = args.out_dir / f"{args.split}.predictions.jsonl"
     asyncio.run(

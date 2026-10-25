@@ -6,7 +6,7 @@ from PIL import Image
 
 from dentabridge_core import Finding, FindingCode, ModelInfo, Region, VisionOutput
 from dentabridge_ml.data.records import ImageRecord, LabelBox
-from dentabridge_ml.eval.predict import predict, read_predictions, sanitise
+from dentabridge_ml.eval.predict import predict, read_predictions, research_release, sanitise
 from dentabridge_ml.eval.report import build_result
 from dentabridge_ml.serving.parse import ParseError
 from dentabridge_ml.splits.manifest import SplitEntry, SplitName
@@ -201,3 +201,20 @@ def test_a_batch_size_needs_a_backend_that_batches(tmp_path: Path) -> None:
                 batch_size=4,
             )
         )
+
+
+def test_the_research_release_asks_only_what_the_trained_sources_label() -> None:
+    four = research_release({"aku_caries", "alphadent"})
+    assert four.assessed == {
+        FindingCode.CARIES,
+        FindingCode.FILLING,
+        FindingCode.CROWN,
+        FindingCode.ABRASION,
+    }
+    with_gums = research_release({"aku_caries", "alphadent", "mendeley_gingivitis"})
+    assert with_gums.assessed == four.assessed | {FindingCode.GINGIVITIS}
+    assert research_release({"aku_caries"}).assessed == {FindingCode.CARIES}
+
+
+def test_a_private_source_never_widens_the_release() -> None:
+    assert research_release({"aku_caries", "kaggle_oral_private"}).assessed == {FindingCode.CARIES}

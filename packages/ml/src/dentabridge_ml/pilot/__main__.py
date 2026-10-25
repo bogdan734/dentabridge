@@ -133,7 +133,7 @@ def _compare(args: argparse.Namespace) -> int:
         return OllamaVisionBackend(
             OLLAMA_URL,
             args.name,
-            research_release(),
+            research_release(sources),
             image_max_px=args.image_max_px,
             constrain=constrain,
         )

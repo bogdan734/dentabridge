@@ -13,9 +13,11 @@ from peft import get_peft_model
 from torch.utils.data import Dataset
 from transformers import AutoProcessor, Qwen3VLForConditionalGeneration, Trainer, TrainingArguments
 
+from dentabridge_ml.provenance import git_commit
 from dentabridge_ml.train.config import TrainConfig
 from dentabridge_ml.train.data import SftCollator, SftRow, read_sft
 from dentabridge_ml.train.lora import lora_config
+from dentabridge_ml.train.record import make_record
 
 DTYPES = {"fp16": torch.float16, "bf16": torch.bfloat16}
 
@@ -106,15 +108,22 @@ def make_trainer(
     return Trainer(model=model, args=args, train_dataset=Rows(rows), data_collator=collator)
 
 
+def _hardware() -> str:
+    if torch.cuda.is_available():
+        return str(torch.cuda.get_device_name(0))
+    return "Apple MPS" if torch.backends.mps.is_available() else "cpu"
+
+
 def train(cfg: TrainConfig, train_file: Path, root: Path, out: Path, resume: bool = False) -> Path:
     """Run a configured fine-tune and return the directory holding the LoRA adapter."""
     out.mkdir(parents=True, exist_ok=True)
     (out / "train_config.json").write_text(cfg.model_dump_json(indent=2), encoding="utf-8")
+    rows = read_sft(train_file)
     trainer = make_trainer(
         load_model(cfg),
         load_processor(cfg.base_id),
         cfg,
-        read_sft(train_file),
+        rows,
         root,
         out,
         amp=cfg.device
@@ -124,5 +133,8 @@ def train(cfg: TrainConfig, train_file: Path, root: Path, out: Path, resume: boo
     trainer.train(resume_from_checkpoint=True if resume and has_checkpoint else None)
     adapter = out / "adapter"
     trainer.save_model(str(adapter))
-    (out / "log_history.json").write_text(json.dumps(trainer.state.log_history), encoding="utf-8")
+    history = trainer.state.log_history
+    (out / "log_history.json").write_text(json.dumps(history), encoding="utf-8")
+    record = make_record(cfg, len(rows), history, git_commit(), _hardware())
+    (out / "run.json").write_text(record.model_dump_json(indent=2) + "\n", encoding="utf-8")
     return adapter

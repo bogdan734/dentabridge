@@ -63,12 +63,14 @@ class OllamaVisionBackend:
         release: ReleaseConfig,
         client: httpx.AsyncClient | None = None,
         image_max_px: int | None = None,
+        constrain: bool = True,
     ) -> None:
         self.model = ModelInfo(model_id=model, version="ollama", backend="ollama")
         self._url = f"{base_url.rstrip('/')}/api/chat"
         self._release = release
         self._client = client or httpx.AsyncClient(timeout=httpx.Timeout(30.0, read=600.0))
         self._image_max_px = image_max_px  # the size the tuned model was trained on; None = as is
+        self._constrain = constrain  # False: free decoding, to compare weights with other runtimes
 
     def _payload(self, image: SanitisedImage) -> str:
         data = image.data
@@ -82,10 +84,9 @@ class OllamaVisionBackend:
 
     async def analyse(self, image: SanitisedImage, modality: Modality) -> VisionOutput:
         asked = self._release.assessed & ASSESSABLE[modality]
-        body = {
+        body: dict[str, Any] = {
             "model": self.model.model_id,
             "stream": False,
-            "format": answer_schema(asked),
             "options": {"temperature": 0, "num_predict": MAX_NEW_TOKENS},
             "messages": [
                 {
@@ -95,6 +96,8 @@ class OllamaVisionBackend:
                 }
             ],
         }
+        if self._constrain:
+            body["format"] = answer_schema(asked)
         started = time.perf_counter()
         response = await self._client.post(self._url, json=body)
         response.raise_for_status()

@@ -225,3 +225,32 @@ def test_a_batch_of_differently_sized_pictures_is_padded_on_the_left(tmp_path: P
 def test_backend_generates_end_to_end_and_reports_unparseable_text(tmp_path: Path) -> None:
     with pytest.raises(ParseError):
         asyncio.run(_backend(tmp_path).analyse(_photo(tmp_path), "intraoral_photo"))
+
+
+def test_merged_directory_has_the_base_checkpoint_layout(tmp_path: Path) -> None:
+    """Ollama and llama.cpp convert by tensor name, shape and dtype: a merge must change none."""
+    from safetensors import safe_open
+
+    processor = load_processor(str(MODEL_DIR))
+    base = _tiny_model()
+    base.save_pretrained(tmp_path / "base")
+    processor.save_pretrained(tmp_path / "base")
+    tuned = attach_lora(base, _config())
+    tuned.save_pretrained(tmp_path / "adapter")
+    merged = merge_adapter(
+        str(tmp_path / "base"), tmp_path / "adapter", tmp_path / "merged", "fp16"
+    )
+
+    def layout(directory: Path) -> dict[str, tuple[tuple[int, ...], str]]:
+        found = {}
+        for shard in sorted(directory.glob("*.safetensors")):
+            with safe_open(shard, "pt") as handle:
+                for key in handle.keys():  # noqa: SIM118  (safetensors handles are not mappings)
+                    piece = handle.get_slice(key)
+                    found[key] = (tuple(piece.get_shape()), piece.get_dtype())
+        return found
+
+    base_layout, merged_layout = layout(tmp_path / "base"), layout(merged)
+    assert merged_layout.keys() == base_layout.keys()
+    assert {k: v[0] for k, v in merged_layout.items()} == {k: v[0] for k, v in base_layout.items()}
+    assert not any("lora" in k for k in merged_layout)

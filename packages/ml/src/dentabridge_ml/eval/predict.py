@@ -7,7 +7,6 @@ were looked at once.
 
 import hashlib
 import io
-import subprocess
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
@@ -19,6 +18,7 @@ from pydantic import BaseModel, ConfigDict
 from dentabridge_core import Modality, SanitisedImage, VisionBackend, VisionOutput
 from dentabridge_ml.data.records import ImageRecord
 from dentabridge_ml.data.sources import SOURCES
+from dentabridge_ml.provenance import git_commit
 from dentabridge_ml.serving.parse import ParseError, ReleaseConfig
 from dentabridge_ml.splits.manifest import SplitEntry
 
@@ -62,13 +62,6 @@ def sanitise(path: Path, max_side: int = MAX_SIDE) -> SanitisedImage:
     )
 
 
-def _commit() -> str:
-    result = subprocess.run(
-        ["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, check=False
-    )
-    return result.stdout.strip() or "unknown"
-
-
 async def _answer(backend: VisionBackend, image: SanitisedImage) -> VisionOutput | ParseError:
     try:
         return await backend.analyse(image, "intraoral_photo")
@@ -94,7 +87,7 @@ async def predict(
         if access_log is None:
             raise PermissionError("a final run must name the test access log")
         stamp = datetime.now(UTC).isoformat(timespec="seconds")
-        line = f"{stamp} {backend.model.model_id} commit={_commit()} split=test\n"
+        line = f"{stamp} {backend.model.model_id} commit={git_commit()} split=test\n"
         with access_log.open("a", encoding="utf-8") as log:
             log.write(line)
     wanted = {e.record_id for e in entries}

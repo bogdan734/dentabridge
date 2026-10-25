@@ -24,7 +24,11 @@ ANSWER = {
 
 
 def _backend(
-    content: str, seen: list[dict[str, Any]], status: int = 200, image_max_px: int | None = None
+    content: str,
+    seen: list[dict[str, Any]],
+    status: int = 200,
+    image_max_px: int | None = None,
+    constrain: bool = True,
 ) -> OllamaVisionBackend:
     def handler(request: httpx.Request) -> httpx.Response:
         seen.append(json.loads(request.content))
@@ -34,7 +38,12 @@ def _backend(
 
     client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
     return OllamaVisionBackend(
-        "http://ollama.test:11434/", "qwen3-vl:4b", RELEASE, client, image_max_px=image_max_px
+        "http://ollama.test:11434/",
+        "qwen3-vl:4b",
+        RELEASE,
+        client,
+        image_max_px=image_max_px,
+        constrain=constrain,
     )
 
 
@@ -82,3 +91,11 @@ def test_the_picture_is_fitted_to_the_size_the_model_was_trained_on() -> None:
     sent = base64.b64decode(seen[0]["messages"][0]["images"][0])
     with Image.open(io.BytesIO(sent)) as image:
         assert image.size == (64, 32)
+
+
+def test_unconstrained_decoding_sends_no_schema() -> None:
+    seen: list[dict[str, Any]] = []
+    asyncio.run(
+        _backend(json.dumps(ANSWER), seen, constrain=False).analyse(IMAGE, "intraoral_photo")
+    )
+    assert "format" not in seen[0]

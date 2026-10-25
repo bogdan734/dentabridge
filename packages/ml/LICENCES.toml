@@ -1,0 +1,57 @@
+# Every dataset and model the ML package touches, with the licence read at the publisher.
+# status: shipped (in released weights or the repo) | downloaded (fetched by the user, not
+# redistributed) | opt-in (never fetched by default) | private (local tests only, never published)
+
+[[row]]
+component = "AKU caries photos (Zenodo 14827784)"
+kind = "dataset"
+licence = "CC-BY-4.0"
+verified_on = 2026-10-25
+url = "https://zenodo.org/records/14827784"
+status = "downloaded"
+note = "Record licence cc-by-4.0. The Sci Data article is CC BY-NC-ND and states no data licence, so the record is the citation."
+
+[[row]]
+component = "AlphaDent (Zenodo 16582489)"
+kind = "dataset"
+licence = "CC-BY-4.0"
+verified_on = 2026-10-25
+url = "https://zenodo.org/records/16582489"
+status = "downloaded"
+note = "Zenodo record cc-by-4.0; the Hugging Face copy declares Apache-2.0; code at ZFTurbo/AlphaDent is Apache-2.0."
+
+[[row]]
+component = "Mendeley gingivitis captions (3253gj88rr)"
+kind = "dataset"
+licence = "CC-BY-4.0"
+verified_on = 2026-10-25
+url = "https://data.mendeley.com/datasets/3253gj88rr/1"
+status = "downloaded"
+note = "Licence field read on the dataset page. Hanoi Medical University, 1,096 images."
+
+[[row]]
+component = "Kaggle Oral Diseases (salmansajid05)"
+kind = "dataset"
+licence = "Unknown"
+verified_on = 2026-10-25
+url = "https://www.kaggle.com/datasets/salmansajid05/oral-diseases"
+status = "private"
+note = "Data Card says License Unknown; images come from hospitals and websites and are pre-augmented. Local tests only; never in manifests, results, weights or the README."
+
+[[row]]
+component = "DENTEX panoramic X-ray"
+kind = "dataset"
+licence = "CC-BY-NC-SA-4.0"
+verified_on = 2026-10-25
+url = "https://huggingface.co/datasets/ibrahimhamamci/DENTEX"
+status = "opt-in"
+note = "Non-commercial and share-alike: a model trained on it is a separate NC-SA release (ML11)."
+
+[[row]]
+component = "Qwen3-VL-4B-Instruct"
+kind = "model"
+licence = "Apache-2.0"
+verified_on = 2026-10-25
+url = "https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct"
+status = "downloaded"
+note = "Licence read from the Hub tags and card metadata. 4.44B parameters, bf16."

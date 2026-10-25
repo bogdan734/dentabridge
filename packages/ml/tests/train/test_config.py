@@ -50,3 +50,18 @@ def test_invalid_configs_are_rejected(change: dict[str, object], tmp_path: Path)
     data = load_config(CONFIG_DIR / "lean-t4.toml").model_dump()
     with pytest.raises(ValidationError):
         TrainConfig.model_validate({**data, **change})
+
+
+@pytest.mark.parametrize(
+    ("name", "changed"),
+    [
+        ("abl-vision", {"train_vision"}),
+        ("abl-672px", {"image_max_px"}),
+        ("abl-1024px", {"image_max_px"}),
+        ("abl-r64", {"lora_r", "lora_alpha"}),  # alpha follows r so the scale stays 1
+    ],
+)
+def test_each_ablation_changes_one_thing_from_the_base_recipe(name: str, changed: set[str]) -> None:
+    base = load_config(CONFIG_DIR / "mi300x-base.toml").model_dump()
+    variant = load_config(CONFIG_DIR / f"{name}.toml").model_dump()
+    assert {k for k in base if base[k] != variant[k]} == changed

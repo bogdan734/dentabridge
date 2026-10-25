@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dentabridge_api.clock import Clock
 from dentabridge_api.db.session import init_schema, make_engine, session_factory
 from dentabridge_api.errors import install_error_handlers
+from dentabridge_api.ratelimit import DEFAULT_BUDGETS, RateLimiter
 from dentabridge_api.routes import meta
 from dentabridge_api.settings import Settings
 from dentabridge_core import CONTRACT_VERSION, FareEstimator, VisionBackend
@@ -37,6 +38,7 @@ def create_app(
     app.state.vision = vision
     app.state.fares = fares
     app.state.sessions = session_factory(engine)
+    app.state.limiter = RateLimiter(DEFAULT_BUDGETS, clock)
 
     app.add_middleware(
         CORSMiddleware,

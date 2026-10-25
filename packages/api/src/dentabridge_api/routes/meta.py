@@ -1,12 +1,13 @@
 from typing import Literal
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 
+from dentabridge_api.ratelimit import rate_limited
 from dentabridge_api.schemas import Health, Meta
 from dentabridge_core import ASSESSABLE, CONTRACT_VERSION, VERIFIED_PAIRS
 from dentabridge_core.policy import texts
 
-router = APIRouter(tags=["meta"])
+router = APIRouter(tags=["meta"], dependencies=[Depends(rate_limited("read"))])
 
 
 @router.get("/health", operation_id="getHealth")

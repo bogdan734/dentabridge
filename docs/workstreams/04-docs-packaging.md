@@ -16,7 +16,7 @@ Branch ws/04-docs. D1 starts when A3, A5 and V3 are merged (M2-M4). D2 and D3 ru
 - CLIs: `dentabridge-api serve|seed|export` (WS02), `dentabridge-voice worker` (WS03), `make data | models` (WS01)
 - Settings env vars, prefix DENTABRIDGE_: MODE, UPLOADS, CORS_ORIGINS, DB_URL, VISION_BACKEND, LIVEKIT_URL/KEY/SECRET, REPLAYS_DIR, XRAY_BACKEND
 - Results JSON: docs/results/ml/*.json, docs/results/fares.json, docs/results/voice.json
-- Licence tables: packages/{ml,pricing,voice}/LICENCES.yaml
+- Licence tables: packages/{ml,pricing,voice}/LICENCES.toml
 - `dentabridge-lint --profile docs`
 
 ## Contracts produced

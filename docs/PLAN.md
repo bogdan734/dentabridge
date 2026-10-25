@@ -187,7 +187,7 @@ Invariants the validators enforce at construction (a violation raises Validation
 - Tests: test_decision_rule_table; test_report_roundtrips_json. The pilot itself is marked `gpu` and run by hand.
 - Verify: `uv run python -m dentabridge_ml.pilot.roundtrip --config packages/ml/configs/pilot_roundtrip.yaml`
 ### ML2 Data download, lock, canonical records [L] WS01 M1 (deps F1)
-- Files: dentabridge_ml/data/{sources.py, download.py, lock.py, records.py}; packages/ml/{data.lock.json, LICENCES.yaml, docs/data-card.md}.
+- Files: dentabridge_ml/data/{sources.py, download.py, lock.py, records.py}; packages/ml/{data.lock.json, LICENCES.toml, docs/data-card.md}.
 - Sources: `SOURCES: Mapping[SourceId, SourceSpec(url, licence, published: bool, coverage: frozenset[FindingCode], camera: Literal["phone","clinic","xray"])]` for aku_caries, alphadent, mendeley_gingivitis, dentex (opt-in) and kaggle_oral_private (private).
 - Signatures: `download(source: SourceId, root: Path) -> list[Path]`; `verify_lock(root: Path, lock: Path) -> None` (raises LockMismatch); `load_records(source: SourceId, root: Path) -> list[ImageRecord(record_id, source, path, width, height, patient_id: str | None, boxes: tuple[LabelBox, ...], image_labels: frozenset[FindingCode], caption: str | None)]`.
 - Resolve and date in the data card: AlphaDent 1,320 vs 1,455 (count + hash, hidden-test rows?); caries 1-6 = severity or Black class; whether patient ids exist; Mendeley classes (healthy controls?) and caption language; DINOv2 licence.
@@ -276,7 +276,7 @@ Invariants the validators enforce at construction (a violation raises Validation
 - Samples: 12 test-split images from AlphaDent and Mendeley with CC BY attribution. AKU is excluded because its participants include minors.
 - Tests: test_exif_gps_removed; test_orientation_applied; test_400_413_415; test_consent_required_403; test_uploads_off_403; test_no_file_written; test_no_image_bytes_in_logs; test_result_410_after_ttl; test_fixture_backend_deterministic; test_runtime_lint_violation_raises; test_meta_texts_pass_patient_lint.
 ### P1 Airports, cities, FX snapshots [S] WS02 M1 (deps F1)
-- Files: dentabridge_pricing/{airports.py, fx.py}; packages/pricing/data/{airports_<date>.csv.gz, fx_<date>.json}; packages/pricing/scripts/build_snapshots.py (network); packages/pricing/LICENCES.yaml.
+- Files: dentabridge_pricing/{airports.py, fx.py}; packages/pricing/data/{airports_<date>.csv.gz, fx_<date>.json}; packages/pricing/scripts/build_snapshots.py (network); packages/pricing/LICENCES.toml.
 - Signatures: `load_airports() -> Mapping[str, Airport(iata, name, municipality, iso_country, lat, lon)]`; `search_cities(q: str, limit: int) -> list[Airport]`; `haversine_km(a: Airport, b: Airport) -> float`; `convert(m: Money, to: str, fx: FxSnapshot) -> Money` (raises CurrencyUnsupported).
 - Tests: test_haversine_lhr_jfk (5,540 ± 10 km); test_search_case_insensitive_prefix; test_convert_roundtrip_within_one_minor; test_unsupported_currency_raises; test_only_scheduled_iata_airports.
 ### P2 Fare estimator, calibration, offline evaluation [L] WS02 M2 (deps P1)
@@ -305,7 +305,7 @@ Invariants the validators enforce at construction (a violation raises Validation
   - `missing_terms(src: str, tgt: str, entries: Sequence[GlossaryEntry]) -> tuple[str, ...]`; `digits_preserved(src: str, tgt: str) -> bool`.
 - Tests: test_caption_before_audio; test_tts_failure_emits_captions_only; test_missing_glossary_term_reported; test_digit_swap_flagged ("tooth 36" → "зуб 63"); test_segments_capped_at_10s; test_timings_monotonic.
 ### V2 Model adapters [L] WS03 M1 (deps V1)
-- Files: dentabridge_voice/adapters/{parakeet_mlx.py, faster_whisper.py, ollama_translator.py, piper_http.py}; packages/voice/LICENCES.yaml.
+- Files: dentabridge_voice/adapters/{parakeet_mlx.py, faster_whisper.py, ollama_translator.py, piper_http.py}; packages/voice/LICENCES.toml.
 - Signatures: `ParakeetMlxSTT(model_id: str)`; `FasterWhisperSTT(model: str, device: Literal["cpu","cuda"], compute_type: str)`; `OllamaTranslator(base_url: str, model: str)` (prompt carries only the matched glossary terms); `PiperHttpTTS(base_url: str, voices: Mapping[str, str])`. Default voices must have CC0 or permissive data; anything else is opt-in.
 - Tests: test_prompt_contains_only_matched_terms; test_translator_mock_transport; test_piper_mock_transport; real-model tests [slow].
 ### V3 LiveKit worker [L] WS03 M2 (deps V2; uses CallRoomMetadata from F1)

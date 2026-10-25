@@ -1,5 +1,6 @@
 import hashlib
 import zipfile
+from collections.abc import Iterator
 from datetime import date
 from pathlib import Path
 
@@ -78,6 +79,71 @@ def test_download_resumes_a_partial_file(tmp_path: Path, monkeypatch: pytest.Mon
     seen: list[str | None] = []
     (path,) = dl.download("aku_caries", tmp_path, _client(PAYLOAD, seen))
     assert seen == ["bytes=1000-"]
+    assert path.read_bytes() == PAYLOAD
+
+
+class _DropsAfter(httpx.SyncByteStream):
+    """Sends `cut` bytes, then the server hangs up like Zenodo did."""
+
+    def __init__(self, content: bytes, cut: int) -> None:
+        self._content, self._cut = content, cut
+
+    def __iter__(self) -> Iterator[bytes]:
+        if self._cut:
+            yield self._content[: self._cut]
+        raise httpx.RemoteProtocolError("peer closed connection without sending complete message")
+
+
+def test_download_retries_a_dropped_connection_and_resumes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _patch(monkeypatch, _spec())
+    monkeypatch.setattr(dl, "_sleep", lambda seconds: None)
+    seen: list[str | None] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        wanted = request.headers.get("Range")
+        seen.append(wanted)
+        if wanted is None:
+            return httpx.Response(200, stream=_DropsAfter(PAYLOAD, 1000))
+        start = int(wanted.removeprefix("bytes=").removesuffix("-"))
+        return httpx.Response(206, content=PAYLOAD[start:])
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    (path,) = dl.download("aku_caries", tmp_path, client)
+    assert seen == [None, "bytes=1000-"]
+    assert path.read_bytes() == PAYLOAD
+
+
+def test_download_gives_up_when_no_progress_is_made(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _patch(monkeypatch, _spec())
+    monkeypatch.setattr(dl, "_sleep", lambda seconds: None)
+    monkeypatch.setattr(dl, "MAX_FAILURES", 3)
+    calls = 0
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        return httpx.Response(200, stream=_DropsAfter(PAYLOAD, 0))
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    with pytest.raises(httpx.RemoteProtocolError):
+        dl.download("aku_caries", tmp_path, client)
+    assert calls == 3
+
+
+def test_a_complete_part_file_is_finished_without_another_request(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _patch(monkeypatch, _spec())
+    folder = dl.raw_dir(tmp_path, "aku_caries")
+    folder.mkdir(parents=True)
+    (folder / "data.zip.part").write_bytes(PAYLOAD)
+    seen: list[str | None] = []
+    (path,) = dl.download("aku_caries", tmp_path, _client(PAYLOAD, seen))
+    assert seen == []
     assert path.read_bytes() == PAYLOAD
 
 

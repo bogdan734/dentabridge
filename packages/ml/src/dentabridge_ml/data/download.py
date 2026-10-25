@@ -8,6 +8,7 @@ import hashlib
 import shutil
 import subprocess
 import sys
+import time
 import zipfile
 from pathlib import Path
 
@@ -17,6 +18,8 @@ from dentabridge_ml.data.sources import SOURCES, RemoteFile, SourceId
 
 CHUNK = 1 << 20
 REPORT_EVERY = 256 << 20
+MAX_FAILURES = 8  # consecutive reconnects without a single new byte
+_sleep = time.sleep  # a module attribute so tests do not wait
 
 
 class ChecksumMismatch(Exception):
@@ -48,16 +51,41 @@ def verify_file(path: Path, remote: RemoteFile) -> None:
 
 
 def _fetch(remote: RemoteFile, target: Path, client: httpx.Client) -> None:
+    """Fetch with resume. Servers hang up mid-file (Zenodo did, at ~12 MB), so reconnect."""
+    part = target.with_name(target.name + ".part")
+    failures = 0
+    while True:
+        before = part.stat().st_size if part.exists() else 0
+        try:
+            _fetch_once(remote, target, client)
+            return
+        except httpx.TransportError as error:
+            grew = part.exists() and part.stat().st_size > before
+            failures = 0 if grew else failures + 1
+            if failures >= MAX_FAILURES:
+                raise
+            print(f"{remote.name}: {error}; reconnecting", file=sys.stderr, flush=True)
+            _sleep(min(2.0**failures, 30.0))
+
+
+def _fetch_once(remote: RemoteFile, target: Path, client: httpx.Client) -> None:
     part = target.with_name(target.name + ".part")
     start = part.stat().st_size if part.exists() else 0
-    headers = {"Range": f"bytes={start}-"} if start else {}
+    if start == remote.size:  # a finished download that was never renamed
+        part.rename(target)
+        return
+    # identity: an archive must arrive byte for byte, never re-compressed in transit
+    headers = {"Accept-Encoding": "identity"}
+    if start:
+        headers["Range"] = f"bytes={start}-"
     with client.stream("GET", remote.url, headers=headers, follow_redirects=True) as response:
         response.raise_for_status()
         resumed = response.status_code == 206
         done = start if resumed else 0
         reported = done
         with part.open("ab" if resumed else "wb") as handle:
-            for chunk in response.iter_bytes(CHUNK):
+            # no chunk size: bytes are written as they arrive, a dropped connection loses none
+            for chunk in response.iter_bytes():
                 handle.write(chunk)
                 done += len(chunk)
                 if done - reported >= REPORT_EVERY:
@@ -74,7 +102,7 @@ def download(source: SourceId, root: Path, client: httpx.Client | None = None) -
     target_dir = raw_dir(root, source)
     target_dir.mkdir(parents=True, exist_ok=True)
     owned = client is None
-    http = client or httpx.Client(timeout=httpx.Timeout(60.0, read=300.0))
+    http = client or httpx.Client(timeout=httpx.Timeout(30.0, read=60.0))
     try:
         paths: list[Path] = []
         for remote in spec.files:

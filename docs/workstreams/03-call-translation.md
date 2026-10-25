@@ -2,7 +2,7 @@
 Branch ws/03-call. Starts after tag `m0`. EN<->RU is verified; other pairs are config only and flagged "unverified".
 
 ## Owned paths
-- packages/voice/ (src/dentabridge_voice/{pipeline,segment,checks,ports,worker,routing}.py, adapters/, harness/, glossary/en-ru.tsv, config/pairs.yaml, replays/, LICENCES.yaml, tests/)
+- packages/voice/ (src/dentabridge_voice/{pipeline,segment,checks,ports,worker,routing}.py, adapters/, harness/, glossary/en-ru.tsv, config/pairs.yaml, replays/, LICENCES.toml, tests/)
 - docs/results/voice.{json,md}, mk/voice.mk
 
 ## Tasks (PLAN.md ids, in order)
@@ -48,7 +48,7 @@ Branch ws/03-call. Starts after tag `m0`. EN<->RU is verified; other pairs are c
 - Numbers and licences:
   - voice.json holds measured p50/p95 (the 1.3-2.5 s figure stays labelled "estimate" until then);
   - the replay is recorded;
-  - LICENCES.yaml has a dated row for every model and voice.
+  - LICENCES.toml has a dated row for every model and voice.
 
 ## Do NOT touch
 - packages/core (file a change request below), packages/api, packages/pricing, packages/ml, contracts/, deploy/, space/, tools/, README.md, web/

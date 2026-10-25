@@ -3,7 +3,7 @@ Branch ws/02-api. Starts after tag `m0`.
 
 ## Owned paths
 - packages/api/ (src/dentabridge_api/{app,settings,errors,clock,ratelimit,idempotency,uploads,analysis_service,export,call_tokens}.py, db/, routes/, booking/, demo/, alembic/, tests/)
-- packages/pricing/ (src/dentabridge_pricing/{airports,fx,fares,calibrate,evaluate,quote,hotels}.py, data/, scripts/build_snapshots.py, LICENCES.yaml, tests/)
+- packages/pricing/ (src/dentabridge_pricing/{airports,fx,fares,calibrate,evaluate,quote,hotels}.py, data/, scripts/build_snapshots.py, LICENCES.toml, tests/)
 - seed/ (clinics.yaml, hotel_tiers.yaml, schema.json), contracts/ (generated only), docs/results/fares.{json,md}, mk/api.mk
 - Gitignored: var/ (SQLite), data/raw/pricing/ (DB1B, Kaggle flight prices)
 

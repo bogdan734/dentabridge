@@ -1,4 +1,4 @@
-"""LoRA fine-tuning of Qwen3-VL on the SFT rows: one code path for CUDA, ROCm and MPS.
+"""LoRA fine-tuning of Qwen3-VL on the SFT rows: one code path for CUDA and MPS.
 
 Needs the `train` extra. Nothing here runs in CI; the tiny-model test (marked slow) covers it.
 """
@@ -126,8 +126,7 @@ def train(cfg: TrainConfig, train_file: Path, root: Path, out: Path, resume: boo
         rows,
         root,
         out,
-        amp=cfg.device
-        != "mps",  # Trainer's mixed precision is CUDA/ROCm only; MPS loads fp16 weights
+        amp=cfg.device == "cuda",  # Trainer's mixed precision is CUDA only; MPS loads fp16 weights
     )
     has_checkpoint = any(out.glob("checkpoint-*"))
     trainer.train(resume_from_checkpoint=True if resume and has_checkpoint else None)

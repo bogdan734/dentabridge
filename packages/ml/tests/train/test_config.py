@@ -16,30 +16,23 @@ def test_lean_config_is_t4_safe() -> None:
     assert cfg.gradient_checkpointing, "16 GB needs it"
 
 
-def test_rocm_configs_have_no_bitsandbytes() -> None:
-    for name in ("mi300x-base.toml", "pilot-50.toml"):
-        cfg = load_config(CONFIG_DIR / name)
-        assert (cfg.device, cfg.quant, cfg.dtype) == ("rocm", "none", "bf16")
-
-
-def test_pilot_changes_only_the_length() -> None:
-    base = load_config(CONFIG_DIR / "mi300x-base.toml").model_dump()
-    pilot = load_config(CONFIG_DIR / "pilot-50.toml").model_dump()
-    differing = {k for k in base if base[k] != pilot[k]}
-    assert differing == {"epochs", "max_steps", "save_every"}
-    assert pilot["max_steps"] == 50
+def test_smoke_changes_only_the_length() -> None:
+    lean = load_config(CONFIG_DIR / "lean-t4.toml").model_dump()
+    smoke = load_config(CONFIG_DIR / "smoke-t4.toml").model_dump()
+    assert {k for k in lean if lean[k] != smoke[k]} == {"epochs", "max_steps", "save_every"}
+    assert smoke["max_steps"] == 10
 
 
 def test_every_shipped_config_loads() -> None:
     paths = sorted(CONFIG_DIR.glob("*.toml"))
-    assert len(paths) >= 3
+    assert len(paths) >= 2
     assert all(isinstance(load_config(p), TrainConfig) for p in paths)
 
 
 @pytest.mark.parametrize(
     "change",
     [
-        {"device": "rocm", "quant": "nf4"},
+        {"device": "rocm"},
         {"device": "mps", "dtype": "bf16"},
         {"lora_r": 0},
         {"unknown_field": 1},
@@ -50,18 +43,3 @@ def test_invalid_configs_are_rejected(change: dict[str, object], tmp_path: Path)
     data = load_config(CONFIG_DIR / "lean-t4.toml").model_dump()
     with pytest.raises(ValidationError):
         TrainConfig.model_validate({**data, **change})
-
-
-@pytest.mark.parametrize(
-    ("name", "changed"),
-    [
-        ("abl-vision", {"train_vision"}),
-        ("abl-672px", {"image_max_px"}),
-        ("abl-1024px", {"image_max_px"}),
-        ("abl-r64", {"lora_r", "lora_alpha"}),  # alpha follows r so the scale stays 1
-    ],
-)
-def test_each_ablation_changes_one_thing_from_the_base_recipe(name: str, changed: set[str]) -> None:
-    base = load_config(CONFIG_DIR / "mi300x-base.toml").model_dump()
-    variant = load_config(CONFIG_DIR / f"{name}.toml").model_dump()
-    assert {k for k in base if base[k] != variant[k]} == changed

@@ -30,7 +30,7 @@ Star deliverables: (1) a fine-tuned open VLM of at most 4B parameters with a scr
 | web/ | WS05 site (reserved) | README placeholder only |
 
 ## Global constraints
-- Python 3.13 everywhere, including Kaggle, Colab and AMD (`uv python install 3.13`), with one uv.lock. Torch comes from the conflicting uv extras `cpu | cu128 | rocm` (prior art: uv's "Using uv with PyTorch" guide).
+- Python 3.13 everywhere, including Kaggle and Colab (`uv python install 3.13`), with one uv.lock. Torch for a Kaggle T4 is installed by `scripts/kaggle/setup.sh` from PyTorch's CUDA 12.6 wheel index, which the T4 driver accepts.
 - MIT code. No AGPL/GPL code imported in-process (Ultralytics never in packages/; Piper over HTTP only). NC models (XTTS-v2, F5-TTS-RU, NLLB) and DENTEX are opt-in downloads with licence rows.
 - Datasets are never committed; data/, private/ and var/ are gitignored. Kaggle "Oral Diseases" (licence Unknown) lives only under private/ and never reaches manifests, results, weights, the README or the Space (a test enforces this).
 - Patient-facing strings come only from the core i18n templates (EN, RU), linted at test time and at runtime; a violation raises, never passes silently. The VLM note is EN only, optional and linted.
@@ -41,14 +41,14 @@ Star deliverables: (1) a fine-tuned open VLM of at most 4B parameters with a scr
 - The owner's private project names never appear in the repo; the banned list lives outside it (env `DENTABRIDGE_BANNED_NAMES_FILE`).
 - Contract change protocol: a workstream writes the request in its WS file; the lead edits core, bumps `CONTRACT_VERSION`, refreshes the snapshots and merges; the others rebase.
 - Workstream branches are created by the app when a session card starts (their names differ from `ws/NN-name`); the lead merges them in milestone order. On a uv.lock conflict, take main's lock and run `uv lock`. The repo and the HF repos stay private until the owner says "publish".
-- Schedule rule (owner, 2026-10-25): speed over calendar. The AMD credit expiry is unknown, so the ML stream starts first and its 50-step MI300X pilot runs as soon as ML4 and ML8 allow; ablations do not wait for M2.
+- Schedule rule (owner, 2026-10-25): speed over calendar, so the ML stream starts first. Compute rule (owner, 2026-10-25 evening): train only on free, open platforms (Kaggle T4, Colab, the owner's Mac); no paid or credit-based cloud, because this is a résumé project.
 
 ## Rejected alternatives and why
 - Detector-only shipped path: cannot learn gingivitis from image-level labels, has no quality gate, and the VLM is the star. Kept as the ablation and the ship-rule fallback.
 - Detector + VLM explainer: text comes from linted templates, so the explainer only adds failure modes.
 - MedGemma 1.5 4B: HAI-DEF terms (pass-through, termination, deletion). Qwen3.5-4B: Ollama vision disputed, no T4 bf16. Fallbacks only after ML1.
 - Ultralytics YOLO: AGPL-3.0. RF-DETR: separate package, and the licence varies by size (PML 1.0 for Atto/Femto/Pico/XL/2XL); D-FINE in Transformers covers the need.
-- Unsloth as a requirement: vendor-specific. Transformers `Trainer` + PEFT run on CUDA, ROCm and MPS; Unsloth stays an optional accelerator. TRL's `SFTTrainer` was dropped (2026-10-25): its API moves with every transformers release and the answer-only loss mask is eight lines in our own collator.
+- Unsloth as a requirement: vendor-specific. Transformers `Trainer` + PEFT run on CUDA and MPS; Unsloth stays an optional accelerator. TRL's `SFTTrainer` was dropped (2026-10-25): its API moves with every transformers release and the answer-only loss mask is eight lines in our own collator.
 - MetaDent: dataset licence unstated and images web-sourced, so deferred.
 - LiveKit turn-detector plugin: models under the LiveKit Model License (not OSI). Silero VAD + silence endpointing instead.
 - Open S2S (Seamless, Hibiki): NC licences and no EN<->RU.
@@ -63,7 +63,7 @@ Star deliverables: (1) a fine-tuned open VLM of at most 4B parameters with a scr
 - RF-DETR: code + N/S/M/L detection + all Seg models Apache-2.0, other sizes PML 1.0 (P). piper1-gpl: GPL-3.0 with HTTP server mode (P). mlx-vlm: MIT, LoRA/QLoRA, OpenAI-compatible server (P).
 - livekit-agents 1.8.9 (2026-10-24), Apache-2.0, Python >=3.10,<3.15 (P, PyPI); 2.0.0b1 is a pre-release, so pin 1.8.x. LiveKit server Apache-2.0, v1.13.2 2026-06-27 (S).
 - openapi-typescript 7.13.0 MIT, openapi-fetch 0.17.0 MIT (S). On this machine: uv 0.11.19, Ollama 0.40.10, Python 3.13 (P).
-- AMD Developer Cloud runs on DigitalOcean. 1x MI300X is $2.59/GPU-h on the DigitalOcean docs pricing page (P, fetched 2026-10-25) and $1.99 in older secondary sources, so $100 buys 38-50 GPU-h: read the price in the console before the pilot. Credits expire 30 days after deposit unless the confirmation email says otherwise (AMD FAQ, S via search snippet; the AMD pages time out for our fetcher), and a payment method is required even with credits (S).
+- AMD Developer Cloud credits (the owner has about $100) are NOT used: owner decision 2026-10-25 evening, free open platforms only. Facts found before that decision, kept so nobody has to look again: it runs on DigitalOcean, 1x MI300X lists at $1.99-2.59/h, credits expire 30 days after deposit by default, a powered-off droplet still bills, and the Qwen3-VL ROCm path was never run here.
 - llama.cpp has loaded Qwen3-VL GGUF with a separate mmproj since 2025-10-30 (S, Unsloth docs). No Ollama recipe found for a tuned VLM → ML1.
 - Still UNVERIFIED, each owned by a task: DINOv2 licence, AlphaDent 1,320 vs 1,455, the meaning of caries 1-6, Mendeley labels and caption language (ML2); Ollama logprobs (ML1); DB1B and Kaggle flight-price terms (P2); RUB missing from the ECB snapshot (memory, P1); Piper RU voice, faster-whisper, parakeet-mlx and FLEURS licences (V2, V4).
 
@@ -229,17 +229,17 @@ Invariants the validators enforce at construction (a violation raises Validation
 - Signatures: `train_detector(cfg: DetectorConfig) -> Path`; `detector_predict(ckpt: Path, manifest: SplitManifest, split: str, out: Path) -> Path` (image score = max box score per code).
 - Tests: test_image_score_is_max_box; test_no_ultralytics_import_in_packages (AST scan); test_zero_shot_prompt_equals_tuned_prompt.
 - Verify: `make baselines` (writes docs/results/ml/val.json)
-### ML8 Training recipe, portable CUDA/ROCm/MLX [L] WS01 M2 (deps ML4)
-- Files: dentabridge_ml/train/{config.py, data.py, lora.py, run.py, merge.py, __main__.py}; packages/ml/configs/train/{lean-t4,mi300x-base,pilot-50,pilot-mac}.toml; notebooks/kaggle_lean.ipynb (thin: install uv, run the CLI). CLI: `python -m dentabridge_ml.train sft|run|merge`; `sft` never accepts the test split.
+### ML8 Training recipe, CUDA (Kaggle T4) and MPS [L] WS01 M2 (deps ML4)
+- Files: dentabridge_ml/train/{config.py, data.py, lora.py, run.py, merge.py, __main__.py}; packages/ml/configs/train/{lean-t4,smoke-t4}.toml; packages/ml/notebooks/kaggle_lean.ipynb and scripts/kaggle/*.sh (the notebook is thin: it calls the scripts, which call the CLI). CLI: `python -m dentabridge_ml.train sft|run|merge`; `sft` never accepts the test split.
 - Signatures:
   - `TrainConfig(base_id: str, image_max_px: int, lora_r: int, lora_alpha: int, train_vision: bool, quant: Literal["none","nf4"], dtype: Literal["fp16","bf16"], lr: float, epochs: int, grad_accum: int, save_every: int, push_to: str | None, seed: int)`;
-  - `train(cfg: TrainConfig, train_file, root, out, resume) -> Path` (Transformers Trainer + PEFT, loss on answer tokens only); `mlx_train(cfg: TrainConfig) -> Path` (mlx-vlm LoRA CLI).
+  - `train(cfg: TrainConfig, train_file, root, out, resume) -> Path` (Transformers Trainer + PEFT, loss on answer tokens only).
 - Lean T4 recipe: 4B, nf4, fp16, r 16, alpha 16, 448 px, 2 epochs, lr 1e-4, checkpoint every 500 steps. P100 is not used.
-- Tests: test_collate_masks_prompt_and_image_tokens; test_lean_config_is_t4_safe; test_rocm_config_has_no_bitsandbytes; test_two_steps_tiny_model [slow].
-- Verify: `uv run pytest packages/ml/tests/train -q`; a 50-step pilot writes docs/results/ml/throughput.json (T4, MI300X, M3 Max).
+- Tests: test_collate_masks_prompt_and_image_tokens; test_lean_config_is_t4_safe; test_smoke_changes_only_the_length; test_two_steps_tiny_model [slow].
+- Verify: `uv run pytest packages/ml/tests/train -q`; the 10-step smoke stage on Kaggle prints seconds per step and writes run.json, which sizes the long run.
 ### ML9 Runs, release gate, ship decision [L] WS01 M3 (deps ML6, ML7, ML8)
-- Runs: Kaggle lean; MI300X ablations, one change each vs lean in bf16 (train_vision, 672 px, no quality negatives, r 64); one larger run (best combination, 3 epochs); MLX 2B.
-- MI300X cap: the smaller of 40 GPU-h and $80 at the console price, with a $20 reserve; the first hour is the 50-step pilot. Selection happens on val; test is evaluated once for the chosen model and every baseline.
+- Runs: zero-shot Instruct baselines and the lean tuned model, in one Kaggle notebook per run; a second tuned run (672 px) only if the weekly GPU quota allows. The Mac imports the tuned model into Ollama (GGUF) and compares it with the Kaggle predictions.
+- Selection happens on val; test is evaluated once for the chosen model and every baseline.
 - Gate (committed before the first test access): a finding ships as assessed if n_pos >= 30, the lower CI bounds of sens and spec are both >= 0.60, and ECE <= 0.10; otherwise not_assessed.
 - Ship rule: the detector replaces the VLM only if it beats the VLM's sensitivity at the VLM's specificity beyond the CI on >= 3 of 4 shared codes. That would add a DetectorVisionBackend.
 - Files: dentabridge_ml/release.py; docs/results/ml/{runs.json, test.json, test.md, gallery/}; release.json next to the weights.
@@ -348,7 +348,7 @@ V1 → V2 → {V3, V5}; V3 → V4. D1 needs {A3, A5, V3}; D2 needs {ML10, P2, V4
 - M0 Contracts frozen (F0, F1): schema snapshots committed, CONTRACT_VERSION 1.0.0, ws branches created, tag `m0`. Parallel work starts only after this.
 - M1 Foundations (F2-F4, ML1-ML3, A1-A3, A6, P1, V1-V2): roundtrip.md decides serving; manifests and leakage tests green; demo-mode analyses return linted EN/RU text; the voice pipeline translates wav files EN<->RU offline.
 - M2 Baselines and flows (ML4-ML8, P2, P3, A4, A5, V3, V5): val table zero-shot vs detector; fare error published (or v0 flagged); happy_path fixtures cover photo → shared results → quote → booking → call + dentist context; a two-tab local EN<->RU call works, chat included; WS05 unblocked (the owner confirms the start and the Opus 5.5 switch then).
-- M3 Tuned model (ML9, ML10): the lean recipe, re-run from a clean Kaggle session, lands within the recorded CI; MI300X spend <= $80; test evaluated once, gate applied, card rendered, weights pushed private.
+- M3 Tuned model (ML9, ML10): the lean recipe, re-run from a clean Kaggle session, lands within the recorded CI; test evaluated once, gate applied, card rendered, weights pushed private.
 - M4 Integration (V4, D1): the demo, cpu, cuda and mac paths start from a clean clone; voice p50/p95 measured; replay recorded; samples precomputed by the shipped model.
 - M5 Release candidate (D2, D3, ML11 optional): README tables generated, licences complete, Space live (private), owner review. M6 (reserved): site + demo video.
 
@@ -366,7 +366,7 @@ V1 → V2 → {V3, V5}; V3 → V4. D1 needs {A3, A5, V3}; D2 needs {ML10, P2, V4
 | 1 | The tuned VLM fails the gate or loses to the detector | Per-finding gate, pre-registered ship rule, publish the loss honestly: the evaluation is the product |
 | 2 | Tuned VLM not importable into Ollama (GGUF + mmproj) | ML1 runs first; three adapters behind VisionBackend; Ollama keeps the baselines |
 | 3 | Leakage or label gaps (AKU split by image, no gingivitis negatives, partial labels) | Grouped split + leakage tests; coverage matrix in targets and metrics; specificity reported "not estimable" when no negatives exist |
-| 4 | Free or credit compute fails (quota, disconnects, ROCm quirks, price) | 500-step checkpoints, lean yardstick, 50-step pilots, one Trainer script for CUDA, ROCm and MPS, $80 cap + $20 reserve |
+| 4 | Free compute fails (weekly quota, 12 h session limit, disconnects) | 500-step checkpoints with resume, a 10-step smoke stage before the long run, a lean config sized for one T4 session, Colab as the fallback |
 | 5 | Licence contamination (private set, AGPL, NC, Gemma Terms) | Manifest source allowlist, AST/grep tests, out-of-process GPL, dated licence tables, opt-in prompts |
 | 6 | Call latency over 2.5 s, or RU errors on digits and negation | Harness before any claim, captions first, digit and glossary checks, captions_only mode, p50/p95 published |
 | 7 | Claims drift (VLM note, site strings, README) | Templates first, runtime + CI lint, /meta serves the safety texts, docs profile on README and cards, Literal[True] disclosure |

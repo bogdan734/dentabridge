@@ -31,7 +31,7 @@ Runs first and alone (M0). After M0 it continues with the policy tasks in parall
 4. Merge to main and tell the affected workstreams to rebase. WS02 re-runs `make contracts`.
 
 ## Lead duties
-- When WS01 adds the torch extras (cpu | cu128 | rocm), add `--extra cpu` to the CI sync and keep CI's uv version equal to `required-version` in pyproject.toml.
+- When WS01 adds the torch extras (cpu | cu128), add `--extra cpu` to the CI sync and keep CI's uv version equal to `required-version` in pyproject.toml.
 - Targets are unique across mk/*.mk (a test enforces it). On a collision the later workstream renames its target with its own prefix (`ml-`, `api-`, `voice-`). `models` belongs to WS04.
 - ruff, mypy and pytest config is root-owned. Sessions use an inline `# type: ignore[import-untyped]  # reason` for untyped libraries and send every config request to the lead.
 

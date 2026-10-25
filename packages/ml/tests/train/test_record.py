@@ -3,7 +3,7 @@ import pytest
 from dentabridge_ml.train.config import CONFIG_DIR, load_config
 from dentabridge_ml.train.record import make_record
 
-CFG = load_config(CONFIG_DIR / "pilot-50.toml")
+CFG = load_config(CONFIG_DIR / "smoke-t4.toml")
 SUMMARY = {
     "train_runtime": 120.0,
     "train_samples_per_second": 3.33,
@@ -17,10 +17,10 @@ def _history() -> list[dict[str, float]]:
 
 
 def test_record_takes_throughput_from_the_trainers_final_summary() -> None:
-    record = make_record(CFG, 400, _history(), "abc1234", "AMD Instinct MI300X")
+    record = make_record(CFG, 400, _history(), "abc1234", "Tesla T4")
     assert (record.steps, record.train_seconds, record.samples_per_second) == (50, 120.0, 3.33)
     assert record.final_loss == 2.2, "the last logged step loss, not the run average"
-    assert (record.rows, record.commit, record.hardware) == (400, "abc1234", "AMD Instinct MI300X")
+    assert (record.rows, record.commit, record.hardware) == (400, "abc1234", "Tesla T4")
 
 
 def test_config_digest_is_stable_and_follows_every_field() -> None:

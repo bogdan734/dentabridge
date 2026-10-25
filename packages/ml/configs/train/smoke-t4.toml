@@ -1,0 +1,18 @@
+# Ten steps of the lean recipe: run first on Kaggle to see seconds per step and to catch a broken
+# install before the multi-hour run. Same as lean-t4.toml; only the length differs.
+base_id = "Qwen/Qwen3-VL-4B-Instruct"
+device = "cuda"
+quant = "nf4"
+dtype = "fp16"
+image_max_px = 448
+lora_r = 16
+lora_alpha = 16
+train_vision = false
+lr = 1e-4
+epochs = 1
+max_steps = 10
+batch_size = 1
+grad_accum = 8
+gradient_checkpointing = true
+save_every = 5
+seed = 0

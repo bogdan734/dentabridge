@@ -28,7 +28,7 @@ from dentabridge_ml.targets.prompt import build_prompt, fit_image
 
 
 def pick_device() -> str:
-    if torch.cuda.is_available():  # ROCm builds report themselves as cuda
+    if torch.cuda.is_available():
         return "cuda"
     return "mps" if torch.backends.mps.is_available() else "cpu"
 

@@ -30,12 +30,10 @@ class TrainConfig(BaseModel):
     save_every: int = Field(gt=0)
     push_to: str | None = None  # a private Hub repo for checkpoints, never public
     seed: int = 0
-    device: Literal["cuda", "rocm", "mps"] = "cuda"
+    device: Literal["cuda", "mps"] = "cuda"
 
     @model_validator(mode="after")
     def _hardware_rules(self) -> Self:
-        if self.device == "rocm" and self.quant == "nf4":
-            raise ValueError("bitsandbytes nf4 is not used on ROCm: set quant = none")
         if self.device == "mps" and self.dtype == "bf16":
             raise ValueError("fp16 on MPS: set dtype = fp16")
         return self

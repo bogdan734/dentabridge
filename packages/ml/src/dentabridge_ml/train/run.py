@@ -42,14 +42,17 @@ def load_processor(base_id: str) -> Any:
 
 
 def attach_lora(model: Any, cfg: TrainConfig) -> Any:
+    checkpointing = {"use_reentrant": False}  # reentrant checkpoints drop grads of frozen inputs
     if cfg.quant == "nf4":
-        from peft import prepare_model_for_kbit_training  # needs bitsandbytes (CUDA only)
+        from peft import prepare_model_for_kbit_training  # needs bitsandbytes
 
         model = prepare_model_for_kbit_training(
-            model, use_gradient_checkpointing=cfg.gradient_checkpointing
+            model,
+            use_gradient_checkpointing=cfg.gradient_checkpointing,
+            gradient_checkpointing_kwargs=checkpointing,
         )
     elif cfg.gradient_checkpointing:
-        model.gradient_checkpointing_enable()
+        model.gradient_checkpointing_enable(gradient_checkpointing_kwargs=checkpointing)
         model.enable_input_require_grads()
     return get_peft_model(model, lora_config(cfg))
 
@@ -64,8 +67,9 @@ def load_model(cfg: TrainConfig) -> Any:
             bnb_4bit_quant_type="nf4",
             bnb_4bit_compute_dtype=DTYPES[cfg.dtype],
             bnb_4bit_use_double_quant=True,
+            llm_int8_skip_modules=["model.visual", "lm_head"],  # lm_head is tied to the embeddings
         )
-        kwargs["device_map"] = {"": 0}
+        kwargs["device_map"] = {"": 0 if torch.cuda.is_available() else "cpu"}  # cpu: the tests
     return attach_lora(Qwen3VLForConditionalGeneration.from_pretrained(cfg.base_id, **kwargs), cfg)
 
 

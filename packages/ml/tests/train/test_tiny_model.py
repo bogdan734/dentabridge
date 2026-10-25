@@ -28,7 +28,12 @@ from dentabridge_ml.targets.prompt import build_prompt  # noqa: E402
 from dentabridge_ml.train.config import TrainConfig  # noqa: E402
 from dentabridge_ml.train.data import END_OF_TURN, SftCollator, SftRow  # noqa: E402
 from dentabridge_ml.train.merge import merge_adapter  # noqa: E402
-from dentabridge_ml.train.run import attach_lora, load_processor, make_trainer  # noqa: E402
+from dentabridge_ml.train.run import (  # noqa: E402
+    attach_lora,
+    load_model,
+    load_processor,
+    make_trainer,
+)
 
 MODEL_DIR = default_root() / "models" / "Qwen3-VL-4B-Instruct"
 IMAGE_TOKEN = 151655
@@ -272,3 +277,34 @@ def test_merged_directory_keeps_the_original_config_and_processor_files(tmp_path
     assert (merged / "preprocessor_config.json").read_text() == '{"from": "the hub"}'
     assert (merged / "config.json").read_text() == (tmp_path / "base" / "config.json").read_text()
     assert (merged / "model.safetensors").stat().st_size > 0
+
+
+def test_two_steps_through_the_nf4_path_with_gradient_checkpointing(tmp_path: Path) -> None:
+    """The Kaggle recipe's code path (4-bit base, checkpointing, LoRA) on a tiny model, on CPU."""
+    bnb = pytest.importorskip("bitsandbytes")
+    processor = load_processor(str(MODEL_DIR))
+    _tiny_model().save_pretrained(tmp_path / "base")
+    processor.save_pretrained(tmp_path / "base")
+    cfg = _config().model_copy(
+        update={
+            "base_id": str(tmp_path / "base"),
+            "quant": "nf4",
+            "dtype": "bf16",
+            "gradient_checkpointing": True,
+        }
+    )
+    model = load_model(cfg)
+    layers = {name: type(module) for name, module in model.named_modules()}
+    assert any(t.__name__ == "Linear4bit" for t in layers.values()), "the language model is 4-bit"
+    assert not any(
+        "visual" in name and isinstance(module, bnb.nn.Linear4bit)
+        for name, module in model.named_modules()
+    ), "the vision tower stays in 16 bit"
+    trainer = make_trainer(
+        model, processor, cfg, _rows(tmp_path), tmp_path, tmp_path / "out", amp=False
+    )
+    trainer.train()
+    assert trainer.state.global_step == 2
+    assert math.isfinite(trainer.state.log_history[-1]["train_loss"])
+    moved = [p for n, p in model.named_parameters() if "lora_B" in n and p.abs().sum() > 0]
+    assert moved, "gradients reached the adapters through the checkpointed 4-bit layers"

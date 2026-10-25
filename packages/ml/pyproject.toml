@@ -19,6 +19,8 @@ train = [
     "peft>=0.17",
     "accelerate>=1.10",
 ]
+# 4-bit base weights for a 16 GB GPU (the lean recipe); also runs on CPU, which the tests use.
+nf4 = ["bitsandbytes>=0.46"]
 # llama.cpp's converter imports sentencepiece before it falls back to the BPE vocabulary of Qwen.
 gguf = ["sentencepiece>=0.2"]
 

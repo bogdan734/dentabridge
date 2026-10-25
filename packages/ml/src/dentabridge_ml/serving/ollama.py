@@ -6,7 +6,9 @@ only the codes being asked about, so a baseline cannot answer about anything els
 
 import base64
 import io
+import math
 import time
+from collections.abc import Sequence
 from typing import Any
 
 import httpx
@@ -20,10 +22,12 @@ from dentabridge_core import (
     SanitisedImage,
     VisionOutput,
 )
-from dentabridge_ml.serving.parse import ReleaseConfig, parse_output
+from dentabridge_ml.serving.parse import ReleaseConfig, answer_codes, parse_output
+from dentabridge_ml.serving.scores import scores_by_code, status_scores
 from dentabridge_ml.targets.prompt import build_prompt, fit_image
 
 MAX_NEW_TOKENS = 700
+TOP_LOGPROBS = 5
 _REGION = {
     "type": "object",
     "properties": {k: {"type": "number"} for k in ("x0", "y0", "x1", "y1")},
@@ -53,6 +57,21 @@ def answer_schema(codes: frozenset[FindingCode]) -> dict[str, Any]:
         },
         "required": ["image_quality", "quality_reason", "findings"],
     }
+
+
+def _probability(alternatives: Sequence[dict[str, Any]], token: str) -> float:
+    return next((math.exp(a["logprob"]) for a in alternatives if a["token"] == token), 0.0)
+
+
+def logprob_scores(logprobs: Sequence[dict[str, Any]]) -> list[float] | None:
+    """One score per status value from Ollama's per-token logprobs; None if not scorable."""
+    tokens = [entry["token"] for entry in logprobs]
+    p_possible = [_probability(entry["top_logprobs"], "possible") for entry in logprobs]
+    p_not = [_probability(entry["top_logprobs"], "not") for entry in logprobs]
+    try:
+        return status_scores(tokens, p_possible, p_not)
+    except ValueError:
+        return None
 
 
 class OllamaVisionBackend:
@@ -96,11 +115,15 @@ class OllamaVisionBackend:
                 }
             ],
         }
+        body.update(logprobs=True, top_logprobs=TOP_LOGPROBS)
         if self._constrain:
             body["format"] = answer_schema(asked)
         started = time.perf_counter()
         response = await self._client.post(self._url, json=body)
         response.raise_for_status()
         elapsed_ms = (time.perf_counter() - started) * 1000
-        raw: str = response.json()["message"]["content"]
-        return parse_output(raw, None, self._release, latency_ms=elapsed_ms)
+        data = response.json()
+        raw: str = data["message"]["content"]
+        scores = logprob_scores(data["logprobs"]) if data.get("logprobs") else None
+        paired = None if scores is None else scores_by_code(answer_codes(raw), scores)
+        return parse_output(raw, paired, self._release, latency_ms=elapsed_ms)

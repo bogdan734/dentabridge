@@ -2,6 +2,7 @@ import asyncio
 import base64
 import io
 import json
+import math
 from typing import Any
 
 import httpx
@@ -99,3 +100,46 @@ def test_unconstrained_decoding_sends_no_schema() -> None:
         _backend(json.dumps(ANSWER), seen, constrain=False).analyse(IMAGE, "intraoral_photo")
     )
     assert "format" not in seen[0]
+
+
+TOKENS = [
+    '{"', "image", "_quality", '":"', "ok", '","', "quality", "_reason", '":', "null", ',"', "find",
+    "ings", '":[{"', "code", '":"', "c", "aries", '","', "status", '":"', "possible", '","',
+    "regions", '":[]', "}]}",
+]  # fmt: skip
+
+
+def _logprobs(possible: float, other: float) -> list[dict[str, Any]]:
+    entries = []
+    for token in TOKENS:
+        top = [{"token": token, "logprob": -0.01}]
+        if token == "possible":
+            top = [
+                {"token": "possible", "logprob": math.log(possible)},
+                {"token": "not", "logprob": math.log(other)},
+            ]
+        entries.append({"token": token, "logprob": top[0]["logprob"], "top_logprobs": top})
+    return entries
+
+
+def test_scores_are_read_from_the_top_logprobs_at_the_status_value() -> None:
+    content = "".join(TOKENS)
+    seen: list[dict[str, Any]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(json.loads(request.content))
+        message = {"role": "assistant", "content": content}
+        return httpx.Response(200, json={"message": message, "logprobs": _logprobs(0.6, 0.2)})
+
+    client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    backend = OllamaVisionBackend("http://ollama.test", "m", RELEASE, client)
+    output = asyncio.run(backend.analyse(IMAGE, "intraoral_photo"))
+    assert seen[0]["logprobs"] is True
+    assert seen[0]["top_logprobs"] >= 2
+    (finding,) = output.findings
+    assert finding.score == pytest.approx(0.75)
+
+
+def test_an_answer_without_logprobs_still_parses_and_has_no_score() -> None:
+    output = asyncio.run(_backend(json.dumps(ANSWER), []).analyse(IMAGE, "intraoral_photo"))
+    assert output.findings[0].score is None

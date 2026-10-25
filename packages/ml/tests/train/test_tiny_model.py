@@ -4,6 +4,8 @@ Needs the `train` extra and the small files of Qwen3-VL-4B-Instruct (tokenizer, 
 config; not the weights), so it skips itself in CI. Run with `-m slow`.
 """
 
+import asyncio
+import json
 import math
 from pathlib import Path
 from typing import Any
@@ -19,6 +21,9 @@ from transformers import AutoConfig, Qwen3VLForConditionalGeneration  # noqa: E4
 
 from dentabridge_core import FindingCode  # noqa: E402
 from dentabridge_ml.data.sources import default_root  # noqa: E402
+from dentabridge_ml.eval.predict import sanitise  # noqa: E402
+from dentabridge_ml.serving.parse import ParseError, ReleaseConfig  # noqa: E402
+from dentabridge_ml.serving.transformers_backend import TransformersVisionBackend  # noqa: E402
 from dentabridge_ml.targets.prompt import build_prompt  # noqa: E402
 from dentabridge_ml.train.config import TrainConfig  # noqa: E402
 from dentabridge_ml.train.data import END_OF_TURN, SftCollator, SftRow  # noqa: E402
@@ -151,3 +156,47 @@ def test_merged_weights_answer_like_the_adapter(tmp_path: Path) -> None:
     assert (tmp_path / "merged" / "tokenizer.json").exists()
     assert not any("lora" in k for k in merged.state_dict())
     assert torch.allclose(expected, actual, atol=2e-2), (expected - actual).abs().max()
+
+
+def _backend(tmp_path: Path) -> TransformersVisionBackend:
+    processor = load_processor(str(MODEL_DIR))
+    _tiny_model().save_pretrained(tmp_path / "base")
+    processor.save_pretrained(tmp_path / "base")
+    release = ReleaseConfig(assessed=frozenset({FindingCode.CARIES}))
+    return TransformersVisionBackend(str(tmp_path / "base"), release, 64, torch.float32, "cpu")
+
+
+def _photo(tmp_path: Path) -> Any:
+    Image.new("RGB", (96, 64), (200, 90, 120)).save(tmp_path / "photo.jpg")
+    return sanitise(tmp_path / "photo.jpg")
+
+
+def test_backend_parses_only_the_newly_generated_tokens(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    backend = _backend(tmp_path)
+    answer = {
+        "image_quality": "ok",
+        "quality_reason": None,
+        "findings": [{"code": "caries", "status": "not_seen", "regions": []}],
+    }
+    ids = backend._processor.tokenizer(
+        json.dumps(answer), add_special_tokens=False, return_tensors="pt"
+    )
+    seen: dict[str, Any] = {}
+
+    def fake_generate(**inputs: Any) -> Any:
+        seen.update(inputs)
+        return torch.cat([inputs["input_ids"], ids["input_ids"]], dim=1)
+
+    monkeypatch.setattr(backend._net, "generate", fake_generate)
+    output = asyncio.run(backend.analyse(_photo(tmp_path), "intraoral_photo"))
+    assert [(f.code, f.status) for f in output.findings] == [(FindingCode.CARIES, "not_seen")]
+    assert seen["do_sample"] is False
+    assert seen["max_new_tokens"] == 700
+    assert (seen["input_ids"] == IMAGE_TOKEN).any(), "the picture reached the model"
+
+
+def test_backend_generates_end_to_end_and_reports_unparseable_text(tmp_path: Path) -> None:
+    with pytest.raises(ParseError):
+        asyncio.run(_backend(tmp_path).analyse(_photo(tmp_path), "intraoral_photo"))

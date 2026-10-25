@@ -19,7 +19,7 @@ from dentabridge_ml.data.records import ImageRecord
 from dentabridge_ml.data.sources import SOURCES
 from dentabridge_ml.splits.manifest import SplitEntry
 from dentabridge_ml.targets.degrade import DEGRADE_KINDS, REASON, DegradeKind, degrade
-from dentabridge_ml.targets.prompt import build_prompt
+from dentabridge_ml.targets.prompt import build_prompt, fit_image
 from dentabridge_ml.targets.sft import target_json, unusable_json
 
 END_OF_TURN = "<|im_end|>\n"
@@ -111,8 +111,7 @@ class SftCollator:
             image = ImageOps.exif_transpose(opened).convert("RGB")
         if row.degrade is not None:
             image = degrade(image, row.degrade.kind, row.degrade.seed)
-        image.thumbnail((self._image_max_px, self._image_max_px), Image.Resampling.LANCZOS)
-        return image
+        return fit_image(image, self._image_max_px)
 
     def __call__(self, rows: Sequence[SftRow]) -> dict[str, Any]:
         images = [self._image(r) for r in rows]

@@ -1,7 +1,10 @@
-"""The one instruction used for training, zero-shot baselines and the shipped model.
+"""What the model is shown: one instruction and one picture size, for training, zero-shot
+baselines and the shipped model.
 
-Training and inference must share this text, or a baseline is not comparable to the tuned model.
+Training and inference must share both, or a baseline is not comparable to the tuned model.
 """
+
+from PIL import Image
 
 from dentabridge_core import FindingCode, Modality
 
@@ -31,3 +34,10 @@ def build_prompt(assess: frozenset[FindingCode], modality: Modality) -> str:
         'If the image cannot be judged, set image_quality to "unusable", give the reason and '
         "return no findings."
     )
+
+
+def fit_image(image: Image.Image, max_px: int) -> Image.Image:
+    """The picture as the model sees it: longest side at most `max_px`, aspect kept."""
+    fitted = image.copy()
+    fitted.thumbnail((max_px, max_px), Image.Resampling.LANCZOS)
+    return fitted

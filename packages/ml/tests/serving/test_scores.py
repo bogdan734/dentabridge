@@ -42,9 +42,22 @@ def test_tokens_outside_a_status_value_are_never_scored() -> None:
 
 
 def test_a_status_token_the_model_gave_no_mass_to_is_an_error() -> None:
-    tokens = ["status", '":"', "possible"]
+    tokens = ['"', "status", '":"', "possible"]
     with pytest.raises(ValueError, match="neither"):
-        status_scores(tokens, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0])
+        status_scores(tokens, [0.0] * 4, [0.0] * 4)
+
+
+def test_a_spaced_layout_scores_like_the_compact_one() -> None:
+    """Models that were not fine-tuned write `"status": "possible"`, tokenised differently."""
+    tokens = ['{"', "status", '":', ' "', "possible", '",', ' "', "regions", '":', " []}"]
+    p_possible, p_not = _probs(tokens, {4: (0.3, 0.1)})
+    assert status_scores(tokens, p_possible, p_not) == pytest.approx([0.75])
+
+
+def test_a_value_glued_to_its_quote_cannot_be_scored() -> None:
+    tokens = ['{"', "status", '":', ' "possible', '"}']
+    with pytest.raises(ValueError, match="token boundary"):
+        status_scores(tokens, [0.0] * 5, [0.0] * 5)
 
 
 def test_scores_are_paired_with_the_answer_codes_in_order() -> None:

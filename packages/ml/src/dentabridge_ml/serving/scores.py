@@ -1,15 +1,16 @@
 """A score for each "possible" / "not_seen" decision, read off the model's own token probabilities.
 
-The answer is JSON the model wrote itself, and its tokens split cleanly: `status`, `":"`, then
-`possible` or `not` (+ `_seen`). The probability mass of those two tokens at that position,
+The answer is JSON the model wrote itself. Wherever `"status": "` ends, the next token starts the
+value: `possible` or `not` (+ `_seen`). The probability mass of those two tokens at that position,
 normalised, is the model's confidence that the finding is present.
 """
 
+import re
 from collections.abc import Mapping, Sequence
 
 from dentabridge_core import FindingCode
 
-_BEFORE_VALUE = ("status", '":"')
+_BEFORE_VALUE = re.compile(r'"status"\s*:\s*"')
 
 
 def status_scores(
@@ -18,16 +19,25 @@ def status_scores(
     """One score per status value, in answer order.
 
     `p_possible[i]` and `p_not[i]` are the probabilities of the tokens `possible` and `not` at
-    generated position i, whatever token was actually chosen there.
+    generated position i, whatever token was actually chosen there. Raises ValueError when a
+    value cannot be scored (it shares a token with its quote, or neither status token has mass).
     """
+    starts: dict[int, int] = {}
+    text = ""
+    for position, token in enumerate(tokens):
+        starts[len(text)] = position
+        text += token
     scores = []
-    for i in range(2, len(tokens)):
-        if (tokens[i - 2], tokens[i - 1]) != _BEFORE_VALUE:
-            continue
-        mass = p_possible[i] + p_not[i]
+    for match in _BEFORE_VALUE.finditer(text):
+        at = starts.get(match.end())
+        if at is None:
+            raise ValueError(
+                f"a status value does not start on a token boundary (char {match.end()})"
+            )
+        mass = p_possible[at] + p_not[at]
         if mass <= 0:
-            raise ValueError(f"neither status token has probability at position {i}")
-        scores.append(p_possible[i] / mass)
+            raise ValueError(f"neither status token has probability at position {at}")
+        scores.append(p_possible[at] / mass)
     return scores
 
 

@@ -24,6 +24,7 @@ else
   kaggle datasets create -p "$dataset"
 fi
 until [ "$(kaggle datasets status "$user/dentabridge-code" 2>/dev/null | tail -1)" = "ready" ]; do sleep 5; done
+sleep 45  # "ready" can still describe the previous version for a moment; the notebook prints the commit it got
 
 python3 - "$user" "${stages[@]}" <<'PY'
 import json, sys

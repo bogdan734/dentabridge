@@ -36,13 +36,16 @@ SOURCES=(aku_caries alphadent)
 
 image_px() { "$PY" -c "import sys,tomllib; print(tomllib.load(open(sys.argv[1],'rb'))['image_max_px'])" "packages/ml/configs/train/$CONFIG.toml"; }
 
+# --no-config: the repository pins the uv version contributors use; Kaggle's own uv is newer.
+uvc() { uv --no-config "$@"; }
+
 stage_setup() {
-  command -v uv >/dev/null || pip install -q "uv>=0.11.19,<0.12"
+  command -v uv >/dev/null || pip install -q uv
   command -v bsdtar >/dev/null || { apt-get update -qq && apt-get install -y -qq libarchive-tools; }
-  uv venv --quiet --python 3.13 "$VENV"
-  uv pip install --quiet --python "$PY" torch==2.14.1 torchvision==0.29.1 \
+  uvc venv --quiet --python 3.13 "$VENV"
+  uvc pip install --quiet --python "$PY" torch==2.14.1 torchvision==0.29.1 \
     --index-url https://download.pytorch.org/whl/cu126
-  uv pip install --quiet --python "$PY" -e packages/core -e packages/ml \
+  uvc pip install --quiet --python "$PY" -e packages/core -e packages/ml \
     transformers==5.20.2 peft==0.21.2 accelerate==1.15.0 bitsandbytes==0.50.2
   "$PY" - <<'PY'
 import torch

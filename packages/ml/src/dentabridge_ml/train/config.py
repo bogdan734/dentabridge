@@ -25,6 +25,7 @@ class TrainConfig(BaseModel):
     batch_size: int = Field(default=1, gt=0)
     grad_accum: int = Field(gt=0)
     max_seq_len: int = Field(default=2048, gt=0)
+    gradient_checkpointing: bool = False  # trades speed for memory: on for 16 GB cards
     max_steps: int | None = Field(default=None, gt=0)  # set for pilots; overrides epochs
     save_every: int = Field(gt=0)
     push_to: str | None = None  # a private Hub repo for checkpoints, never public

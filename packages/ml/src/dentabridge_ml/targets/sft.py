@@ -8,6 +8,7 @@ from dentabridge_ml.data.records import ImageRecord, LabelBox
 from dentabridge_ml.data.sources import SOURCES
 
 PRECISION = 3
+MAX_REGIONS = 6  # the largest boxes per finding: the answer must stay short enough to train on
 
 
 def _region(box: LabelBox) -> dict[str, float]:
@@ -17,6 +18,11 @@ def _region(box: LabelBox) -> dict[str, float]:
         "x1": round(box.x1, PRECISION),
         "y1": round(box.y1, PRECISION),
     }
+
+
+def _largest(boxes: list[LabelBox]) -> list[LabelBox]:
+    ranked = sorted(boxes, key=lambda b: (b.x1 - b.x0) * (b.y1 - b.y0), reverse=True)
+    return sorted(ranked[:MAX_REGIONS], key=lambda b: (b.y0, b.x0))
 
 
 def target_json(rec: ImageRecord, assess: frozenset[FindingCode]) -> str:
@@ -35,7 +41,7 @@ def target_json(rec: ImageRecord, assess: frozenset[FindingCode]) -> str:
             {
                 "code": code.value,
                 "status": "possible" if present else "not_seen",
-                "regions": [_region(b) for b in boxes],
+                "regions": [_region(b) for b in _largest(boxes)],
             }
         )
     answer: dict[str, object] = {

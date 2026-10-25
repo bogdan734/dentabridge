@@ -8,7 +8,7 @@ from dentabridge_core import FindingCode, VisionOutput
 from dentabridge_ml.data.records import ImageRecord, LabelBox
 from dentabridge_ml.targets.degrade import DEGRADE_KINDS, REASON, degrade
 from dentabridge_ml.targets.prompt import build_prompt
-from dentabridge_ml.targets.sft import target_json, unusable_json
+from dentabridge_ml.targets.sft import MAX_REGIONS, target_json, unusable_json
 
 CARIES, FILLING = FindingCode.CARIES, FindingCode.FILLING
 
@@ -58,6 +58,19 @@ def test_possible_carries_rounded_boxes_and_not_seen_none() -> None:
     caries, filling = answer["findings"]
     assert caries["regions"] == [{"x0": 0.123, "y0": 0.1, "x1": 0.5, "y1": 0.4}]
     assert filling == {"code": "filling", "status": "not_seen", "regions": []}
+
+
+def test_regions_are_capped_to_the_largest_boxes() -> None:
+    # box i is i * 0.05 wide, so the three smallest (i = 1..3) must be the ones dropped
+    boxes = [
+        LabelBox(code=CARIES, x0=0.0, y0=0.05 * (10 - i), x1=0.05 * i, y1=0.05 * (10 - i) + 0.04)
+        for i in range(1, MAX_REGIONS + 4)
+    ]
+    answer = json.loads(target_json(_record(*boxes), frozenset({CARIES})))
+    regions = answer["findings"][0]["regions"]
+    assert len(regions) == MAX_REGIONS
+    assert min(r["x1"] for r in regions) == 0.2  # the narrowest kept box is i = 4
+    assert [r["y0"] for r in regions] == sorted(r["y0"] for r in regions)
 
 
 def test_findings_follow_catalogue_order_whatever_the_set_order() -> None:

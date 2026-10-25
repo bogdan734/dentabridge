@@ -13,6 +13,7 @@ def test_lean_config_is_t4_safe() -> None:
     assert cfg.batch_size * cfg.grad_accum >= 8
     assert cfg.save_every <= 500, "a 12 h Kaggle session can end at any time"
     assert cfg.push_to is None
+    assert cfg.gradient_checkpointing, "16 GB needs it"
 
 
 def test_rocm_configs_have_no_bitsandbytes() -> None:

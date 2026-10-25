@@ -1,0 +1,15 @@
+# Free route: one Kaggle or Colab T4 (16 GB, no bf16). 4-bit base, LoRA, short sequences.
+base_id = "Qwen/Qwen3-VL-4B-Instruct"
+device = "cuda"
+quant = "nf4"
+dtype = "fp16"
+image_max_px = 448
+lora_r = 16
+lora_alpha = 16
+train_vision = false
+lr = 1e-4
+epochs = 2
+batch_size = 1
+grad_accum = 8
+save_every = 500
+seed = 0

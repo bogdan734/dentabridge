@@ -1,0 +1,16 @@
+# AMD MI300X (192 GB, ROCm): bf16 LoRA, no quantisation. Ablations change ONE field from here
+# (train_vision, image_max_px, lora_r, the quality negatives); the larger run combines the winners.
+base_id = "Qwen/Qwen3-VL-4B-Instruct"
+device = "rocm"
+quant = "none"
+dtype = "bf16"
+image_max_px = 448
+lora_r = 16
+lora_alpha = 16
+train_vision = false
+lr = 1e-4
+epochs = 2
+batch_size = 4
+grad_accum = 2
+save_every = 500
+seed = 0

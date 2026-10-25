@@ -68,10 +68,18 @@ def split(
     groups: Sequence[str],
     seed: int,
     ratios: tuple[float, float, float] = (0.8, 0.1, 0.1),
+    source_ratios: Mapping[str, tuple[float, float, float]] | None = None,
 ) -> SplitManifest:
-    """Assign whole groups to splits, balancing each source x positive/negative stratum."""
-    if len(records) != len(groups) or abs(sum(ratios) - 1.0) > 1e-9:
-        raise ValueError("records and groups must line up and the ratios must sum to 1")
+    """Assign whole groups to splits, balancing each source x positive/negative stratum.
+
+    A small source can ask for a bigger test share through `source_ratios`, so that its findings
+    have enough positives to be judged at all.
+    """
+    overrides = dict(source_ratios or {})
+    if len(records) != len(groups) or any(
+        abs(sum(r) - 1.0) > 1e-9 for r in (ratios, *overrides.values())
+    ):
+        raise ValueError("records and groups must line up and every ratio triple must sum to 1")
     members: dict[str, list[int]] = defaultdict(list)
     for index, name in enumerate(groups):
         members[name].append(index)
@@ -87,7 +95,8 @@ def split(
     placement: dict[str, SplitName] = {}
     for name in order:
         stratum, size = group_stratum[name], len(members[name])
-        placement[name] = _most_underfilled(stratum, size, assigned, strata[stratum], ratios)
+        wanted = overrides.get(stratum.split(":")[0], ratios)
+        placement[name] = _most_underfilled(stratum, size, assigned, strata[stratum], wanted)
         assigned[(stratum, placement[name])] += size
     entries = tuple(
         SplitEntry(

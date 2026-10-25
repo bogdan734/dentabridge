@@ -16,6 +16,8 @@ from dentabridge_ml.splits.manifest import SPLITS, SplitManifest, split, write_m
 MANIFEST_DIR = Path(__file__).resolve().parents[3] / "manifests"
 MAX_HAMMING = 2  # dHash distance for "the same photo"; teeth of different people sit at 3 and up
 MAX_COS_DIST = 0.05
+# AlphaDent is small: 10% would leave about 22 crown positives, under the gate's minimum of 30.
+SOURCE_RATIOS: dict[str, tuple[float, float, float]] = {"alphadent": (0.7, 0.1, 0.2)}
 
 
 def build(
@@ -27,7 +29,7 @@ def build(
     if any(r.patient_id is None and r.capture_sequence is None for r in records):
         raise NotImplementedError("embeddings for records without an id are not wired in yet")
     groups = group(records, None, hashes, MAX_COS_DIST, MAX_HAMMING)
-    return records, split(records, groups, seed)
+    return records, split(records, groups, seed, source_ratios=SOURCE_RATIOS)
 
 
 def summary(records: Sequence[ImageRecord], manifest: SplitManifest) -> str:

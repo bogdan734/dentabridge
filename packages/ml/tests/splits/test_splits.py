@@ -156,7 +156,26 @@ def test_ratios_are_respected_per_stratum() -> None:
     assert positives, "the test split must contain positives"
 
 
+def test_a_source_can_ask_for_a_bigger_test_share() -> None:
+    records, emb, hashes = _mouths(300, 4)
+    records = [
+        r.model_copy(update={"source": "alphadent" if i % 8 < 4 else "aku_caries"})
+        for i, r in enumerate(records)
+    ]
+    groups = group(records, emb, hashes, 0.05, 2)
+    manifest = split(records, groups, 3, source_ratios={"alphadent": (0.5, 0.1, 0.4)})
+    share = {
+        name: len([e for e in manifest.of("test") if e.source == name])
+        / len([e for e in manifest.entries if e.source == name])
+        for name in ("alphadent", "aku_caries")
+    }
+    assert abs(share["alphadent"] - 0.4) < 0.05
+    assert abs(share["aku_caries"] - 0.1) < 0.05
+
+
 def test_split_rejects_bad_ratios() -> None:
     records, groups, _ = _manifest()
     with pytest.raises(ValueError, match="sum to 1"):
         split(records, groups, 1, (0.5, 0.2, 0.2))
+    with pytest.raises(ValueError, match="sum to 1"):
+        split(records, groups, 1, source_ratios={"alphadent": (0.5, 0.2, 0.2)})

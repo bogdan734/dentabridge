@@ -9,7 +9,7 @@ from dentabridge_ml.data.records import ImageRecord, LabelBox
 from dentabridge_ml.eval.predict import predict, read_predictions, sanitise
 from dentabridge_ml.eval.report import build_result
 from dentabridge_ml.serving.parse import ParseError
-from dentabridge_ml.splits.manifest import SplitEntry, SplitManifest, SplitName
+from dentabridge_ml.splits.manifest import SplitEntry, SplitName
 
 CARIES = FindingCode.CARIES
 
@@ -43,7 +43,9 @@ def _output(possible: bool) -> VisionOutput:
     return VisionOutput(image_quality="ok", findings=(finding,), latency_ms=1.0)
 
 
-def _world(tmp_path: Path, split: SplitName = "val") -> tuple[list[ImageRecord], SplitManifest]:
+def _world(
+    tmp_path: Path, split: SplitName = "val"
+) -> tuple[list[ImageRecord], tuple[SplitEntry, ...]]:
     folder = tmp_path / "aku_caries"
     folder.mkdir()
     records = []
@@ -71,7 +73,7 @@ def _world(tmp_path: Path, split: SplitName = "val") -> tuple[list[ImageRecord],
         )
         for i, r in enumerate(records)
     )
-    return records, SplitManifest(seed=0, ratios=(0.8, 0.1, 0.1), entries=entries)
+    return records, entries
 
 
 def _backend(tmp_path: Path, records: list[ImageRecord]) -> ScriptedBackend:
@@ -84,12 +86,12 @@ def _backend(tmp_path: Path, records: list[ImageRecord]) -> ScriptedBackend:
 
 
 def test_report_matches_a_hand_count_and_scores_only_labelled_codes(tmp_path: Path) -> None:
-    records, manifest = _world(tmp_path)
+    records, entries = _world(tmp_path)
     out = tmp_path / "val.jsonl"
-    asyncio.run(predict(_backend(tmp_path, records), records, manifest, "val", tmp_path, out))
+    asyncio.run(predict(_backend(tmp_path, records), records, entries, tmp_path, out))
     rows = read_predictions(out)
     assert len(rows) == 8
-    result = build_result("scripted", "val", {r.record_id: r for r in records}, manifest, rows)
+    result = build_result("scripted", "val", {r.record_id: r for r in records}, entries, rows)
     caries = next(c for c in result.codes if c.code == CARIES)
     assert (caries.n_pos, caries.n_neg) == (4, 4)
     assert (caries.sens, caries.spec) == (0.75, 0.75)
@@ -100,31 +102,27 @@ def test_report_matches_a_hand_count_and_scores_only_labelled_codes(tmp_path: Pa
 
 
 def test_uncovered_source_codes_not_scored(tmp_path: Path) -> None:
-    records, manifest = _world(tmp_path)
+    records, entries = _world(tmp_path)
     out = tmp_path / "val.jsonl"
-    asyncio.run(predict(_backend(tmp_path, records), records, manifest, "val", tmp_path, out))
+    asyncio.run(predict(_backend(tmp_path, records), records, entries, tmp_path, out))
     result = build_result(
-        "m", "val", {r.record_id: r for r in records}, manifest, read_predictions(out)
+        "m", "val", {r.record_id: r for r in records}, entries, read_predictions(out)
     )
     scored = {c.code for c in result.codes if c.n_pos + c.n_neg}
     assert scored == {CARIES}
 
 
 def test_test_split_requires_final_and_logs(tmp_path: Path) -> None:
-    records, manifest = _world(tmp_path, split="test")
+    records, entries = _world(tmp_path, split="test")
     backend = _backend(tmp_path, records)
     out, log = tmp_path / "test.jsonl", tmp_path / "test-access.log"
     with pytest.raises(PermissionError, match="final=True"):
-        asyncio.run(predict(backend, records, manifest, "test", tmp_path, out, access_log=log))
+        asyncio.run(predict(backend, records, entries, tmp_path, out, access_log=log))
     with pytest.raises(PermissionError, match="access log"):
-        asyncio.run(predict(backend, records, manifest, "test", tmp_path, out, final=True))
+        asyncio.run(predict(backend, records, entries, tmp_path, out, final=True))
     assert not out.exists()
-    asyncio.run(
-        predict(backend, records, manifest, "test", tmp_path, out, final=True, access_log=log)
-    )
-    asyncio.run(
-        predict(backend, records, manifest, "test", tmp_path, out, final=True, access_log=log)
-    )
+    asyncio.run(predict(backend, records, entries, tmp_path, out, final=True, access_log=log))
+    asyncio.run(predict(backend, records, entries, tmp_path, out, final=True, access_log=log))
     lines = log.read_text().splitlines()
     assert len(lines) == 2
     assert "scripted" in lines[0]
@@ -132,14 +130,13 @@ def test_test_split_requires_final_and_logs(tmp_path: Path) -> None:
 
 
 def test_val_never_touches_the_log(tmp_path: Path) -> None:
-    records, manifest = _world(tmp_path)
+    records, entries = _world(tmp_path)
     log = tmp_path / "log"
     asyncio.run(
         predict(
             _backend(tmp_path, records),
             records,
-            manifest,
-            "val",
+            entries,
             tmp_path,
             tmp_path / "v.jsonl",
             access_log=log,

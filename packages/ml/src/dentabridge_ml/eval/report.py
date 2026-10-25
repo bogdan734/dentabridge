@@ -16,7 +16,7 @@ from dentabridge_ml.eval.calibration import ece, risk_coverage
 from dentabridge_ml.eval.metrics import binary_stats
 from dentabridge_ml.eval.predict import PredictionRow
 from dentabridge_ml.eval.results import CodeResult, SplitResult
-from dentabridge_ml.splits.manifest import SplitManifest, SplitName
+from dentabridge_ml.splits.manifest import SplitEntry
 
 
 def _possible(row: PredictionRow, code: FindingCode) -> tuple[bool, float | None]:
@@ -30,13 +30,13 @@ def _possible(row: PredictionRow, code: FindingCode) -> tuple[bool, float | None
 
 def build_result(
     model_id: str,
-    split: SplitName,
+    split: str,
     records: Mapping[str, ImageRecord],
-    manifest: SplitManifest,
+    entries: Sequence[SplitEntry],
     predictions: Sequence[PredictionRow],
     seed: int = 0,
 ) -> SplitResult:
-    group_of = {e.record_id: e.group for e in manifest.entries}
+    group_of = {e.record_id: e.group for e in entries}
     codes: list[CodeResult] = []
     for code in sorted(ASSESSABLE["intraoral_photo"], key=list(FindingCode).index):
         rows = [

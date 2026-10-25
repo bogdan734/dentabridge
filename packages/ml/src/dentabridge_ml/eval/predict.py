@@ -17,8 +17,9 @@ from pydantic import BaseModel, ConfigDict
 
 from dentabridge_core import SanitisedImage, VisionBackend, VisionOutput
 from dentabridge_ml.data.records import ImageRecord
-from dentabridge_ml.serving.parse import ParseError
-from dentabridge_ml.splits.manifest import SplitManifest, SplitName
+from dentabridge_ml.data.sources import SOURCES
+from dentabridge_ml.serving.parse import ParseError, ReleaseConfig
+from dentabridge_ml.splits.manifest import SplitEntry
 
 MAX_SIDE = 1536
 
@@ -29,6 +30,13 @@ class PredictionRow(BaseModel):
     record_id: str
     output: VisionOutput | None = None
     error: str | None = None  # a ParseError: the model did not answer in the agreed format
+
+
+def research_release() -> ReleaseConfig:
+    """Research runs let the model judge every code a published source labels; the release gate
+    later decides which of them may ship."""
+    covered = frozenset().union(*(s.coverage for s in SOURCES.values() if s.published))
+    return ReleaseConfig(assessed=covered)
 
 
 def sanitise(path: Path, max_side: int = MAX_SIDE) -> SanitisedImage:
@@ -54,14 +62,13 @@ def _commit() -> str:
 async def predict(
     backend: VisionBackend,
     records: Sequence[ImageRecord],
-    manifest: SplitManifest,
-    split: SplitName,
+    entries: Sequence[SplitEntry],
     root: Path,
     out: Path,
     final: bool = False,
     access_log: Path | None = None,
 ) -> Path:
-    if split == "test":
+    if any(e.split == "test" for e in entries):
         if not final:
             raise PermissionError("the test split is read once, with final=True")
         if access_log is None:
@@ -70,7 +77,7 @@ async def predict(
         line = f"{stamp} {backend.model.model_id} commit={_commit()} split=test\n"
         with access_log.open("a", encoding="utf-8") as log:
             log.write(line)
-    wanted = {e.record_id for e in manifest.of(split)}
+    wanted = {e.record_id for e in entries}
     rows: list[PredictionRow] = []
     for record in records:
         if record.record_id not in wanted:

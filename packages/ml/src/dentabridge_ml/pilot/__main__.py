@@ -19,8 +19,8 @@ import httpx
 
 from dentabridge_core import VisionBackend, VisionOutput
 from dentabridge_ml.data.loaders import load_records
-from dentabridge_ml.data.sources import SOURCES, default_root
-from dentabridge_ml.eval.predict import sanitise
+from dentabridge_ml.data.sources import default_root
+from dentabridge_ml.eval.predict import research_release, sanitise
 from dentabridge_ml.pilot.roundtrip import (
     COLOURS,
     RoundtripReport,
@@ -29,18 +29,11 @@ from dentabridge_ml.pilot.roundtrip import (
     serving_decision,
     valid_rate,
 )
+from dentabridge_ml.serving import OLLAMA_URL
 from dentabridge_ml.serving.ollama import OllamaVisionBackend
-from dentabridge_ml.serving.parse import ParseError, ReleaseConfig
+from dentabridge_ml.serving.parse import ParseError
 from dentabridge_ml.splits.build import MANIFEST_DIR
 from dentabridge_ml.splits.manifest import read_entries
-
-OLLAMA_URL = "http://localhost:11434"
-
-
-def _release() -> ReleaseConfig:
-    return ReleaseConfig(
-        assessed=frozenset().union(*(s.coverage for s in SOURCES.values() if s.published))
-    )
 
 
 def modelfile(stock: str, merged: Path) -> str:
@@ -120,10 +113,14 @@ def _compare(args: argparse.Namespace) -> int:
     ]
 
     dtype = torch.bfloat16 if args.dtype == "bf16" else torch.float16
-    reference = TransformersVisionBackend(str(args.merged), _release(), args.image_max_px, dtype)
+    reference = TransformersVisionBackend(
+        str(args.merged), research_release(), args.image_max_px, dtype
+    )
     expected = asyncio.run(_answers(reference, images))
     del reference
-    ollama = OllamaVisionBackend(OLLAMA_URL, args.name, _release(), image_max_px=args.image_max_px)
+    ollama = OllamaVisionBackend(
+        OLLAMA_URL, args.name, research_release(), image_max_px=args.image_max_px
+    )
     got = asyncio.run(_answers(ollama, images))
 
     version = httpx.get(f"{OLLAMA_URL}/api/version", timeout=10.0).json()["version"]

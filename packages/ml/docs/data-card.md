@@ -10,8 +10,8 @@ Datasets are never committed: `make data` downloads them from the publishers and
 | Source | Licence | Camera | Labels used | Role |
 |---|---|---|---|---|
 | AKU caries (Zenodo 14827784) | CC BY 4.0 | one phone (Samsung Galaxy A23, per the publisher) | decay boxes `D` / `d` | train / val / test |
-| AlphaDent (Zenodo 16582489) | CC BY 4.0 | DSLR + mirror | filling, crown, abrasion, caries 1-6 | train / val / test (loader pending) |
-| Mendeley gingivitis (3253gj88rr) | CC BY 4.0 | clinic camera | image-level gingivitis + 3 clinician captions | train / val / test (loader pending) |
+| AlphaDent (Zenodo 16582489) | CC BY 4.0 | Canon 6D Mark II DSLR with an intraoral mirror | abrasion, filling, crown, caries by site class 1-6 | train / val / test |
+| Mendeley gingivitis (3253gj88rr) | CC BY 4.0 | clinic camera | image-level gingivitis + 3 clinician captions | loader pending |
 | Kaggle Oral Diseases | Unknown | mixed web and hospital | six classes | private local tests only |
 
 ## AKU, checked on 2026-10-25
@@ -40,16 +40,38 @@ Datasets are never committed: `make data` downloads them from the publishers and
 - Children and young adults (ages 10-24) from schools in one region; one phone model; image
   sizes range from about 730x410 to 3060x1720.
 
+## AlphaDent, checked on 2026-10-25
+
+- 1,455 JPEGs in the zip: 1,237 train, 83 valid and 135 test. The 135 test images have no labels
+  (the hidden test of a competition) and are not used. That explains the 1,320 versus 1,455
+  difference: **1,320 labelled images of 293 patients** are in use.
+- File names carry a real patient id, sex and age (`p002_F_52_001`). The publisher's own train and
+  valid sets share no patient. 2 to 18 photos per patient (median 3); 162 women and 131 men,
+  ages 8 to 66 (median 34): adults, which complements AKU's children.
+- Labels are YOLO segmentation polygons, reduced here to bounding boxes. Classes: abrasion (6,347
+  polygons), filling (2,373), crown (589) and caries by **site, not severity**: the paper grades
+  caries in six classes (five standard ones plus a sixth proposed by the WHO), e.g. class 1 is pits
+  and fissures, 2 the contact surfaces of molars and premolars, 5 the cervical area, 6 incisal
+  edges and cusp tips. The loader keeps them as `caries_1` to `caries_6`; nothing treats a higher
+  number as worse, so the urgency rule for a severity subtype (R1) stays disabled.
+- 32 polygons have no area (a single point: the class was named, nothing was outlined). The image
+  keeps the label and the region is dropped.
+- **No image is free of all nine classes.** Every photo shows at least one pathology, so a "negative"
+  for caries means "something else is present, not caries". Specificity measured here is against
+  that harder negative set, and AKU supplies the caries-free photos instead.
+- Positive images per class: abrasion 1,138, caries 910, filling 743, crown 219. Photos are 18 MP
+  and are resized to at most 1,536 px before any model sees them.
+- Splits for AlphaDent use 70 / 10 / 20 so that the test split holds 44 crown positives (the
+  release gate needs 30).
+
 ## Splits
 
 Grouped by participant, never by image (`dentabridge_ml.splits`). Manifests are in
-`packages/ml/manifests/` with their sha256. Seed 0 on AKU alone: train 5,015 / val 625 /
-test 625 images; 1,738 / 221 / 205 positives.
+`packages/ml/manifests/` with their sha256. Seed 0, AKU + AlphaDent: 7,585 images in 1,510 groups; train 5,939 /
+val 757 / test 889. AKU is split 80 / 10 / 10, AlphaDent 70 / 10 / 20.
 
 ## Still open
 
-- AlphaDent: image count (paper 1,320 from 295 patients; Hugging Face copy 1,455 rows), whether
-  caries grades 1-6 mean severity, whether patient ids exist.
 - Mendeley: class labels (are there healthy controls?) and the language of the captions.
   Without negatives, specificity for gingivitis is not estimable and the release gate keeps the
   finding "not assessed".

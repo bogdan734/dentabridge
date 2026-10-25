@@ -1,0 +1,19 @@
+{
+  "sources": {
+    "aku_caries": {
+      "bytes": 1745853273,
+      "files": 13003,
+      "licence": "CC-BY-4.0",
+      "locked_on": "2026-10-25",
+      "sha256": "cf2cbdef6ba734d0310ae58567dce38521973cc3c42d726b828793ad38fadb58"
+    },
+    "alphadent": {
+      "bytes": 5024654126,
+      "files": 2776,
+      "licence": "CC-BY-4.0",
+      "locked_on": "2026-10-25",
+      "sha256": "0cbf050b3f5fa9ddbb41edb1676cc48253b1a69227313668d2ff4283195bc99b"
+    }
+  },
+  "version": 1
+}

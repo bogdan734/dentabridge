@@ -4,6 +4,9 @@
 set -eu
 cd "$(dirname "$0")/.."
 
+# A stale uv.lock must fail the gate instead of being re-locked silently.
+export UV_LOCKED=1
+
 log=$(mktemp "${TMPDIR:-/tmp}/check.XXXXXX")
 trap 'rm -f "$log"' EXIT
 

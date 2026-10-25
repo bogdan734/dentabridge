@@ -1,0 +1,117 @@
+# Fictional demo clinics in real cities. Nothing here is a real clinic, dentist, price or schedule.
+# Prices are sample figures in USD (shown with the SAMPLE chip); hours are local wall-clock time
+# and are turned into 60-minute slots in UTC, so daylight-saving changes need no special care here.
+- clinic_id: alfama-demo-dental
+  name: Alfama Demo Dental
+  city: Lisbon
+  country_code: PT
+  airport_iata: LIS
+  timezone: Europe/Lisbon
+  languages: [en, pt]
+  hotel_tier: standard
+  is_fictional: true
+  dentists:
+    - dentist_id: dr-ines-marques
+      display_name: Dr. Ines Marques (demo)
+      languages: [en, pt]
+      weekly_hours:
+        mon: ["09:00-13:00", "14:00-18:00"]
+        tue: ["09:00-13:00", "14:00-18:00"]
+        wed: ["09:00-13:00"]
+        thu: ["09:00-13:00", "14:00-18:00"]
+        fri: ["09:00-13:00", "14:00-17:00"]
+    - dentist_id: dr-tomas-ribeiro
+      display_name: Dr. Tomas Ribeiro (demo)
+      languages: [en, pt, es]
+      weekly_hours:
+        tue: ["10:00-14:00", "15:00-19:00"]
+        thu: ["10:00-14:00", "15:00-19:00"]
+        sat: ["09:00-13:00"]
+  treatments:
+    - {treatment_code: consultation, price_usd: 50, trips: 1, nights_per_trip: 1}
+    - {treatment_code: scaling, price_usd: 70, trips: 1, nights_per_trip: 1}
+    - {treatment_code: filling, price_usd: 110, trips: 1, nights_per_trip: 2}
+    - {treatment_code: root_canal, price_usd: 380, trips: 1, nights_per_trip: 3}
+    - {treatment_code: crown, price_usd: 450, trips: 1, nights_per_trip: 5}
+    - {treatment_code: implant, price_usd: 1400, trips: 2, nights_per_trip: 5}
+
+- clinic_id: galata-demo-dental
+  name: Galata Demo Dental
+  city: Istanbul
+  country_code: TR
+  airport_iata: IST
+  timezone: Europe/Istanbul
+  languages: [en, tr, ru]
+  hotel_tier: standard
+  is_fictional: true
+  dentists:
+    - dentist_id: dr-selin-aydin
+      display_name: Dr. Selin Aydin (demo)
+      languages: [en, tr, ru]
+      weekly_hours:
+        mon: ["09:00-13:00", "14:00-18:00"]
+        tue: ["09:00-13:00", "14:00-18:00"]
+        wed: ["09:00-13:00", "14:00-18:00"]
+        thu: ["09:00-13:00", "14:00-18:00"]
+        fri: ["09:00-13:00"]
+  treatments:
+    - {treatment_code: consultation, price_usd: 30, trips: 1, nights_per_trip: 1}
+    - {treatment_code: scaling, price_usd: 45, trips: 1, nights_per_trip: 1}
+    - {treatment_code: filling, price_usd: 70, trips: 1, nights_per_trip: 2}
+    - {treatment_code: root_canal, price_usd: 250, trips: 1, nights_per_trip: 3}
+    - {treatment_code: crown, price_usd: 280, trips: 1, nights_per_trip: 5}
+    - {treatment_code: implant, price_usd: 700, trips: 2, nights_per_trip: 5}
+
+- clinic_id: sukhumvit-demo-dental
+  name: Sukhumvit Demo Dental
+  city: Bangkok
+  country_code: TH
+  airport_iata: BKK
+  timezone: Asia/Bangkok
+  languages: [en, th]
+  hotel_tier: budget
+  is_fictional: true
+  dentists:
+    - dentist_id: dr-nattaya-chai
+      display_name: Dr. Nattaya Chai (demo)
+      languages: [en, th]
+      weekly_hours:
+        mon: ["10:00-14:00", "15:00-19:00"]
+        tue: ["10:00-14:00", "15:00-19:00"]
+        wed: ["10:00-14:00", "15:00-19:00"]
+        fri: ["10:00-14:00", "15:00-19:00"]
+        sat: ["10:00-14:00"]
+  treatments:
+    - {treatment_code: consultation, price_usd: 35, trips: 1, nights_per_trip: 1}
+    - {treatment_code: scaling, price_usd: 40, trips: 1, nights_per_trip: 1}
+    - {treatment_code: filling, price_usd: 60, trips: 1, nights_per_trip: 2}
+    - {treatment_code: root_canal, price_usd: 260, trips: 1, nights_per_trip: 3}
+    - {treatment_code: crown, price_usd: 300, trips: 1, nights_per_trip: 5}
+    - {treatment_code: implant, price_usd: 900, trips: 2, nights_per_trip: 5}
+
+- clinic_id: harbour-demo-dental
+  name: Harbour Demo Dental
+  city: Sydney
+  country_code: AU
+  airport_iata: SYD
+  timezone: Australia/Sydney
+  languages: [en]
+  hotel_tier: premium
+  is_fictional: true
+  dentists:
+    - dentist_id: dr-oliver-grant
+      display_name: Dr. Oliver Grant (demo)
+      languages: [en]
+      weekly_hours:
+        mon: ["08:00-12:00", "13:00-17:00"]
+        tue: ["08:00-12:00", "13:00-17:00"]
+        wed: ["08:00-12:00", "13:00-17:00"]
+        thu: ["08:00-12:00", "13:00-17:00"]
+        fri: ["08:00-12:00"]
+  treatments:
+    - {treatment_code: consultation, price_usd: 120, trips: 1, nights_per_trip: 1}
+    - {treatment_code: scaling, price_usd: 160, trips: 1, nights_per_trip: 1}
+    - {treatment_code: filling, price_usd: 250, trips: 1, nights_per_trip: 2}
+    - {treatment_code: root_canal, price_usd: 900, trips: 1, nights_per_trip: 3}
+    - {treatment_code: crown, price_usd: 1100, trips: 1, nights_per_trip: 5}
+    - {treatment_code: implant, price_usd: 3400, trips: 2, nights_per_trip: 5}

@@ -48,7 +48,7 @@ Star deliverables: (1) a fine-tuned open VLM of at most 4B parameters with a scr
 - Detector + VLM explainer: text comes from linted templates, so the explainer only adds failure modes.
 - MedGemma 1.5 4B: HAI-DEF terms (pass-through, termination, deletion). Qwen3.5-4B: Ollama vision disputed, no T4 bf16. Fallbacks only after ML1.
 - Ultralytics YOLO: AGPL-3.0. RF-DETR: separate package, and the licence varies by size (PML 1.0 for Atto/Femto/Pico/XL/2XL); D-FINE in Transformers covers the need.
-- Unsloth as a requirement: vendor-specific. TRL + PEFT run on CUDA and ROCm; Unsloth stays an optional accelerator.
+- Unsloth as a requirement: vendor-specific. Transformers `Trainer` + PEFT run on CUDA, ROCm and MPS; Unsloth stays an optional accelerator. TRL's `SFTTrainer` was dropped (2026-10-25): its API moves with every transformers release and the answer-only loss mask is eight lines in our own collator.
 - MetaDent: dataset licence unstated and images web-sourced, so deferred.
 - LiveKit turn-detector plugin: models under the LiveKit Model License (not OSI). Silero VAD + silence endpointing instead.
 - Open S2S (Seamless, Hibiki): NC licences and no EN<->RU.
@@ -63,7 +63,7 @@ Star deliverables: (1) a fine-tuned open VLM of at most 4B parameters with a scr
 - RF-DETR: code + N/S/M/L detection + all Seg models Apache-2.0, other sizes PML 1.0 (P). piper1-gpl: GPL-3.0 with HTTP server mode (P). mlx-vlm: MIT, LoRA/QLoRA, OpenAI-compatible server (P).
 - livekit-agents 1.8.9 (2026-10-24), Apache-2.0, Python >=3.10,<3.15 (P, PyPI); 2.0.0b1 is a pre-release, so pin 1.8.x. LiveKit server Apache-2.0, v1.13.2 2026-06-27 (S).
 - openapi-typescript 7.13.0 MIT, openapi-fetch 0.17.0 MIT (S). On this machine: uv 0.11.19, Ollama 0.40.10, Python 3.13 (P).
-- AMD Developer Cloud MI300X: $1.99/GPU-h (S, DigitalOcean doc last verified 2025-06-03), so $100 buys about 50 GPU-h. Re-check at sign-up.
+- AMD Developer Cloud runs on DigitalOcean. 1x MI300X is $2.59/GPU-h on the DigitalOcean docs pricing page (P, fetched 2026-10-25) and $1.99 in older secondary sources, so $100 buys 38-50 GPU-h: read the price in the console before the pilot. Credits expire 30 days after deposit unless the confirmation email says otherwise (AMD FAQ, S via search snippet; the AMD pages time out for our fetcher), and a payment method is required even with credits (S).
 - llama.cpp has loaded Qwen3-VL GGUF with a separate mmproj since 2025-10-30 (S, Unsloth docs). No Ollama recipe found for a tuned VLM → ML1.
 - Still UNVERIFIED, each owned by a task: DINOv2 licence, AlphaDent 1,320 vs 1,455, the meaning of caries 1-6, Mendeley labels and caption language (ML2); Ollama logprobs (ML1); DB1B and Kaggle flight-price terms (P2); RUB missing from the ECB snapshot (memory, P1); Piper RU voice, faster-whisper, parakeet-mlx and FLEURS licences (V2, V4).
 
@@ -180,12 +180,13 @@ Invariants the validators enforce at construction (a violation raises Validation
 - Tests: test_keys_identical_across_locales; test_every_rendering_passes_patient_lint (hypothesis over finding combinations × locale); test_see_dentist_always_present; test_note_with_verdict_rejected.
 - Verify (F2-F4): `uv run pytest packages/core/tests/policy -q && uv run dentabridge-lint --profile patient --locale ru packages/core/src/dentabridge_core/i18n/ru.json`
 ### ML1 Ollama round-trip pilot [L] WS01 M1 (deps F0; first ML task)
-- Files: dentabridge_ml/pilot/roundtrip.py; packages/ml/configs/pilot_roundtrip.yaml; docs/results/ml/roundtrip.{json,md}.
+- Files: dentabridge_ml/pilot/{roundtrip.py, __main__.py}; packages/ml/configs/train/pilot-mac.toml; docs/results/ml/roundtrip.{json,md}.
 - Procedure: untuned Qwen3-VL-4B + 20-step PEFT LoRA on 20 AlphaDent HF rows (MPS), then merge. Path A: `ollama create` from the merged safetensors dir. Path B: llama.cpp `convert_hf_to_gguf.py` text + mmproj, a Modelfile with the projector, then `ollama create`. Compare both with Transformers greedy output on 20 images.
 - Signatures: `run_roundtrip(cfg: RoundtripConfig) -> RoundtripReport(path: Literal["safetensors","gguf_mmproj"], vision_ok: bool, json_valid_rate: float, agreement: float, logprobs_available: bool, ollama_version: str)`; `serving_decision(reports: Sequence[RoundtripReport]) -> Literal["ollama","mlx_or_transformers"]`.
 - Pass = vision_ok, agreement >= 0.9 and json_valid_rate >= 0.95. On fail, the tuned model is served by MLX (Mac) and Transformers (CUDA), and Ollama keeps the baselines.
 - Tests: test_decision_rule_table; test_report_roundtrips_json. The pilot itself is marked `gpu` and run by hand.
-- Verify: `uv run python -m dentabridge_ml.pilot.roundtrip --config packages/ml/configs/pilot_roundtrip.yaml`
+- Verify (by hand, needs Ollama and the weights): `python -m dentabridge_ml.train sft train --limit 20 --out var/pilot/train.jsonl`, `python -m dentabridge_ml.train run packages/ml/configs/train/pilot-mac.toml var/pilot/train.jsonl --out var/pilot/run`, `python -m dentabridge_ml.train merge var/pilot/run/adapter --base data/models/Qwen3-VL-4B-Instruct --out var/pilot/merged`, `python -m dentabridge_ml.pilot import var/pilot/merged --name dentabridge-pilot`, `python -m dentabridge_ml.pilot compare var/pilot/merged --name dentabridge-pilot --image-max-px 336 --out docs/results/ml/roundtrip.json`.
+- Colour probe: Ollama must name the colour of a big square (red, green, blue) for `vision_ok`; agreement compares quality and per-code statuses, never boxes.
 ### ML2 Data download, lock, canonical records [L] WS01 M1 (deps F1)
 - Files: dentabridge_ml/data/{sources.py, download.py, lock.py, records.py}; packages/ml/{data.lock.json, LICENCES.toml, docs/data-card.md}.
 - Sources: `SOURCES: Mapping[SourceId, SourceSpec(url, licence, published: bool, coverage: frozenset[FindingCode], camera: Literal["phone","clinic","xray"])]` for aku_caries, alphadent, mendeley_gingivitis, dentex (opt-in) and kaggle_oral_private (private).
@@ -204,18 +205,18 @@ Invariants the validators enforce at construction (a violation raises Validation
 - assess = the source's coverage, so findings without labels are never trained as not_seen.
 - Tests: test_target_limited_to_source_coverage; test_target_parses_as_vision_output; test_negative_fraction_within_1pct; test_degrade_deterministic.
 ### ML5 VisionBackend adapters [L] WS01 M2 (deps F1, ML1)
-- Files: dentabridge_ml/serving/{parse.py, ollama.py, transformers_backend.py, mlx_backend.py, factory.py}.
+- Files: dentabridge_ml/serving/{__init__.py, parse.py, ollama.py, transformers_backend.py, mlx_backend.py}. Both backends fit the picture to `image_max_px` with the function training uses (`targets.prompt.fit_image`).
 - Signatures:
   - `parse_output(raw: str, token_scores: Mapping[FindingCode, float] | None, release: ReleaseConfig) -> VisionOutput` (raises ParseError, no repair);
   - `OllamaVisionBackend(base_url: str, model: str, release: ReleaseConfig)`; `TransformersVisionBackend(model_dir: Path, device: str, release: ReleaseConfig)`; `MlxVisionBackend(model_dir: Path, release: ReleaseConfig)`;
-  - `load_vision_backend(spec: str) -> VisionBackend` for "ollama:<tag>" | "transformers:<dir>" | "mlx:<dir>";
+  - `load_vision_backend(spec: str, release: ReleaseConfig, image_max_px: int | None = None) -> VisionBackend` for "ollama:<tag>" | "transformers:<dir>" (| "mlx:<dir>" if ML1 fails), in `serving/__init__.py`;
   - `ReleaseConfig(assessed: frozenset[FindingCode], thresholds: Mapping[FindingCode, float], needs_scores: bool)`, read from release.json next to the weights.
 - Score = probability of "possible" at the status token (logprobs). An adapter without logprobs raises at construction if needs_scores is set.
 - Tests: test_parse_golden (10 raw outputs, 3 invalid → ParseError); test_ollama_request_shape (httpx.MockTransport: images, JSON-schema format, temperature 0); test_release_marks_unshipped_codes_not_assessed; test_factory_rejects_unknown_scheme.
 ### ML6 Evaluation harness [L] WS01 M2 (deps ML3, ML5)
-- Files: dentabridge_ml/eval/{predict.py, metrics.py, calibration.py, report.py, gallery.py}; packages/ml/configs/release_gate.yaml (pre-registered); docs/results/ml/test-access.log.
+- Files: dentabridge_ml/eval/{predict.py, metrics.py, calibration.py, report.py, gallery.py}; packages/ml/configs/release_gate.toml (pre-registered); `python -m dentabridge_ml.eval run --backend ... --split val|test`; docs/results/ml/test-access.log.
 - Signatures:
-  - `predict(backend: VisionBackend, manifest: SplitManifest, split: Literal["val","test"], out: Path, final: bool = False) -> Path` (test requires final=True and appends to the log);
+  - `predict(backend, records, entries: Sequence[SplitEntry], root, out, final=False, access_log=None) -> Path` (any test entry requires final=True and an access log; entries come from `read_entries`, which checks manifests.sha256);
   - `binary_stats(preds, labels, code: FindingCode, groups: Sequence[str], seed: int) -> BinaryStats(tp, fp, tn, fn, sens, spec, sens_ci, spec_ci)` (cluster bootstrap over groups, 2,000 reps);
   - `ece(scores: np.ndarray, labels: np.ndarray, bins: int) -> float`; `risk_coverage(conf: np.ndarray, correct: np.ndarray) -> tuple[np.ndarray, np.ndarray, float]` (curve + AURC);
   - `shift(preds, records) -> ShiftReport` (caries: AKU phone vs AlphaDent clinic); `gallery(preds, records, k: int, out: Path) -> None` (top FP/FN per code, published sources only, with attribution);
@@ -229,16 +230,16 @@ Invariants the validators enforce at construction (a violation raises Validation
 - Tests: test_image_score_is_max_box; test_no_ultralytics_import_in_packages (AST scan); test_zero_shot_prompt_equals_tuned_prompt.
 - Verify: `make baselines` (writes docs/results/ml/val.json)
 ### ML8 Training recipe, portable CUDA/ROCm/MLX [L] WS01 M2 (deps ML4)
-- Files: dentabridge_ml/train/{config.py, collate.py, sft.py}; configs/{lean-t4.yaml, mi300x-*.yaml, mlx-2b.yaml}; notebooks/kaggle_lean.ipynb (thin: install uv, run the CLI).
+- Files: dentabridge_ml/train/{config.py, data.py, lora.py, run.py, merge.py, __main__.py}; packages/ml/configs/train/{lean-t4,mi300x-base,pilot-50,pilot-mac}.toml; notebooks/kaggle_lean.ipynb (thin: install uv, run the CLI). CLI: `python -m dentabridge_ml.train sft|run|merge`; `sft` never accepts the test split.
 - Signatures:
   - `TrainConfig(base_id: str, image_max_px: int, lora_r: int, lora_alpha: int, train_vision: bool, quant: Literal["none","nf4"], dtype: Literal["fp16","bf16"], lr: float, epochs: int, grad_accum: int, save_every: int, push_to: str | None, seed: int)`;
-  - `train(cfg: TrainConfig) -> Path` (TRL SFTTrainer + PEFT, loss on answer tokens only); `mlx_train(cfg: TrainConfig) -> Path` (mlx-vlm LoRA CLI).
+  - `train(cfg: TrainConfig, train_file, root, out, resume) -> Path` (Transformers Trainer + PEFT, loss on answer tokens only); `mlx_train(cfg: TrainConfig) -> Path` (mlx-vlm LoRA CLI).
 - Lean T4 recipe: 4B, nf4, fp16, r 16, alpha 16, 448 px, 2 epochs, lr 1e-4, checkpoint every 500 steps. P100 is not used.
 - Tests: test_collate_masks_prompt_and_image_tokens; test_lean_config_is_t4_safe; test_rocm_config_has_no_bitsandbytes; test_two_steps_tiny_model [slow].
 - Verify: `uv run pytest packages/ml/tests/train -q`; a 50-step pilot writes docs/results/ml/throughput.json (T4, MI300X, M3 Max).
 ### ML9 Runs, release gate, ship decision [L] WS01 M3 (deps ML6, ML7, ML8)
 - Runs: Kaggle lean; MI300X ablations, one change each vs lean in bf16 (train_vision, 672 px, no quality negatives, r 64); one larger run (best combination, 3 epochs); MLX 2B.
-- MI300X cap 40 GPU-h (about $80), with a $20 reserve; the first hour is the 50-step pilot. Selection happens on val; test is evaluated once for the chosen model and every baseline.
+- MI300X cap: the smaller of 40 GPU-h and $80 at the console price, with a $20 reserve; the first hour is the 50-step pilot. Selection happens on val; test is evaluated once for the chosen model and every baseline.
 - Gate (committed before the first test access): a finding ships as assessed if n_pos >= 30, the lower CI bounds of sens and spec are both >= 0.60, and ECE <= 0.10; otherwise not_assessed.
 - Ship rule: the detector replaces the VLM only if it beats the VLM's sensitivity at the VLM's specificity beyond the CI on >= 3 of 4 shared codes. That would add a DetectorVisionBackend.
 - Files: dentabridge_ml/release.py; docs/results/ml/{runs.json, test.json, test.md, gallery/}; release.json next to the weights.
@@ -365,7 +366,7 @@ V1 → V2 → {V3, V5}; V3 → V4. D1 needs {A3, A5, V3}; D2 needs {ML10, P2, V4
 | 1 | The tuned VLM fails the gate or loses to the detector | Per-finding gate, pre-registered ship rule, publish the loss honestly: the evaluation is the product |
 | 2 | Tuned VLM not importable into Ollama (GGUF + mmproj) | ML1 runs first; three adapters behind VisionBackend; Ollama keeps the baselines |
 | 3 | Leakage or label gaps (AKU split by image, no gingivitis negatives, partial labels) | Grouped split + leakage tests; coverage matrix in targets and metrics; specificity reported "not estimable" when no negatives exist |
-| 4 | Free or credit compute fails (quota, disconnects, ROCm quirks, price) | 500-step checkpoints, lean yardstick, 50-step pilots, one TRL script for CUDA and ROCm, $80 cap + $20 reserve |
+| 4 | Free or credit compute fails (quota, disconnects, ROCm quirks, price) | 500-step checkpoints, lean yardstick, 50-step pilots, one Trainer script for CUDA, ROCm and MPS, $80 cap + $20 reserve |
 | 5 | Licence contamination (private set, AGPL, NC, Gemma Terms) | Manifest source allowlist, AST/grep tests, out-of-process GPL, dated licence tables, opt-in prompts |
 | 6 | Call latency over 2.5 s, or RU errors on digits and negation | Harness before any claim, captions first, digit and glossary checks, captions_only mode, p50/p95 published |
 | 7 | Claims drift (VLM note, site strings, README) | Templates first, runtime + CI lint, /meta serves the safety texts, docs profile on README and cards, Literal[True] disclosure |

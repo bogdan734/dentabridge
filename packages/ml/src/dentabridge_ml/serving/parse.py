@@ -69,6 +69,11 @@ def _load(raw: str) -> _Answer:
         raise ParseError(f"not the agreed JSON: {error}") from error
 
 
+def answer_codes(raw: str) -> list[FindingCode]:
+    """The codes of the findings in the order the model wrote them (to pair them with scores)."""
+    return [item.code for item in _load(raw).findings]
+
+
 def parse_output(
     raw: str,
     token_scores: Mapping[FindingCode, float] | None,

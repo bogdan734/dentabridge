@@ -3,7 +3,7 @@ import json
 import pytest
 
 from dentabridge_core import FindingCode
-from dentabridge_ml.serving.parse import ParseError, ReleaseConfig, parse_output
+from dentabridge_ml.serving.parse import ParseError, ReleaseConfig, answer_codes, parse_output
 
 C, F = FindingCode.CARIES, FindingCode.FILLING
 BOX = {"x0": 0.1, "y0": 0.2, "x1": 0.5, "y1": 0.6}
@@ -91,3 +91,17 @@ def test_release_file_roundtrip(tmp_path: object) -> None:
     release = ReleaseConfig(assessed=frozenset({C}), thresholds={C: 0.5}, needs_scores=True)
     path.write_text(release.model_dump_json())
     assert ReleaseConfig.read(path) == release
+
+
+def test_answer_codes_follow_the_order_of_the_answer() -> None:
+    raw = _answer(
+        {"code": "filling", "status": "not_seen", "regions": []},
+        {"code": "caries", "status": "possible", "regions": [BOX]},
+    )
+    assert answer_codes(raw) == [F, C]
+    assert answer_codes(_answer()) == []
+
+
+def test_answer_codes_refuse_what_parse_output_refuses() -> None:
+    with pytest.raises(ParseError):
+        answer_codes("I see a cavity.")

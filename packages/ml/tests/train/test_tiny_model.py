@@ -8,6 +8,7 @@ import asyncio
 import json
 import math
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -171,27 +172,40 @@ def _photo(tmp_path: Path) -> Any:
     return sanitise(tmp_path / "photo.jpg")
 
 
-def test_backend_parses_only_the_newly_generated_tokens(
+def test_backend_parses_only_the_newly_generated_tokens_and_scores_each_status(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     backend = _backend(tmp_path)
     answer = {
         "image_quality": "ok",
         "quality_reason": None,
-        "findings": [{"code": "caries", "status": "not_seen", "regions": []}],
+        "findings": [{"code": "caries", "status": "possible", "regions": []}],
     }
-    ids = backend._processor.tokenizer(
-        json.dumps(answer), add_special_tokens=False, return_tensors="pt"
+    tokenizer = backend._processor.tokenizer
+    ids = tokenizer(
+        json.dumps(answer, separators=(",", ":")), add_special_tokens=False, return_tensors="pt"
     )
+    possible_id, not_id = backend._ids
+    vocab = backend._net.config.text_config.vocab_size
+    steps = []
+    for token_id in ids["input_ids"][0].tolist():
+        row = torch.full((1, vocab), -1e4)
+        row[0, token_id] = 0.0
+        if token_id == possible_id:  # the model chose "possible" over "not" by one nat
+            row[0, token_id], row[0, not_id] = 2.0, 1.0
+        steps.append(row)
     seen: dict[str, Any] = {}
 
     def fake_generate(**inputs: Any) -> Any:
         seen.update(inputs)
-        return torch.cat([inputs["input_ids"], ids["input_ids"]], dim=1)
+        sequences = torch.cat([inputs["input_ids"], ids["input_ids"]], dim=1)
+        return SimpleNamespace(sequences=sequences, logits=tuple(steps))
 
     monkeypatch.setattr(backend._net, "generate", fake_generate)
     output = asyncio.run(backend.analyse(_photo(tmp_path), "intraoral_photo"))
-    assert [(f.code, f.status) for f in output.findings] == [(FindingCode.CARIES, "not_seen")]
+    (finding,) = output.findings
+    assert (finding.code, finding.status) == (FindingCode.CARIES, "possible")
+    assert finding.score == pytest.approx(math.exp(2) / (math.exp(2) + math.exp(1)), abs=1e-4)
     assert seen["do_sample"] is False
     assert seen["max_new_tokens"] == 700
     assert (seen["input_ids"] == IMAGE_TOKEN).any(), "the picture reached the model"

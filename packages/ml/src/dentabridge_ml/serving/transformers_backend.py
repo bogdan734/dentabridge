@@ -16,7 +16,8 @@ from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
 
 from dentabridge_core import ASSESSABLE, Modality, ModelInfo, SanitisedImage, VisionOutput
 from dentabridge_ml.serving.ollama import MAX_NEW_TOKENS
-from dentabridge_ml.serving.parse import ReleaseConfig, parse_output
+from dentabridge_ml.serving.parse import ReleaseConfig, answer_codes, parse_output
+from dentabridge_ml.serving.scores import scores_by_code, status_scores
 from dentabridge_ml.targets.prompt import build_prompt, fit_image
 
 
@@ -42,8 +43,14 @@ class TransformersVisionBackend:
         self._processor: Any = AutoProcessor.from_pretrained(model_dir)
         self._net: Any = Qwen3VLForConditionalGeneration.from_pretrained(model_dir, dtype=dtype)
         self._net.to(self._device).eval()
+        tokenizer = self._processor.tokenizer
+        self._ids = (
+            tokenizer.convert_tokens_to_ids("possible"),
+            tokenizer.convert_tokens_to_ids("not"),
+        )
 
-    def _generate(self, image: SanitisedImage, prompt: str) -> str:
+    def _generate(self, image: SanitisedImage, prompt: str) -> tuple[str, list[float] | None]:
+        """The raw answer and one score per status value (None if they cannot be paired)."""
         with Image.open(io.BytesIO(image.data)) as opened:
             picture = fit_image(opened.convert("RGB"), self._image_max_px)
         turn = [{"role": "user", "content": [{"type": "image"}, {"type": "text", "text": prompt}]}]
@@ -52,13 +59,30 @@ class TransformersVisionBackend:
             self._device
         )
         with torch.no_grad():
-            out = self._net.generate(**inputs, max_new_tokens=MAX_NEW_TOKENS, do_sample=False)
-        new_tokens = out[0, inputs["input_ids"].shape[1] :]
-        return str(self._processor.tokenizer.decode(new_tokens, skip_special_tokens=True))
+            out = self._net.generate(
+                **inputs,
+                max_new_tokens=MAX_NEW_TOKENS,
+                do_sample=False,
+                return_dict_in_generate=True,
+                output_logits=True,
+            )
+        new_ids = out.sequences[0, inputs["input_ids"].shape[1] :]
+        tokenizer = self._processor.tokenizer
+        raw = str(tokenizer.decode(new_ids, skip_special_tokens=True))
+        if not out.logits:
+            return raw, None
+        probs = torch.softmax(torch.stack([step[0] for step in out.logits]).float(), dim=-1)
+        p_possible, p_not = (probs[:, i].tolist() for i in self._ids)
+        tokens = [tokenizer.decode([i]) for i in new_ids.tolist()]
+        try:
+            return raw, status_scores(tokens, p_possible, p_not)
+        except ValueError:
+            return raw, None
 
     async def analyse(self, image: SanitisedImage, modality: Modality) -> VisionOutput:
         prompt = build_prompt(self._release.assessed & ASSESSABLE[modality], modality)
         started = time.perf_counter()
-        raw = await asyncio.to_thread(self._generate, image, prompt)
+        raw, scores = await asyncio.to_thread(self._generate, image, prompt)
         elapsed_ms = (time.perf_counter() - started) * 1000
-        return parse_output(raw, None, self._release, latency_ms=elapsed_ms)
+        paired = None if scores is None else scores_by_code(answer_codes(raw), scores)
+        return parse_output(raw, paired, self._release, latency_ms=elapsed_ms)

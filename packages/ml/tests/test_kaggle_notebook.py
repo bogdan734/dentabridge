@@ -18,7 +18,7 @@ def test_every_stage_the_notebook_calls_exists_in_the_script() -> None:
         stage
         for cell in notebook["cells"]
         if cell["cell_type"] == "code"
-        for stage in re.findall(r"kaggle/run\.sh (\w+)", "".join(cell["source"]))
+        for stage in re.findall(r'run_stage\("(\w+)"\)', "".join(cell["source"]))
     }
     assert called, "the notebook calls no stage"
     assert called <= _stages()
@@ -32,6 +32,13 @@ def test_the_script_dispatches_exactly_its_stages() -> None:
 
 
 def test_scripts_are_executable_and_the_bundle_builds_from_a_clean_commit_only() -> None:
-    for name in ("run.sh", "bundle.sh"):
+    for name in ("run.sh", "bundle.sh", "push.sh"):
         assert (REPO / "scripts" / "kaggle" / name).stat().st_mode & 0o111
     assert "commit first" in (REPO / "scripts" / "kaggle" / "bundle.sh").read_text()
+
+
+def test_the_default_stages_only_smoke_test() -> None:
+    notebook = json.loads(NOTEBOOK.read_text(encoding="utf-8"))
+    sources = ["".join(cell["source"]) for cell in notebook["cells"] if cell["cell_type"] == "code"]
+    line = next(src for src in sources if src.lstrip().startswith("STAGES"))
+    assert re.search(r'STAGES = \["setup", "data", "smoke"\]', line), "a first push must not train"

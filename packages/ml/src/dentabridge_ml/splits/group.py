@@ -63,7 +63,7 @@ def _close_pairs(
 
 def group(
     records: Sequence[ImageRecord],
-    emb: NDArray[np.floating],
+    emb: NDArray[np.floating] | None,
     hashes: Sequence[int],
     max_cos_dist: float,
     max_hamming: int,
@@ -74,12 +74,14 @@ def group(
     clustered by embedding and hash closeness. Finally, any two records whose hashes are
     near-identical are merged whatever their ids (a photo uploaded twice under two people).
     """
-    if not (len(records) == len(emb) == len(hashes)):
+    if len(records) != len(hashes) or (emb is not None and len(emb) != len(records)):
         raise ValueError("records, embeddings and hashes must line up")
     ids = [r.record_id for r in records]
     result = [_known_group(r) for r in records]
     free = [i for i, name in enumerate(result) if not name]
     if free:
+        if emb is None:
+            raise ValueError("records without an id or a capture sequence need embeddings")
         components = _Components(len(free))
         sub_hashes = np.array([hashes[i] for i in free], dtype=np.uint64)
         for a, b in _close_pairs(emb[free], sub_hashes, max_cos_dist, max_hamming):

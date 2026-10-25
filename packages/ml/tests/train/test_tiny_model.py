@@ -22,6 +22,7 @@ from dentabridge_ml.data.sources import default_root  # noqa: E402
 from dentabridge_ml.targets.prompt import build_prompt  # noqa: E402
 from dentabridge_ml.train.config import TrainConfig  # noqa: E402
 from dentabridge_ml.train.data import END_OF_TURN, SftCollator, SftRow  # noqa: E402
+from dentabridge_ml.train.merge import merge_adapter  # noqa: E402
 from dentabridge_ml.train.run import attach_lora, load_processor, make_trainer  # noqa: E402
 
 MODEL_DIR = default_root() / "models" / "Qwen3-VL-4B-Instruct"
@@ -123,3 +124,30 @@ def test_two_steps_tiny_model(tmp_path: Path) -> None:
     assert math.isfinite(mean_loss), "a random model starts near ln(vocab), not at nan or inf"
     trainer.save_model(str(tmp_path / "adapter"))
     assert (tmp_path / "adapter" / "adapter_config.json").exists()
+
+
+def test_merged_weights_answer_like_the_adapter(tmp_path: Path) -> None:
+    processor = load_processor(str(MODEL_DIR))
+    base = _tiny_model()
+    base.save_pretrained(tmp_path / "base")
+    processor.save_pretrained(tmp_path / "base")
+    tuned = attach_lora(base, _config())
+    with torch.no_grad():  # lora_B starts at zero, which would make the comparison trivial
+        for name, param in tuned.named_parameters():
+            if "lora_B" in name:
+                param.normal_(0.0, 0.05)
+    tuned.save_pretrained(tmp_path / "adapter")
+    batch = SftCollator(processor, tmp_path, 64, 1024)(_rows(tmp_path)[:2])
+    batch.pop("labels")
+    tuned.eval()
+    with torch.no_grad():
+        expected = tuned(**batch).logits
+    merged_dir = merge_adapter(
+        str(tmp_path / "base"), tmp_path / "adapter", tmp_path / "merged", "fp16"
+    )
+    merged = Qwen3VLForConditionalGeneration.from_pretrained(merged_dir, dtype=torch.float32).eval()
+    with torch.no_grad():
+        actual = merged(**batch).logits
+    assert (tmp_path / "merged" / "tokenizer.json").exists()
+    assert not any("lora" in k for k in merged.state_dict())
+    assert torch.allclose(expected, actual, atol=2e-2), (expected - actual).abs().max()

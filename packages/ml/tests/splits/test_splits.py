@@ -8,7 +8,7 @@ from PIL import Image
 from dentabridge_core import FindingCode
 from dentabridge_ml.data.records import ImageRecord, LabelBox
 from dentabridge_ml.splits.group import group, group_method, hamming, phash
-from dentabridge_ml.splits.manifest import SPLITS, split, write_manifests
+from dentabridge_ml.splits.manifest import SPLITS, read_entries, split, write_manifests
 
 DIM = 16
 
@@ -144,6 +144,25 @@ def test_manifest_deterministic_and_seed_sensitive(tmp_path: Path) -> None:
     assert (tmp_path / "a" / "manifests.sha256").read_text() == (
         tmp_path / "b" / "manifests.sha256"
     ).read_text()
+
+
+def test_read_entries_returns_what_was_written_and_checks_the_digest(tmp_path: Path) -> None:
+    _, _, manifest = _manifest()
+    write_manifests(manifest, tmp_path)
+    for name in SPLITS:
+        assert set(read_entries(tmp_path, name)) == set(manifest.of(name))
+    (tmp_path / "val.jsonl").write_text("")  # editing one split invalidates all three
+    with pytest.raises(ValueError, match=r"val\.jsonl does not match manifests\.sha256"):
+        read_entries(tmp_path, "train")
+
+
+def test_read_entries_needs_a_digest_for_every_split(tmp_path: Path) -> None:
+    _, _, manifest = _manifest()
+    write_manifests(manifest, tmp_path)
+    lines = (tmp_path / "manifests.sha256").read_text().splitlines(keepends=True)
+    (tmp_path / "manifests.sha256").write_text("".join(lines[:2]))
+    with pytest.raises(ValueError, match=r"does not list test\.jsonl"):
+        read_entries(tmp_path, "train")
 
 
 def test_ratios_are_respected_per_stratum() -> None:

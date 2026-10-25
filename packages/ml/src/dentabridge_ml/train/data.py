@@ -17,7 +17,7 @@ from pydantic import BaseModel, ConfigDict
 from dentabridge_core import ASSESSABLE, FindingCode
 from dentabridge_ml.data.records import ImageRecord
 from dentabridge_ml.data.sources import SOURCES
-from dentabridge_ml.splits.manifest import SplitManifest, SplitName
+from dentabridge_ml.splits.manifest import SplitEntry
 from dentabridge_ml.targets.degrade import DEGRADE_KINDS, REASON, DegradeKind, degrade
 from dentabridge_ml.targets.prompt import build_prompt
 from dentabridge_ml.targets.sft import target_json, unusable_json
@@ -52,14 +52,13 @@ def _asked(record: ImageRecord, rng: random.Random, subsets: bool) -> frozenset[
 
 def build_rows(
     records: Mapping[str, ImageRecord],
-    manifest: SplitManifest,
-    split: SplitName,
+    entries: Sequence[SplitEntry],
     negatives_frac: float,
     seed: int,
     subsets: bool = True,
 ) -> list[SftRow]:
     rng = random.Random(seed)
-    chosen = [records[e.record_id] for e in manifest.of(split)]
+    chosen = [records[e.record_id] for e in entries]
     rows: list[SftRow] = []
     for record in chosen:
         asked = _asked(record, rng, subsets)

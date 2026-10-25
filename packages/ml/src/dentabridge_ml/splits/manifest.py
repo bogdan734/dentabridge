@@ -11,6 +11,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict
 
 from dentabridge_ml.data.records import ImageRecord
+from dentabridge_ml.data.sources import SourceId
 from dentabridge_ml.splits.group import GroupMethod, group_method
 
 SplitName = Literal["train", "val", "test"]
@@ -20,7 +21,7 @@ SPLITS: tuple[SplitName, ...] = ("train", "val", "test")
 class SplitEntry(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
     record_id: str
-    source: str
+    source: SourceId
     split: SplitName
     group: str
     group_method: GroupMethod
@@ -109,6 +110,25 @@ def split(
         for i, r in enumerate(records)
     )
     return SplitManifest(seed=seed, ratios=ratios, entries=entries)
+
+
+def read_entries(directory: Path, name: SplitName) -> tuple[SplitEntry, ...]:
+    """One split's entries, after every manifest file is checked against manifests.sha256."""
+    digests = {
+        file: digest
+        for digest, file in (
+            line.split("  ", 1)
+            for line in (directory / "manifests.sha256").read_text().splitlines()
+        )
+    }
+    for split_name in SPLITS:
+        if f"{split_name}.jsonl" not in digests:
+            raise ValueError(f"manifests.sha256 does not list {split_name}.jsonl")
+    for file, digest in digests.items():
+        if hashlib.sha256((directory / file).read_bytes()).hexdigest() != digest:
+            raise ValueError(f"{file} does not match manifests.sha256")
+    lines = (directory / f"{name}.jsonl").read_text().splitlines()
+    return tuple(SplitEntry.model_validate_json(line) for line in lines if line)
 
 
 def write_manifests(manifest: SplitManifest, directory: Path) -> None:

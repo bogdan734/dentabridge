@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     call_secret: str = secrets.token_urlsafe(32)  # set it in .env to keep call tokens valid
     result_ttl_h: int = 24
     replays_dir: Path = Path("packages/voice/replays")
+    samples_dir: Path = Path(__file__).parent / "demo" / "samples"
 
     @field_validator("cors_origins", mode="before")
     @classmethod

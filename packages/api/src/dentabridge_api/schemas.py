@@ -22,3 +22,14 @@ class Meta(Contract):
     verified_pairs: list[tuple[str, str]]
     currencies: list[str] = Field(description="Only currencies the dated FX snapshot holds")
     fx_as_of: date | None
+
+
+class SampleImage(Contract):
+    id: str
+    attribution: str
+    licence: str
+
+
+class AnalyseSampleRequest(Contract):
+    sample_id: str
+    locale: Literal["en", "ru"]

@@ -1,0 +1,67 @@
+{
+  "$defs": {
+    "FindingCode": {
+      "enum": [
+        "caries",
+        "filling",
+        "crown",
+        "abrasion",
+        "gingivitis",
+        "calculus",
+        "ulcer",
+        "discolouration",
+        "hypodontia",
+        "malocclusion",
+        "periapical_lesion",
+        "impacted_tooth"
+      ],
+      "title": "FindingCode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "level": {
+      "enum": [
+        "routine",
+        "soon",
+        "prompt",
+        "retake_photo"
+      ],
+      "title": "Level",
+      "type": "string"
+    },
+    "review_status": {
+      "enum": [
+        "illustrative_not_clinically_reviewed",
+        "reviewed"
+      ],
+      "title": "Review Status",
+      "type": "string"
+    },
+    "rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "table_version": {
+      "title": "Table Version",
+      "type": "string"
+    },
+    "triggered_by": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/FindingCode"
+      },
+      "title": "Triggered By",
+      "type": "array"
+    }
+  },
+  "required": [
+    "level",
+    "rule_id",
+    "table_version",
+    "review_status"
+  ],
+  "title": "UrgencyHint",
+  "type": "object"
+}

@@ -40,7 +40,7 @@ Star deliverables: (1) a fine-tuned open VLM of at most 4B parameters with a scr
 - No literal country, city or currency in code: they live in seed/ and config/. Clinics are fictional (`is_fictional: Literal[True]`).
 - The owner's private project names never appear in the repo; the banned list lives outside it (env `DENTABRIDGE_BANNED_NAMES_FILE`).
 - Contract change protocol: a workstream writes the request in its WS file; the lead edits core, bumps `CONTRACT_VERSION`, refreshes the snapshots and merges; the others rebase.
-- Branches `ws/NN-name`, merged by the lead. On a uv.lock conflict, take main's lock and run `uv lock`. The repo and the HF repos stay private until the owner says "publish".
+- Workstream branches are created by the app when a session card starts (their names differ from `ws/NN-name`); the lead merges them in milestone order. On a uv.lock conflict, take main's lock and run `uv lock`. The repo and the HF repos stay private until the owner says "publish".
 - Schedule rule (owner, 2026-10-25): speed over calendar. The AMD credit expiry is unknown, so the ML stream starts first and its 50-step MI300X pilot runs as soon as ML4 and ML8 allow; ablations do not wait for M2.
 
 ## Rejected alternatives and why
@@ -69,6 +69,12 @@ Star deliverables: (1) a fine-tuned open VLM of at most 4B parameters with a scr
 
 ## Shared contracts (packages/core, frozen at M0, CONTRACT_VERSION 1.0.0)
 Pydantic v2 with `frozen=True, extra="forbid"`; tz-aware UTC datetimes; money in minor units; BCP-47 language strings.
+Invariants the validators enforce at construction (a violation raises ValidationError, never passes silently):
+- Region: 0 <= x0 < x1 <= 1 and the same for y. Finding: score in 0..1; regions only on `possible`; `not_assessed` has no score.
+- AnalysisResult: every FindingCode exactly once; codes outside ASSESSABLE[modality] are `not_assessed`; an `unusable` image has a quality_reason and every finding `not_assessed`; vlm_note is present exactly when vlm_note_status is `passed`; expires_at > created_at. So the API completes a partial VisionOutput (missing codes → `not_assessed`) before it builds the result.
+- PriceRange: one currency, low <= mid <= high. Quote: every line and the total use the requested currency. QuoteRequest and FareRequest: return not before depart (a trip shorter than the treatment needs is the API's `trip_too_short`).
+- BookingRequest: analysis_id and share_consent_id come together or not at all. Slot: end > start. ChatEvent: tgt_text present exactly when translation_status is `ok`. CallSession and CallRoomMetadata name both roles.
+- Core stays free of fakes: `dentabridge_core.testing` (fakes, `sample_findings`, `sample_analysis`) is imported by tests only. Snapshots: `uv run python -m dentabridge_core.schema_export` rewrites packages/core/schemas.
 - `FindingCode(StrEnum)`: photo v1 = caries, filling, crown, abrasion, gingivitis; never assessed = calculus, ulcer, discolouration, hypodontia, malocclusion; xray opt-in = periapical_lesion, impacted_tooth. `ASSESSABLE: Mapping[Modality, frozenset[FindingCode]]`.
 - `Finding`: code; status: Literal["possible","not_seen","not_assessed"]; score: float | None (0..1); subtype: str | None (source label, never shown to patients in v1); regions: tuple[Region(x0, y0, x1, y1: float 0..1), ...].
 - `ModelInfo`: model_id; version; backend: Literal["ollama","mlx","transformers","fixture"]; card_url: str | None.

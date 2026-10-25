@@ -1,0 +1,34 @@
+{
+  "additionalProperties": false,
+  "description": "A decoded upload: JPEG bytes without metadata, plus a hash for caching and fixtures.",
+  "properties": {
+    "data": {
+      "format": "binary",
+      "title": "Data",
+      "type": "string"
+    },
+    "height": {
+      "exclusiveMinimum": 0,
+      "title": "Height",
+      "type": "integer"
+    },
+    "sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "width": {
+      "exclusiveMinimum": 0,
+      "title": "Width",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "data",
+    "width",
+    "height",
+    "sha256"
+  ],
+  "title": "SanitisedImage",
+  "type": "object"
+}

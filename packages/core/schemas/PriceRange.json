@@ -1,0 +1,44 @@
+{
+  "$defs": {
+    "Money": {
+      "additionalProperties": false,
+      "properties": {
+        "amount_minor": {
+          "minimum": 0,
+          "title": "Amount Minor",
+          "type": "integer"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount_minor",
+        "currency"
+      ],
+      "title": "Money",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "high": {
+      "$ref": "#/$defs/Money"
+    },
+    "low": {
+      "$ref": "#/$defs/Money"
+    },
+    "mid": {
+      "$ref": "#/$defs/Money"
+    }
+  },
+  "required": [
+    "low",
+    "mid",
+    "high"
+  ],
+  "title": "PriceRange",
+  "type": "object"
+}

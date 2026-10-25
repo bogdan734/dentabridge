@@ -1,0 +1,30 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "chip": {
+      "const": "SIMULATED",
+      "title": "Chip",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "flight",
+        "hotel"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "reference": {
+      "pattern": "^DEMO-[A-Z0-9-]+$",
+      "title": "Reference",
+      "type": "string"
+    }
+  },
+  "required": [
+    "kind",
+    "reference",
+    "chip"
+  ],
+  "title": "MockTicket",
+  "type": "object"
+}

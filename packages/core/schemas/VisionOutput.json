@@ -1,0 +1,177 @@
+{
+  "$defs": {
+    "Finding": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/FindingCode"
+        },
+        "regions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Region"
+          },
+          "title": "Regions",
+          "type": "array"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Score"
+        },
+        "status": {
+          "enum": [
+            "possible",
+            "not_seen",
+            "not_assessed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "subtype": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subtype"
+        }
+      },
+      "required": [
+        "code",
+        "status"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "FindingCode": {
+      "enum": [
+        "caries",
+        "filling",
+        "crown",
+        "abrasion",
+        "gingivitis",
+        "calculus",
+        "ulcer",
+        "discolouration",
+        "hypodontia",
+        "malocclusion",
+        "periapical_lesion",
+        "impacted_tooth"
+      ],
+      "title": "FindingCode",
+      "type": "string"
+    },
+    "Region": {
+      "additionalProperties": false,
+      "description": "Box in image fractions with the origin at the top left.",
+      "properties": {
+        "x0": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "X0",
+          "type": "number"
+        },
+        "x1": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "X1",
+          "type": "number"
+        },
+        "y0": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Y0",
+          "type": "number"
+        },
+        "y1": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Y1",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x0",
+        "y0",
+        "x1",
+        "y1"
+      ],
+      "title": "Region",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "image_quality": {
+      "enum": [
+        "ok",
+        "unusable"
+      ],
+      "title": "Image Quality",
+      "type": "string"
+    },
+    "latency_ms": {
+      "minimum": 0,
+      "title": "Latency Ms",
+      "type": "number"
+    },
+    "note_en": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Note En"
+    },
+    "quality_reason": {
+      "anyOf": [
+        {
+          "enum": [
+            "blurry",
+            "dark",
+            "no_teeth",
+            "not_dental"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Quality Reason"
+    }
+  },
+  "required": [
+    "image_quality",
+    "findings",
+    "latency_ms"
+  ],
+  "title": "VisionOutput",
+  "type": "object"
+}

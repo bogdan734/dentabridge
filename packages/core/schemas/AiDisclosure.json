@@ -1,0 +1,45 @@
+{
+  "additionalProperties": false,
+  "description": "What the user must acknowledge before joining (EU AI Act Art. 50).",
+  "properties": {
+    "basis": {
+      "const": "EU AI Act Art. 50",
+      "title": "Basis",
+      "type": "string"
+    },
+    "machine_translation": {
+      "const": true,
+      "title": "Machine Translation",
+      "type": "boolean"
+    },
+    "must_acknowledge": {
+      "const": true,
+      "title": "Must Acknowledge",
+      "type": "boolean"
+    },
+    "not_medical_interpreter": {
+      "const": true,
+      "title": "Not Medical Interpreter",
+      "type": "boolean"
+    },
+    "synthetic_voice": {
+      "const": true,
+      "title": "Synthetic Voice",
+      "type": "boolean"
+    },
+    "text_key": {
+      "title": "Text Key",
+      "type": "string"
+    }
+  },
+  "required": [
+    "synthetic_voice",
+    "machine_translation",
+    "not_medical_interpreter",
+    "must_acknowledge",
+    "basis",
+    "text_key"
+  ],
+  "title": "AiDisclosure",
+  "type": "object"
+}

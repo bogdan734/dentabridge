@@ -1,0 +1,20 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "latency_ms": {
+      "minimum": 0,
+      "title": "Latency Ms",
+      "type": "number"
+    },
+    "text": {
+      "title": "Text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "text",
+    "latency_ms"
+  ],
+  "title": "Translation",
+  "type": "object"
+}

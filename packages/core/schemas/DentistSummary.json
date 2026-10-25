@@ -1,0 +1,30 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "dentist_id": {
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "title": "Dentist Id",
+      "type": "string"
+    },
+    "display_name": {
+      "title": "Display Name",
+      "type": "string"
+    },
+    "languages": {
+      "items": {
+        "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Languages",
+      "type": "array"
+    }
+  },
+  "required": [
+    "dentist_id",
+    "display_name",
+    "languages"
+  ],
+  "title": "DentistSummary",
+  "type": "object"
+}

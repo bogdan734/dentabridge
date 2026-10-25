@@ -1,0 +1,49 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "clinic_id": {
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "title": "Clinic Id",
+      "type": "string"
+    },
+    "dentist_id": {
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "title": "Dentist Id",
+      "type": "string"
+    },
+    "end": {
+      "format": "date-time",
+      "title": "End",
+      "type": "string"
+    },
+    "slot_id": {
+      "format": "uuid",
+      "title": "Slot Id",
+      "type": "string"
+    },
+    "start": {
+      "format": "date-time",
+      "title": "Start",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "available",
+        "held",
+        "booked"
+      ],
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "slot_id",
+    "clinic_id",
+    "dentist_id",
+    "start",
+    "end",
+    "status"
+  ],
+  "title": "Slot",
+  "type": "object"
+}

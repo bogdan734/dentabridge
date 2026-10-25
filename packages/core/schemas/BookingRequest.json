@@ -1,0 +1,47 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "analysis_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Analysis Id"
+    },
+    "hold_id": {
+      "format": "uuid",
+      "title": "Hold Id",
+      "type": "string"
+    },
+    "quote_id": {
+      "format": "uuid",
+      "title": "Quote Id",
+      "type": "string"
+    },
+    "share_consent_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Share Consent Id"
+    }
+  },
+  "required": [
+    "hold_id",
+    "quote_id"
+  ],
+  "title": "BookingRequest",
+  "type": "object"
+}

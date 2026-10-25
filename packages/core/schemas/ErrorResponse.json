@@ -1,0 +1,86 @@
+{
+  "$defs": {
+    "ErrorCode": {
+      "enum": [
+        "image_unreadable",
+        "consent_required",
+        "uploads_disabled",
+        "consent_expired",
+        "payload_too_large",
+        "unsupported_media_type",
+        "backend_unavailable",
+        "not_found",
+        "gone",
+        "trip_too_short",
+        "currency_unsupported",
+        "unknown_airport",
+        "slot_unavailable",
+        "hold_expired",
+        "quote_mismatch",
+        "outside_trip",
+        "quote_expired",
+        "analysis_expired",
+        "share_consent_required",
+        "booking_cancelled",
+        "language_pair_unsupported",
+        "disclosure_not_acknowledged",
+        "invalid_call_token",
+        "wrong_role",
+        "idempotency_key_required",
+        "idempotency_in_progress",
+        "idempotency_key_reuse",
+        "validation_error",
+        "rate_limited",
+        "internal_error"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "$ref": "#/$defs/ErrorCode"
+    },
+    "detail": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Detail"
+    },
+    "message_key": {
+      "title": "Message Key",
+      "type": "string"
+    },
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "retry_after_s": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Retry After S"
+    }
+  },
+  "required": [
+    "code",
+    "message_key",
+    "request_id"
+  ],
+  "title": "ErrorResponse",
+  "type": "object"
+}

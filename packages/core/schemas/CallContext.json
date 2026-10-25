@@ -1,0 +1,450 @@
+{
+  "$defs": {
+    "AnalysisResult": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_id": {
+          "format": "uuid",
+          "title": "Analysis Id",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "findings": {
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "title": "Findings",
+          "type": "array"
+        },
+        "image_quality": {
+          "enum": [
+            "ok",
+            "unusable"
+          ],
+          "title": "Image Quality",
+          "type": "string"
+        },
+        "modality": {
+          "enum": [
+            "intraoral_photo",
+            "panoramic_xray"
+          ],
+          "title": "Modality",
+          "type": "string"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelInfo"
+        },
+        "patient_text": {
+          "$ref": "#/$defs/PatientText"
+        },
+        "quality_reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "blurry",
+                "dark",
+                "no_teeth",
+                "not_dental"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quality Reason"
+        },
+        "urgency": {
+          "$ref": "#/$defs/UrgencyHint"
+        },
+        "vlm_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vlm Note"
+        },
+        "vlm_note_status": {
+          "default": "absent",
+          "enum": [
+            "absent",
+            "passed",
+            "rejected"
+          ],
+          "title": "Vlm Note Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "analysis_id",
+        "modality",
+        "model",
+        "image_quality",
+        "findings",
+        "urgency",
+        "patient_text",
+        "created_at",
+        "expires_at"
+      ],
+      "title": "AnalysisResult",
+      "type": "object"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/FindingCode"
+        },
+        "regions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Region"
+          },
+          "title": "Regions",
+          "type": "array"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Score"
+        },
+        "status": {
+          "enum": [
+            "possible",
+            "not_seen",
+            "not_assessed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "subtype": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subtype"
+        }
+      },
+      "required": [
+        "code",
+        "status"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "FindingCode": {
+      "enum": [
+        "caries",
+        "filling",
+        "crown",
+        "abrasion",
+        "gingivitis",
+        "calculus",
+        "ulcer",
+        "discolouration",
+        "hypodontia",
+        "malocclusion",
+        "periapical_lesion",
+        "impacted_tooth"
+      ],
+      "title": "FindingCode",
+      "type": "string"
+    },
+    "ModelInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "backend": {
+          "enum": [
+            "ollama",
+            "mlx",
+            "transformers",
+            "fixture"
+          ],
+          "title": "Backend",
+          "type": "string"
+        },
+        "card_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Card Url"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "model_id",
+        "version",
+        "backend"
+      ],
+      "title": "ModelInfo",
+      "type": "object"
+    },
+    "PatientText": {
+      "additionalProperties": false,
+      "properties": {
+        "disclaimer": {
+          "title": "Disclaimer",
+          "type": "string"
+        },
+        "locale": {
+          "enum": [
+            "en",
+            "ru"
+          ],
+          "title": "Locale",
+          "type": "string"
+        },
+        "not_assessed_line": {
+          "title": "Not Assessed Line",
+          "type": "string"
+        },
+        "observations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Observations",
+          "type": "array"
+        },
+        "see_dentist_line": {
+          "title": "See Dentist Line",
+          "type": "string"
+        },
+        "urgency_line": {
+          "title": "Urgency Line",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locale",
+        "observations",
+        "urgency_line",
+        "see_dentist_line",
+        "not_assessed_line",
+        "disclaimer"
+      ],
+      "title": "PatientText",
+      "type": "object"
+    },
+    "Region": {
+      "additionalProperties": false,
+      "description": "Box in image fractions with the origin at the top left.",
+      "properties": {
+        "x0": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "X0",
+          "type": "number"
+        },
+        "x1": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "X1",
+          "type": "number"
+        },
+        "y0": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Y0",
+          "type": "number"
+        },
+        "y1": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Y1",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x0",
+        "y0",
+        "x1",
+        "y1"
+      ],
+      "title": "Region",
+      "type": "object"
+    },
+    "Slot": {
+      "additionalProperties": false,
+      "properties": {
+        "clinic_id": {
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "title": "Clinic Id",
+          "type": "string"
+        },
+        "dentist_id": {
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "title": "Dentist Id",
+          "type": "string"
+        },
+        "end": {
+          "format": "date-time",
+          "title": "End",
+          "type": "string"
+        },
+        "slot_id": {
+          "format": "uuid",
+          "title": "Slot Id",
+          "type": "string"
+        },
+        "start": {
+          "format": "date-time",
+          "title": "Start",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "available",
+            "held",
+            "booked"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "slot_id",
+        "clinic_id",
+        "dentist_id",
+        "start",
+        "end",
+        "status"
+      ],
+      "title": "Slot",
+      "type": "object"
+    },
+    "UrgencyHint": {
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "enum": [
+            "routine",
+            "soon",
+            "prompt",
+            "retake_photo"
+          ],
+          "title": "Level",
+          "type": "string"
+        },
+        "review_status": {
+          "enum": [
+            "illustrative_not_clinically_reviewed",
+            "reviewed"
+          ],
+          "title": "Review Status",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "table_version": {
+          "title": "Table Version",
+          "type": "string"
+        },
+        "triggered_by": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/FindingCode"
+          },
+          "title": "Triggered By",
+          "type": "array"
+        }
+      },
+      "required": [
+        "level",
+        "rule_id",
+        "table_version",
+        "review_status"
+      ],
+      "title": "UrgencyHint",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "What the dentist's panel shows. It never holds an image.",
+  "properties": {
+    "analysis": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AnalysisResult"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "booking_id": {
+      "format": "uuid",
+      "title": "Booking Id",
+      "type": "string"
+    },
+    "patient_locale": {
+      "enum": [
+        "en",
+        "ru"
+      ],
+      "title": "Patient Locale",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "slot": {
+      "$ref": "#/$defs/Slot"
+    }
+  },
+  "required": [
+    "session_id",
+    "booking_id",
+    "slot",
+    "patient_locale"
+  ],
+  "title": "CallContext",
+  "type": "object"
+}

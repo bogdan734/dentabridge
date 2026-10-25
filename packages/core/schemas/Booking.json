@@ -1,0 +1,142 @@
+{
+  "$defs": {
+    "MockTicket": {
+      "additionalProperties": false,
+      "properties": {
+        "chip": {
+          "const": "SIMULATED",
+          "title": "Chip",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "flight",
+            "hotel"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "reference": {
+          "pattern": "^DEMO-[A-Z0-9-]+$",
+          "title": "Reference",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "reference",
+        "chip"
+      ],
+      "title": "MockTicket",
+      "type": "object"
+    },
+    "Slot": {
+      "additionalProperties": false,
+      "properties": {
+        "clinic_id": {
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "title": "Clinic Id",
+          "type": "string"
+        },
+        "dentist_id": {
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "title": "Dentist Id",
+          "type": "string"
+        },
+        "end": {
+          "format": "date-time",
+          "title": "End",
+          "type": "string"
+        },
+        "slot_id": {
+          "format": "uuid",
+          "title": "Slot Id",
+          "type": "string"
+        },
+        "start": {
+          "format": "date-time",
+          "title": "Start",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "available",
+            "held",
+            "booked"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "slot_id",
+        "clinic_id",
+        "dentist_id",
+        "start",
+        "end",
+        "status"
+      ],
+      "title": "Slot",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "booking_id": {
+      "format": "uuid",
+      "title": "Booking Id",
+      "type": "string"
+    },
+    "quote_id": {
+      "format": "uuid",
+      "title": "Quote Id",
+      "type": "string"
+    },
+    "shared_analysis_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Shared Analysis Id"
+    },
+    "simulated": {
+      "const": true,
+      "title": "Simulated",
+      "type": "boolean"
+    },
+    "slot": {
+      "$ref": "#/$defs/Slot"
+    },
+    "status": {
+      "enum": [
+        "confirmed",
+        "cancelled"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "tickets": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/MockTicket"
+      },
+      "title": "Tickets",
+      "type": "array"
+    }
+  },
+  "required": [
+    "booking_id",
+    "slot",
+    "quote_id",
+    "status",
+    "simulated"
+  ],
+  "title": "Booking",
+  "type": "object"
+}

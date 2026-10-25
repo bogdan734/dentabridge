@@ -1,0 +1,88 @@
+{
+  "$defs": {
+    "Money": {
+      "additionalProperties": false,
+      "properties": {
+        "amount_minor": {
+          "minimum": 0,
+          "title": "Amount Minor",
+          "type": "integer"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount_minor",
+        "currency"
+      ],
+      "title": "Money",
+      "type": "object"
+    },
+    "PriceRange": {
+      "additionalProperties": false,
+      "properties": {
+        "high": {
+          "$ref": "#/$defs/Money"
+        },
+        "low": {
+          "$ref": "#/$defs/Money"
+        },
+        "mid": {
+          "$ref": "#/$defs/Money"
+        }
+      },
+      "required": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "title": "PriceRange",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "amount": {
+      "$ref": "#/$defs/PriceRange"
+    },
+    "basis_key": {
+      "title": "Basis Key",
+      "type": "string"
+    },
+    "chip": {
+      "enum": [
+        "ESTIMATE",
+        "SAMPLE",
+        "SIMULATED"
+      ],
+      "title": "Chip",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "treatment",
+        "flight",
+        "hotel"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "trips": {
+      "minimum": 1,
+      "title": "Trips",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "kind",
+    "trips",
+    "amount",
+    "chip",
+    "basis_key"
+  ],
+  "title": "QuoteLine",
+  "type": "object"
+}

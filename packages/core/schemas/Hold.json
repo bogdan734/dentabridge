@@ -1,0 +1,27 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "hold_id": {
+      "format": "uuid",
+      "title": "Hold Id",
+      "type": "string"
+    },
+    "slot_id": {
+      "format": "uuid",
+      "title": "Slot Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "hold_id",
+    "slot_id",
+    "expires_at"
+  ],
+  "title": "Hold",
+  "type": "object"
+}

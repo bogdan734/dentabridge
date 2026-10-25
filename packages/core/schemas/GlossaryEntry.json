@@ -1,0 +1,21 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "src": {
+      "minLength": 1,
+      "title": "Src",
+      "type": "string"
+    },
+    "tgt": {
+      "minLength": 1,
+      "title": "Tgt",
+      "type": "string"
+    }
+  },
+  "required": [
+    "src",
+    "tgt"
+  ],
+  "title": "GlossaryEntry",
+  "type": "object"
+}

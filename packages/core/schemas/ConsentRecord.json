@@ -1,0 +1,56 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "consent_id": {
+      "format": "uuid",
+      "title": "Consent Id",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "given_at": {
+      "format": "date-time",
+      "title": "Given At",
+      "type": "string"
+    },
+    "health_data_explicit": {
+      "const": true,
+      "title": "Health Data Explicit",
+      "type": "boolean"
+    },
+    "locale": {
+      "enum": [
+        "en",
+        "ru"
+      ],
+      "title": "Locale",
+      "type": "string"
+    },
+    "purpose": {
+      "enum": [
+        "photo_analysis",
+        "share_with_clinic"
+      ],
+      "title": "Purpose",
+      "type": "string"
+    },
+    "text_version": {
+      "title": "Text Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "purpose",
+    "health_data_explicit",
+    "text_version",
+    "locale",
+    "consent_id",
+    "given_at",
+    "expires_at"
+  ],
+  "title": "ConsentRecord",
+  "type": "object"
+}

@@ -1,0 +1,46 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "disclaimer": {
+      "title": "Disclaimer",
+      "type": "string"
+    },
+    "locale": {
+      "enum": [
+        "en",
+        "ru"
+      ],
+      "title": "Locale",
+      "type": "string"
+    },
+    "not_assessed_line": {
+      "title": "Not Assessed Line",
+      "type": "string"
+    },
+    "observations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Observations",
+      "type": "array"
+    },
+    "see_dentist_line": {
+      "title": "See Dentist Line",
+      "type": "string"
+    },
+    "urgency_line": {
+      "title": "Urgency Line",
+      "type": "string"
+    }
+  },
+  "required": [
+    "locale",
+    "observations",
+    "urgency_line",
+    "see_dentist_line",
+    "not_assessed_line",
+    "disclaimer"
+  ],
+  "title": "PatientText",
+  "type": "object"
+}

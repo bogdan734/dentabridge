@@ -1,0 +1,44 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "glossary_id": {
+      "title": "Glossary Id",
+      "type": "string"
+    },
+    "languages": {
+      "additionalProperties": {
+        "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+        "type": "string"
+      },
+      "propertyNames": {
+        "enum": [
+          "patient",
+          "dentist"
+        ]
+      },
+      "title": "Languages",
+      "type": "object"
+    },
+    "mode": {
+      "enum": [
+        "consecutive",
+        "captions_only"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "title": "Session Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "session_id",
+    "languages",
+    "mode",
+    "glossary_id"
+  ],
+  "title": "CallRoomMetadata",
+  "type": "object"
+}

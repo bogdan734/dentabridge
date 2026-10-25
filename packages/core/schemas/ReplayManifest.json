@@ -1,0 +1,171 @@
+{
+  "$defs": {
+    "CaptionEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "audio": {
+          "enum": [
+            "spoken",
+            "captions_only"
+          ],
+          "title": "Audio",
+          "type": "string"
+        },
+        "digits_ok": {
+          "title": "Digits Ok",
+          "type": "boolean"
+        },
+        "final": {
+          "title": "Final",
+          "type": "boolean"
+        },
+        "glossary_missing": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Glossary Missing",
+          "type": "array"
+        },
+        "speaker": {
+          "enum": [
+            "patient",
+            "dentist"
+          ],
+          "title": "Speaker",
+          "type": "string"
+        },
+        "src_lang": {
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+          "title": "Src Lang",
+          "type": "string"
+        },
+        "src_text": {
+          "title": "Src Text",
+          "type": "string"
+        },
+        "t_first_audio_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "T First Audio Ms"
+        },
+        "t_speech_end_ms": {
+          "minimum": 0,
+          "title": "T Speech End Ms",
+          "type": "integer"
+        },
+        "tgt_lang": {
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+          "title": "Tgt Lang",
+          "type": "string"
+        },
+        "tgt_text": {
+          "title": "Tgt Text",
+          "type": "string"
+        },
+        "utterance_id": {
+          "minLength": 1,
+          "title": "Utterance Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "utterance_id",
+        "speaker",
+        "src_lang",
+        "tgt_lang",
+        "src_text",
+        "tgt_text",
+        "final",
+        "digits_ok",
+        "audio",
+        "t_speech_end_ms"
+      ],
+      "title": "CaptionEvent",
+      "type": "object"
+    },
+    "ReplayTrack": {
+      "additionalProperties": false,
+      "properties": {
+        "lang": {
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+          "title": "Lang",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "patient",
+            "dentist"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "lang",
+        "url"
+      ],
+      "title": "ReplayTrack",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "events": {
+      "items": {
+        "$ref": "#/$defs/CaptionEvent"
+      },
+      "title": "Events",
+      "type": "array"
+    },
+    "latency_p50_ms": {
+      "minimum": 0,
+      "title": "Latency P50 Ms",
+      "type": "integer"
+    },
+    "latency_p95_ms": {
+      "minimum": 0,
+      "title": "Latency P95 Ms",
+      "type": "integer"
+    },
+    "n": {
+      "minimum": 0,
+      "title": "N",
+      "type": "integer"
+    },
+    "replay_id": {
+      "title": "Replay Id",
+      "type": "string"
+    },
+    "tracks": {
+      "items": {
+        "$ref": "#/$defs/ReplayTrack"
+      },
+      "title": "Tracks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "replay_id",
+    "tracks",
+    "events",
+    "latency_p50_ms",
+    "latency_p95_ms",
+    "n"
+  ],
+  "title": "ReplayManifest",
+  "type": "object"
+}

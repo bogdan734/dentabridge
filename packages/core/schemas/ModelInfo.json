@@ -1,0 +1,42 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "backend": {
+      "enum": [
+        "ollama",
+        "mlx",
+        "transformers",
+        "fixture"
+      ],
+      "title": "Backend",
+      "type": "string"
+    },
+    "card_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Card Url"
+    },
+    "model_id": {
+      "title": "Model Id",
+      "type": "string"
+    },
+    "version": {
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "model_id",
+    "version",
+    "backend"
+  ],
+  "title": "ModelInfo",
+  "type": "object"
+}

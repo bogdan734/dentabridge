@@ -1,0 +1,38 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "health_data_explicit": {
+      "const": true,
+      "title": "Health Data Explicit",
+      "type": "boolean"
+    },
+    "locale": {
+      "enum": [
+        "en",
+        "ru"
+      ],
+      "title": "Locale",
+      "type": "string"
+    },
+    "purpose": {
+      "enum": [
+        "photo_analysis",
+        "share_with_clinic"
+      ],
+      "title": "Purpose",
+      "type": "string"
+    },
+    "text_version": {
+      "title": "Text Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "purpose",
+    "health_data_explicit",
+    "text_version",
+    "locale"
+  ],
+  "title": "ConsentRequest",
+  "type": "object"
+}

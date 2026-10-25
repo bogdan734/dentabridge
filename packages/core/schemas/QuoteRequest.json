@@ -1,0 +1,69 @@
+{
+  "$defs": {
+    "TreatmentCode": {
+      "enum": [
+        "consultation",
+        "filling",
+        "crown",
+        "root_canal",
+        "implant",
+        "scaling"
+      ],
+      "title": "TreatmentCode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "clinic_id": {
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "title": "Clinic Id",
+      "type": "string"
+    },
+    "currency": {
+      "pattern": "^[A-Z]{3}$",
+      "title": "Currency",
+      "type": "string"
+    },
+    "depart_date": {
+      "format": "date",
+      "title": "Depart Date",
+      "type": "string"
+    },
+    "origin_iata": {
+      "pattern": "^[A-Z]{3}$",
+      "title": "Origin Iata",
+      "type": "string"
+    },
+    "return_date": {
+      "format": "date",
+      "title": "Return Date",
+      "type": "string"
+    },
+    "travellers": {
+      "maximum": 6,
+      "minimum": 1,
+      "title": "Travellers",
+      "type": "integer"
+    },
+    "treatment_codes": {
+      "items": {
+        "$ref": "#/$defs/TreatmentCode"
+      },
+      "minItems": 1,
+      "title": "Treatment Codes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "clinic_id",
+    "treatment_codes",
+    "origin_iata",
+    "depart_date",
+    "return_date",
+    "travellers",
+    "currency"
+  ],
+  "title": "QuoteRequest",
+  "type": "object"
+}

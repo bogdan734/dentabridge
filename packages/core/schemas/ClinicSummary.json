@@ -1,0 +1,176 @@
+{
+  "$defs": {
+    "DentistSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "dentist_id": {
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "title": "Dentist Id",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "languages": {
+          "items": {
+            "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Languages",
+          "type": "array"
+        }
+      },
+      "required": [
+        "dentist_id",
+        "display_name",
+        "languages"
+      ],
+      "title": "DentistSummary",
+      "type": "object"
+    },
+    "Money": {
+      "additionalProperties": false,
+      "properties": {
+        "amount_minor": {
+          "minimum": 0,
+          "title": "Amount Minor",
+          "type": "integer"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount_minor",
+        "currency"
+      ],
+      "title": "Money",
+      "type": "object"
+    },
+    "TreatmentCode": {
+      "enum": [
+        "consultation",
+        "filling",
+        "crown",
+        "root_canal",
+        "implant",
+        "scaling"
+      ],
+      "title": "TreatmentCode",
+      "type": "string"
+    },
+    "TreatmentPrice": {
+      "additionalProperties": false,
+      "properties": {
+        "chip": {
+          "const": "SAMPLE",
+          "title": "Chip",
+          "type": "string"
+        },
+        "nights_per_trip": {
+          "minimum": 0,
+          "title": "Nights Per Trip",
+          "type": "integer"
+        },
+        "price": {
+          "$ref": "#/$defs/Money"
+        },
+        "treatment_code": {
+          "$ref": "#/$defs/TreatmentCode"
+        },
+        "trips": {
+          "minimum": 1,
+          "title": "Trips",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "treatment_code",
+        "price",
+        "chip",
+        "trips",
+        "nights_per_trip"
+      ],
+      "title": "TreatmentPrice",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "airport_iata": {
+      "pattern": "^[A-Z]{3}$",
+      "title": "Airport Iata",
+      "type": "string"
+    },
+    "city": {
+      "title": "City",
+      "type": "string"
+    },
+    "clinic_id": {
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "title": "Clinic Id",
+      "type": "string"
+    },
+    "country_code": {
+      "pattern": "^[A-Z]{2}$",
+      "title": "Country Code",
+      "type": "string"
+    },
+    "dentists": {
+      "items": {
+        "$ref": "#/$defs/DentistSummary"
+      },
+      "minItems": 1,
+      "title": "Dentists",
+      "type": "array"
+    },
+    "is_fictional": {
+      "const": true,
+      "title": "Is Fictional",
+      "type": "boolean"
+    },
+    "languages": {
+      "items": {
+        "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Languages",
+      "type": "array"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "timezone": {
+      "title": "Timezone",
+      "type": "string"
+    },
+    "treatments": {
+      "items": {
+        "$ref": "#/$defs/TreatmentPrice"
+      },
+      "minItems": 1,
+      "title": "Treatments",
+      "type": "array"
+    }
+  },
+  "required": [
+    "clinic_id",
+    "name",
+    "city",
+    "country_code",
+    "airport_iata",
+    "timezone",
+    "languages",
+    "dentists",
+    "treatments",
+    "is_fictional"
+  ],
+  "title": "ClinicSummary",
+  "type": "object"
+}

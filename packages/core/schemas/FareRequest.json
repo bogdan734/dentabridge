@@ -1,0 +1,46 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "booked_on": {
+      "format": "date",
+      "title": "Booked On",
+      "type": "string"
+    },
+    "depart": {
+      "format": "date",
+      "title": "Depart",
+      "type": "string"
+    },
+    "dest_iata": {
+      "pattern": "^[A-Z]{3}$",
+      "title": "Dest Iata",
+      "type": "string"
+    },
+    "origin_iata": {
+      "pattern": "^[A-Z]{3}$",
+      "title": "Origin Iata",
+      "type": "string"
+    },
+    "return_": {
+      "format": "date",
+      "title": "Return",
+      "type": "string"
+    },
+    "travellers": {
+      "maximum": 6,
+      "minimum": 1,
+      "title": "Travellers",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "origin_iata",
+    "dest_iata",
+    "depart",
+    "return_",
+    "booked_on",
+    "travellers"
+  ],
+  "title": "FareRequest",
+  "type": "object"
+}

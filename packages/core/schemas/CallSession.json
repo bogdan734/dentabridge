@@ -1,0 +1,122 @@
+{
+  "$defs": {
+    "AiDisclosure": {
+      "additionalProperties": false,
+      "description": "What the user must acknowledge before joining (EU AI Act Art. 50).",
+      "properties": {
+        "basis": {
+          "const": "EU AI Act Art. 50",
+          "title": "Basis",
+          "type": "string"
+        },
+        "machine_translation": {
+          "const": true,
+          "title": "Machine Translation",
+          "type": "boolean"
+        },
+        "must_acknowledge": {
+          "const": true,
+          "title": "Must Acknowledge",
+          "type": "boolean"
+        },
+        "not_medical_interpreter": {
+          "const": true,
+          "title": "Not Medical Interpreter",
+          "type": "boolean"
+        },
+        "synthetic_voice": {
+          "const": true,
+          "title": "Synthetic Voice",
+          "type": "boolean"
+        },
+        "text_key": {
+          "title": "Text Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "synthetic_voice",
+        "machine_translation",
+        "not_medical_interpreter",
+        "must_acknowledge",
+        "basis",
+        "text_key"
+      ],
+      "title": "AiDisclosure",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "ai_disclosure": {
+      "$ref": "#/$defs/AiDisclosure"
+    },
+    "booking_id": {
+      "format": "uuid",
+      "title": "Booking Id",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "languages": {
+      "additionalProperties": {
+        "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+        "type": "string"
+      },
+      "propertyNames": {
+        "enum": [
+          "patient",
+          "dentist"
+        ]
+      },
+      "title": "Languages",
+      "type": "object"
+    },
+    "mode": {
+      "enum": [
+        "consecutive",
+        "captions_only"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "pair_status": {
+      "enum": [
+        "verified",
+        "unverified"
+      ],
+      "title": "Pair Status",
+      "type": "string"
+    },
+    "recording": {
+      "const": false,
+      "title": "Recording",
+      "type": "boolean"
+    },
+    "room": {
+      "title": "Room",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "title": "Session Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "session_id",
+    "booking_id",
+    "room",
+    "languages",
+    "pair_status",
+    "mode",
+    "ai_disclosure",
+    "recording",
+    "expires_at"
+  ],
+  "title": "CallSession",
+  "type": "object"
+}

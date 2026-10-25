@@ -6,7 +6,7 @@ from typing import Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONFIG_DIR = Path(__file__).resolve().parents[3] / "configs"
+CONFIG_DIR = Path(__file__).resolve().parents[3] / "configs" / "train"
 
 
 class TrainConfig(BaseModel):

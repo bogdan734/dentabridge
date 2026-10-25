@@ -1,0 +1,7 @@
+# Pre-registered release gate. Committed before the first look at the test split; a test checks
+# that the commit date is earlier than the first line of docs/results/ml/test-access.log.
+# A finding ships as "assessed" only if ALL of these hold on the test split:
+min_positives = 30     # positive test images for the finding
+min_sens_lower = 0.60  # lower end of the 95% cluster-bootstrap interval of sensitivity
+min_spec_lower = 0.60  # lower end of the interval of specificity (needs negatives)
+max_ece = 0.10         # expected calibration error of the finding score

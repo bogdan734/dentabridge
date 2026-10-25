@@ -14,7 +14,7 @@ from PIL import Image
 
 from dentabridge_ml.data.records import ImageRecord
 
-GroupMethod = Literal["patient_id", "cluster"]
+GroupMethod = Literal["patient_id", "capture_sequence", "cluster"]
 BLOCK = 1024
 
 
@@ -68,15 +68,20 @@ def group(
     max_cos_dist: float,
     max_hamming: int,
 ) -> list[str]:
-    """One group id per record. A real patient id wins; the rest are clustered transitively."""
+    """One group id per record.
+
+    A real patient id wins, then the capture sequence of a session; records with neither are
+    clustered by embedding and hash closeness. Finally, any two records whose hashes are
+    near-identical are merged whatever their ids (a photo uploaded twice under two people).
+    """
     if not (len(records) == len(emb) == len(hashes)):
         raise ValueError("records, embeddings and hashes must line up")
     ids = [r.record_id for r in records]
-    free = [i for i, r in enumerate(records) if r.patient_id is None]
-    result = [f"p:{r.source}:{r.patient_id}" if r.patient_id is not None else "" for r in records]
+    result = [_known_group(r) for r in records]
+    free = [i for i, name in enumerate(result) if not name]
     if free:
-        sub_hashes = np.array([hashes[i] for i in free], dtype=np.uint64)
         components = _Components(len(free))
+        sub_hashes = np.array([hashes[i] for i in free], dtype=np.uint64)
         for a, b in _close_pairs(emb[free], sub_hashes, max_cos_dist, max_hamming):
             components.union(a, b)
         smallest: dict[int, str] = {}
@@ -85,8 +90,34 @@ def group(
             smallest[root] = min(smallest.get(root, ids[i]), ids[i])
         for local, i in enumerate(free):
             result[i] = f"c:{smallest[components.find(local)]}"
-    return result
+    return _merge_duplicates(result, hashes, max_hamming)
+
+
+def _known_group(record: ImageRecord) -> str:
+    if record.patient_id is not None:
+        return f"p:{record.source}:{record.patient_id}"
+    if record.capture_sequence is not None:
+        return f"s:{record.source}:{record.capture_sequence}"
+    return ""
+
+
+def _merge_duplicates(groups: list[str], hashes: Sequence[int], max_hamming: int) -> list[str]:
+    """Join groups that share a near-identical image. A real id names the merged group, then a
+    capture sequence, then a cluster."""
+    names = sorted(set(groups), key=lambda name: ("psc".index(name[0]), name))
+    index = {name: i for i, name in enumerate(names)}
+    components = _Components(len(names))
+    packed = np.array(hashes, dtype=np.uint64)
+    for start in range(0, len(packed), BLOCK):
+        close = (
+            np.bitwise_count(packed[start : start + BLOCK, None] ^ packed[None, :]) <= max_hamming
+        )
+        for r, c in zip(*np.nonzero(close), strict=True):
+            components.union(index[groups[start + int(r)]], index[groups[int(c)]])
+    return [names[components.find(index[g])] for g in groups]
 
 
 def group_method(record: ImageRecord) -> GroupMethod:
-    return "patient_id" if record.patient_id is not None else "cluster"
+    if record.patient_id is not None:
+        return "patient_id"
+    return "capture_sequence" if record.capture_sequence is not None else "cluster"

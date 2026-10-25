@@ -40,7 +40,10 @@ class ImageRecord(_Frozen):
     path: str  # relative to <root>/<source>/
     width: int = Field(gt=0)
     height: int = Field(gt=0)
-    patient_id: str | None = None
+    patient_id: str | None = None  # a real participant id from the publisher
+    # Photos of one person when no real id exists (the capture order of a session).
+    capture_sequence: str | None = None
+    view: str | None = None  # e.g. "Frontal", "Maxillary_Occlusal": a shortcut worth reporting
     boxes: tuple[LabelBox, ...] = ()
     image_labels: frozenset[FindingCode] = frozenset()
     caption: str | None = None

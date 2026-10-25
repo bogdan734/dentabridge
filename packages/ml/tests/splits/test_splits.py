@@ -7,7 +7,7 @@ from PIL import Image
 
 from dentabridge_core import FindingCode
 from dentabridge_ml.data.records import ImageRecord, LabelBox
-from dentabridge_ml.splits.group import group, hamming, phash
+from dentabridge_ml.splits.group import group, group_method, hamming, phash
 from dentabridge_ml.splits.manifest import SPLITS, split, write_manifests
 
 DIM = 16
@@ -64,16 +64,37 @@ def test_group_joins_transitively_and_keeps_distinct_mouths_apart() -> None:
     assert all(len(set(groups[m * 5 : (m + 1) * 5])) == 1 for m in range(40))
 
 
-def test_a_real_patient_id_wins_over_clustering() -> None:
+def test_a_real_patient_id_names_the_group_a_duplicate_joins() -> None:
     records, emb, hashes = _mouths(2, 3)
     records = [
         r.model_copy(update={"patient_id": "kid-7" if i < 2 else None})
         for i, r in enumerate(records)
     ]
     groups = group(records, emb, hashes, 0.05, 2)
-    assert groups[0] == groups[1] == "p:aku_caries:kid-7"
-    assert groups[2].startswith("c:")
+    # photo 2 is a near-duplicate of the two with an id, so it joins them under the real id
+    assert groups[0] == groups[1] == groups[2] == "p:aku_caries:kid-7"
+    assert groups[3] == groups[4] == groups[5]
     assert groups[3].startswith("c:")
+
+
+def test_capture_sequence_groups_when_there_is_no_id() -> None:
+    records, emb, hashes = _mouths(2, 3)
+    records = [
+        r.model_copy(update={"capture_sequence": f"pilot-{i // 3}"}) for i, r in enumerate(records)
+    ]
+    groups = group(records, emb, hashes, 0.05, 2)
+    assert groups[:3] == ["s:aku_caries:pilot-0"] * 3
+    assert groups[3:] == ["s:aku_caries:pilot-1"] * 3
+    assert [group_method(r) for r in records] == ["capture_sequence"] * 6
+
+
+def test_near_identical_photos_merge_two_people() -> None:
+    a = _record(0, patient="kid-1")
+    b = _record(1, patient="kid-2")
+    emb = np.array([[1.0, 0.0], [0.0, 1.0]])
+    assert group([a, b], emb, [0b1010, 0b1011], 0.0, 1) == ["p:aku_caries:kid-1"] * 2
+    apart = group([a, b], emb, [0, 2**40 - 1], 0.0, 1)
+    assert apart == ["p:aku_caries:kid-1", "p:aku_caries:kid-2"]
 
 
 def test_group_needs_aligned_inputs() -> None:

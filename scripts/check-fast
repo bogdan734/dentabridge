@@ -1,0 +1,10 @@
+#!/bin/sh
+# Per-edit check of one file ($1): syntax only, must stay under a second. Silent when fine.
+case "$1" in
+  *.py) python3 -c 'import sys
+try:
+    compile(open(sys.argv[1]).read(), sys.argv[1], "exec")
+except SyntaxError as e:
+    sys.exit(f"{e.filename}:{e.lineno}: {e.msg}")' "$1" ;;
+  *) exit 0 ;;
+esac

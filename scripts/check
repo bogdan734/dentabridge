@@ -1,0 +1,23 @@
+#!/bin/sh
+# Full gate. Claude's Stop hook runs it after changes; red means not done.
+# Keep it under ~2 minutes and quiet on success (CHECK_TIMEOUT raises the limit).
+set -eu
+cd "$(dirname "$0")/.."
+
+log=$(mktemp "${TMPDIR:-/tmp}/check.XXXXXX")
+trap 'rm -f "$log"' EXIT
+
+# Run one step with its output captured; print the output only if the step fails.
+step() {
+  if ! "$@" >"$log" 2>&1; then
+    cat "$log"
+    echo "scripts/check: FAILED: $*"
+    exit 1
+  fi
+}
+
+step uv run ruff check .
+step uv run ruff format --check .
+step uv run mypy
+step uv run pytest -q -m "not slow and not gpu and not network"
+# ---- F2 (claims linter) adds its step here: step uv run dentabridge-lint --profile P --locale L PATH...

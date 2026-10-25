@@ -1,0 +1,38 @@
+# Local-only trees. data/ is anchored: dentabridge_ml/data/ is source code and
+# packages/pricing/data/ holds committed snapshots.
+/data/
+private/
+var/
+.env
+.work/
+runs/
+wandb/
+
+# Model weights
+*.gguf
+*.safetensors
+*.pt
+*.onnx
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# Node
+node_modules/
+.next/
+*.tsbuildinfo
+npm-debug.log*
+
+# Editors and OS
+.idea/
+.vscode/
+*.swp
+.DS_Store

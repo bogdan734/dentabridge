@@ -1,0 +1,35 @@
+# Virtual root: no [project] table, so uv installs every member of packages/*.
+# requires-python lives in each member; .python-version pins 3.13 for the workspace.
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[dependency-groups]
+dev = [
+  "hypothesis>=6",
+  "mypy>=2.4",
+  "pytest>=9",
+  "ruff>=0.17",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["packages/*/src"]
+# ruff 0.17 also formats Markdown; the gate covers Python only
+extend-exclude = ["docs", "*.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF", "PT", "C4"]
+
+[tool.mypy]
+strict = true
+files = ["packages/*/src", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "packages"]
+addopts = "--strict-markers"
+markers = [
+  "slow: long-running test, excluded from scripts/check",
+  "gpu: needs a GPU, excluded from scripts/check",
+  "network: needs network access, excluded from scripts/check",
+]

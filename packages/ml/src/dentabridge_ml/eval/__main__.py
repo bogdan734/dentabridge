@@ -13,11 +13,18 @@ from dentabridge_ml.eval.results import render_markdown
 from dentabridge_ml.eval.slices import slice_results
 from dentabridge_ml.serving import load_vision_backend
 from dentabridge_ml.splits.build import MANIFEST_DIR
-from dentabridge_ml.splits.manifest import read_entries
+from dentabridge_ml.splits.manifest import SplitEntry, read_entries
+
+
+def _spread(entries: Sequence[SplitEntry], limit: int | None) -> list[SplitEntry]:
+    """`limit` evenly spaced entries, so a smoke run still meets every source and view."""
+    if limit is None or limit >= len(entries):
+        return list(entries)
+    return [entries[int(i * len(entries) / limit)] for i in range(limit)]
 
 
 def _run(args: argparse.Namespace) -> int:
-    entries = read_entries(args.manifests, args.split)[: args.limit]
+    entries = _spread(read_entries(args.manifests, args.split), args.limit)
     sources = sorted({e.source for e in entries})
     records = {r.record_id: r for s in sources for r in load_records(s, args.root)}
     backend = load_vision_backend(args.backend, research_release(), args.image_max_px)

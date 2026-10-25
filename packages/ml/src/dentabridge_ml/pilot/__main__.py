@@ -1,14 +1,13 @@
 """`python -m dentabridge_ml.pilot import|compare`: ML1 by hand. Needs Ollama and the train extra.
 
-`import` registers a merged model in Ollama from its safetensors directory, copying the template
-and parameters of a stock model. `compare` answers the same validation photos with Transformers
-(the reference) and with Ollama, and writes the round-trip report with the serving verdict.
+`import` registers a merged (or base) safetensors directory in Ollama. `compare` answers the
+validation photos of a reference run (`eval run --backend transformers:<dir> --limit N`) with
+Ollama and writes the round-trip report with the serving verdict.
 """
 
 import argparse
 import asyncio
 import base64
-import random
 import subprocess
 import tempfile
 from collections.abc import Sequence
@@ -20,7 +19,7 @@ import httpx
 from dentabridge_core import VisionBackend, VisionOutput
 from dentabridge_ml.data.loaders import load_records
 from dentabridge_ml.data.sources import default_root
-from dentabridge_ml.eval.predict import research_release, sanitise
+from dentabridge_ml.eval.predict import read_predictions, research_release, sanitise
 from dentabridge_ml.pilot.roundtrip import (
     COLOURS,
     RoundtripReport,
@@ -36,21 +35,26 @@ from dentabridge_ml.splits.build import MANIFEST_DIR
 from dentabridge_ml.splits.manifest import read_entries
 
 
-def modelfile(stock: str, merged: Path) -> str:
-    """The stock model's Modelfile (template, renderer, parameters), FROM pointing at `merged`."""
-    shown = subprocess.run(
-        ["ollama", "show", stock, "--modelfile"], capture_output=True, text=True, check=True
-    ).stdout
-    kept = [
-        line for line in shown.splitlines() if line.strip() and not line.startswith(("#", "FROM"))
-    ]
-    return "\n".join([f"FROM {merged.resolve()}", *kept]) + "\n"
+def modelfile(merged: Path) -> str:
+    """The Modelfile for a merged safetensors directory.
+
+    The stock `qwen3-vl:4b` is the thinking variant; ours is tuned from the Instruct checkpoint,
+    so it gets the instruct renderer and parser and the Instruct sampling defaults.
+    """
+    return (
+        f"FROM {merged.resolve()}\n"
+        "TEMPLATE {{ .Prompt }}\n"
+        "RENDERER qwen3-vl-instruct\n"
+        "PARSER qwen3-vl-instruct\n"
+        "PARAMETER top_k 20\n"
+        "PARAMETER top_p 0.8\n"
+    )
 
 
 def _import(args: argparse.Namespace) -> int:
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "Modelfile"
-        path.write_text(modelfile(args.like, args.merged), encoding="utf-8")
+        path.write_text(modelfile(args.merged), encoding="utf-8")
         command = ["ollama", "create", args.name, "-f", str(path)]
         if args.quantize:
             command += ["--quantize", args.quantize]
@@ -99,28 +103,13 @@ async def _answers(backend: VisionBackend, images: Sequence[Any]) -> list[Vision
 
 
 def _compare(args: argparse.Namespace) -> int:
-    import torch
-
-    from dentabridge_ml.serving.transformers_backend import TransformersVisionBackend
-
-    entries = read_entries(MANIFEST_DIR, "val")
-    chosen = random.Random(args.seed).sample(list(entries), args.n)
-    records = {
-        r.record_id: r
-        for s in sorted({e.source for e in chosen})
-        for r in load_records(s, args.root)
-    }
-    images = [
-        sanitise(args.root / records[e.record_id].source / records[e.record_id].path)
-        for e in chosen
-    ]
-
-    dtype = torch.bfloat16 if args.dtype == "bf16" else torch.float16
-    reference = TransformersVisionBackend(
-        str(args.merged), research_release(), args.image_max_px, dtype
-    )
-    expected = asyncio.run(_answers(reference, images))
-    del reference
+    reference = read_predictions(args.reference)
+    ids = [row.record_id for row in reference]
+    entries = {e.record_id: e for e in read_entries(MANIFEST_DIR, args.split)}
+    sources = sorted({entries[i].source for i in ids})
+    records = {r.record_id: r for s in sources for r in load_records(s, args.root)}
+    images = [sanitise(args.root / records[i].source / records[i].path) for i in ids]
+    expected = [row.output for row in reference]
 
     def served(constrain: bool) -> OllamaVisionBackend:
         return OllamaVisionBackend(
@@ -148,7 +137,7 @@ def _compare(args: argparse.Namespace) -> int:
     report.write(args.out)
     print(report.model_dump_json(indent=2))
     verdict = serving_decision([report])
-    print(f"transformers valid: {valid_rate(expected):.2f}; serving verdict: {verdict}")
+    print(f"reference valid: {valid_rate(expected):.2f}; serving verdict: {verdict}")
     return 0
 
 
@@ -166,14 +155,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     register.set_defaults(func=_import)
 
-    compare = steps.add_parser("compare", help="Transformers vs Ollama on the same photos")
-    compare.add_argument("merged", type=Path)
+    compare = steps.add_parser("compare", help="Ollama vs a Transformers reference run")
+    compare.add_argument("reference", type=Path, help="predictions.jsonl from `eval run`")
     compare.add_argument("--name", required=True, help="the model name given to `import`")
+    compare.add_argument("--split", choices=("val",), default="val")
     compare.add_argument("--route", choices=("safetensors", "gguf_mmproj"), default="safetensors")
-    compare.add_argument("--n", type=int, default=20)
-    compare.add_argument("--seed", type=int, default=0)
     compare.add_argument("--image-max-px", type=int, required=True)
-    compare.add_argument("--dtype", choices=("bf16", "fp16"), default="bf16")
     compare.add_argument("--root", type=Path, default=default_root())
     compare.add_argument("--out", type=Path, required=True)
     compare.set_defaults(func=_compare)

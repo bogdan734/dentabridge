@@ -97,9 +97,12 @@ def test_run_writes_predictions_result_and_table(world: Path) -> None:
     assert "[view=unknown]" in (out / "val.by-view.md").read_text()
 
 
-def test_limit_keeps_a_smoke_run_small(world: Path) -> None:
+def test_limit_keeps_a_smoke_run_small_and_spread_over_the_split(world: Path) -> None:
     _run(world, "--limit", "2")
     assert SplitResult.read(world / "out" / "val.json").n_images == 2
+    lines = (world / "out" / "val.predictions.jsonl").read_text().splitlines()
+    ids = [json.loads(line)["record_id"] for line in lines]
+    assert ids == ["aku_caries/0", "aku_caries/2"], "every other val image, not the first two"
 
 
 def test_the_test_split_needs_final_and_a_log_and_never_a_limit(world: Path) -> None:

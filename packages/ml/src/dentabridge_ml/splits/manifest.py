@@ -2,7 +2,6 @@
 
 import hashlib
 import json
-import random
 from collections import Counter, defaultdict
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -90,9 +89,12 @@ def split(
         for name, idx in members.items()
     }
     assigned: dict[tuple[str, SplitName], int] = Counter()
-    order = sorted(members)
-    random.Random(seed).shuffle(order)
-    order.sort(key=lambda name: -len(members[name]))  # stable: big groups first, seeded ties
+    # Big groups first, ties in an order that depends only on (seed, group name): the groups of one
+    # source are always placed in the same order, so adding a dataset never moves what is placed.
+    order = sorted(
+        members,
+        key=lambda name: (-len(members[name]), hashlib.sha256(f"{seed}:{name}".encode()).digest()),
+    )
     placement: dict[str, SplitName] = {}
     for name in order:
         stratum, size = group_stratum[name], len(members[name])

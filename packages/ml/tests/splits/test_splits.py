@@ -192,6 +192,20 @@ def test_a_source_can_ask_for_a_bigger_test_share() -> None:
     assert abs(share["aku_caries"] - 0.1) < 0.05
 
 
+def test_adding_a_source_does_not_move_images_that_were_already_placed() -> None:
+    """Results on a split stay valid when a new dataset joins: splits are append-only."""
+    old_records = [_record(i, patient=f"p{i // 3}", pos=i % 4 == 0) for i in range(240)]
+    new_records = [
+        _record(i, source="alphadent", patient=f"a{i // 2}", pos=i % 3 == 0) for i in range(100)
+    ]
+    old_groups = [f"p:{r.patient_id}" for r in old_records]
+    new_groups = [f"p:{r.patient_id}" for r in new_records]
+    before = split(old_records, old_groups, seed=7)
+    after = split(old_records + new_records, old_groups + new_groups, seed=7)
+    kept = {e.record_id: e.split for e in before.entries}
+    assert {e.record_id: e.split for e in after.entries if e.record_id in kept} == kept
+
+
 def test_split_rejects_bad_ratios() -> None:
     records, groups, _ = _manifest()
     with pytest.raises(ValueError, match="sum to 1"):

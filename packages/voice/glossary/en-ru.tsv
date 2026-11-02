@@ -7,7 +7,7 @@
 # Not reviewed by a dentist or a medical interpreter: a miss is a prompt to double-check, not proof.
 en	ru
 # teeth and mouth
-tooth|teeth	зуб|зуб*
+tooth|teeth|molar|molars|premolar|premolars|incisor|incisors|canine|canines	зуб|зуба|зубу|зубом|зубе|зубы|зубов|зубам|зубами|зубах
 molar|molars	коренной зуб|моляр*|коренн* зуб*
 premolar|premolars	премоляр|премоляр*|малы* коренн*
 incisor|incisors	резец|резц*
@@ -18,18 +18,22 @@ gum|gums	десна|десн*|десен
 enamel	эмаль|эмал*
 dentin|dentine	дентин|дентин*
 pulp	пульпа|пульп*
-nerve|nerves	нерв|нерв*
-root|roots	корень|корен*|корн*
+nerve|nerves	нерв|нерва|нерву|нервом|нерве|нервы|нервов|нервам|нервами|нервах
 jaw|jaws	челюсть|челюст*
 upper jaw|maxilla	верхняя челюсть|верхн* челюст*
 lower jaw|mandible	нижняя челюсть|нижн* челюст*
 jaw joint|tmj	височно-нижнечелюстной сустав|височно-нижнечелюстн*|сустав*
-tongue	язык|язык*
+upper left|left upper|top left	верхний левый|верхн* лев*|лев* верхн*
+upper right|right upper|top right	верхний правый|верхн* прав*|прав* верхн*
+lower left|left lower|bottom left	нижний левый|нижн* лев*|лев* нижн*
+lower right|right lower|bottom right	нижний правый|нижн* прав*|прав* нижн*
+left side	левая сторона|лев* сторон*|слева
+right side	правая сторона|прав* сторон*|справа
 lip|lips	губа|губ*
 cheek|cheeks	щека|щек*
 palate	нёбо|неб*|неб*
 saliva	слюна|слюн*
-bone	кость|кост*
+bone	кость|кости|костью|костей|костн*
 sinus|sinuses	пазуха|пазух*|синус*
 bite	прикус|прикус*
 chewing	жевание|жеван*|жевать
@@ -37,7 +41,7 @@ swallowing|swallow	глотание|глота*|глотан*
 # conditions and symptoms
 cavity|cavities|caries|decay	кариес|кариес*|кариоз*
 toothache	зубная боль|зубн* бол*|бол* в зуб*
-pain|ache	боль|бол*
+pain|ache|hurt|hurts|hurting|sore|painful|aching	боль|боли|болью|болит|болят|ноет|ноют|больно|болезненн*|болев*
 sharp pain	острая боль|остр* бол*
 dull pain|throbbing pain	ноющая боль|ноющ* бол*|пульсирующ* бол*
 sensitivity|sensitive	чувствительность|чувствительн*
@@ -45,14 +49,14 @@ swelling|swollen	отёк|отек*|опух*
 abscess	абсцесс|абсцесс*|нарыв*
 infection|infected	инфекция|инфекц*|инфицир*|воспален*
 inflammation|inflamed	воспаление|воспален*|воспал*
-bleeding|bleed|bleeds	кровотечение|кровотеч*|кровоточ*|кров*
+bleeding|bleed|bleeds	кровотечение|кровотеч*|кровоточ*|кровь|крови|кровью
 gingivitis	гингивит|гингивит*
 periodontitis|gum disease	пародонтит|пародонтит*|заболеван* десен
 plaque	налёт|налет*
 tartar|calculus	зубной камень|зубн* кам*
 bad breath	неприятный запах изо рта|запах* изо рта|неприятн* запах*
-cracked tooth|fracture|fractured	трещина|трещин*|перелом*|скол*
-chipped	скол|скол*
+cracked tooth|fracture|fractured	трещина|трещин*|перелом*|скол|скола|сколы|сколов|сколот*
+chipped	скол|скола|сколы|сколов|сколом|сколе|сколот*
 loose tooth|loose teeth	подвижный зуб|подвижн* зуб*|шатающ* зуб*|расшатан*
 dry socket	альвеолит|альвеолит*|сух* лунк*
 impacted tooth	ретинированный зуб|ретинированн* зуб*|дистопированн* зуб*
@@ -86,8 +90,6 @@ orthodontic|orthodontics	ортодонтия|ортодонт*
 periodontal treatment	лечение дёсен|пародонтолог*|лечени* десен
 stitches|sutures|stitch	швы|шов*|шв*
 dressing|gauze	тампон|тампон*|салфетк*
-temporary	временный|временн*
-permanent	постоянный|постоянн*
 # imaging and procedures
 x-ray|xray|radiograph	рентгеновский снимок|рентген*|снимок|снимк*
 panoramic x-ray|panoramic	панорамный снимок|панорамн*
@@ -116,7 +118,7 @@ anticoagulant|blood thinner|blood thinners	антикоагулянт|антик
 medication|medications|medicine|drug|drugs	лекарство|лекарств*|препарат*
 tablet|tablets|pill|pills	таблетка|таблетк*|таблеток|пилюл*
 capsule|capsules	капсула|капсул*
-dose|dosage	доза|доз*
+dose|dosage	доза|дозы|дозу|дозе|дозой|доз|дозировк*
 mouthwash|rinse	ополаскиватель для рта|полоскан*|ополаскиват*|ополоснуть|полоскать
 toothbrush	зубная щётка|зубн* щетк*
 toothpaste	зубная паста|зубн* паст*
@@ -128,27 +130,25 @@ allergic reaction	аллергическая реакция|аллергичес
 pregnant|pregnancy	беременность|беремен*
 breastfeeding	кормление грудью|кормлен* грудью|грудн* вскармливан*
 diabetes|diabetic	диабет|диабет*
-blood pressure	давление|давлен*
+blood pressure	кровяное давление|кровян* давлен*|артериальн* давлен*|давлен* крови
 hypertension|high blood pressure	гипертония|гипертони*|гипертенз*|повышенн* давлен*
-heart condition|heart disease|heart problems	заболевание сердца|сердц*|сердечн*
+heart condition|heart disease|heart problems|heart	заболевание сердца|сердц*|сердечн*
 pacemaker	кардиостимулятор|кардиостимулятор*|водител* ритма
 asthma	астма|астм*
 epilepsy	эпилепсия|эпилепси*
 hepatitis	гепатит|гепатит*
 hiv	вич
-cancer	рак|рак*|онколог*
+cancer	рак|рака|раку|раком|раке|онколог*
 radiation|radiotherapy	лучевая терапия|лучев*|облучен*|радиотерапи*
 chemotherapy	химиотерапия|химиотерапи*
 bisphosphonates	бисфосфонаты|бисфосфонат*
 kidney|kidneys	почки|почк*
-liver	печень|печен*
+liver	печень|печени|печенью
 latex	латекс|латекс*
 smoking|smoke|smoker	курение|курен*|курить|курю|курильщик*
 alcohol	алкоголь|алкогол*|спиртн*
 sugar	сахар|сахар*
 sweets|sweet	сладкое|сладк*
-hot	горячее|горяч*
-cold	холодное|холодн*
 empty stomach	натощак
 after meals|after eating	после еды|после приема пищи
 before meals|before eating	до еды|перед едой
@@ -157,18 +157,31 @@ twice a day	два раза в день|дважды в день|2 раза в �
 three times a day	три раза в день|трижды в день|3 раза в день
 once a day	раз в день|один раз в день|1 раз в день
 # directions and positions (a wrong side is a wrong tooth)
-left	левый|лев*
-right	правый|прав*
-upper	верхний|верхн*
-lower	нижний|нижн*
-front	передний|передн*
 # visit and money
-appointment	приём|прием*|запис*
-follow-up|follow up	повторный приём|повторн*|контрольн*
-emergency	неотложная помощь|неотложн*|экстренн*|срочн*
-price|cost	цена|цен*|стоимост*|стоит|стоить
+appointment	приём|приема|приему|приемом|приеме|приемы|приемов|запис* на прием*|запис* на осмотр*
+follow-up|follow up	повторный приём|повторн* прием*|повторн* визит*|контрольн* осмотр*|контрольн* визит*
+emergency	неотложная помощь|неотложн*|экстренн*
+price|cost	цена|цены|цену|ценой|цене|цен|стоимост*|стоит|стоить
 insurance	страховка|страхов*
-payment|pay	оплата|оплат*|платить|плат*
+payment|pay	оплата|оплаты|оплату|оплатить|оплачива*|платить|заплатить|платеж*
 invoice|receipt	счёт|счет*|чек|квитанц*
 discount	скидка|скидк*
 deposit	предоплата|предоплат*|залог|депозит*
+dentist|dental surgeon	стоматолог|стоматолог*|зубной врач
+dental hygienist|hygienist	гигиенист|гигиенист*
+oral surgeon|surgeon	хирург|хирург*
+doctor	врач|врач*|доктор|доктор*
+nurse	медсестра|медсестр*|медицинск* сестр*
+clinic	клиника|клиник*
+mouth	рот|рта|рту|ртом|рте
+throat	горло|горл*
+headache	головная боль|голов* бол*|бол* в голов*
+dizziness|dizzy	головокружение|головокружен*|кружится голова|голов* кружи*
+nausea|nauseous	тошнота|тошн*
+vomiting|vomit	рвота|рвот*|тошнит
+rash	сыпь|сып*
+itching|itchy	зуд|зуд*|чешется
+fainting|faint|pass out	обморок|обморок*|потерять сознание|сознани*
+chest pain	боль в груди|бол* в груд*|груд* бол*
+shortness of breath	одышка|одышк*|нехватк* воздуха|не хватает воздуха
+anaphylaxis|anaphylactic shock	анафилаксия|анафилакти*|анафилаксии

@@ -2,7 +2,7 @@
 
 from collections.abc import AsyncIterator
 from datetime import datetime
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -32,10 +32,12 @@ class AudioChunk(BaseModel):
     t_ms: int
 
 
+@runtime_checkable
 class SpeechToText(Protocol):
     async def transcribe(self, pcm: bytes, sample_rate: int, lang: str) -> str: ...
 
 
+@runtime_checkable
 class TextToSpeech(Protocol):
     sample_rate: int
 

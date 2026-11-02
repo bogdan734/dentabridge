@@ -1,0 +1,58 @@
+# Models, voices and engines the voice package uses, with where each came from and why it may be
+# used. Downloaded on the user's machine by `make models` (D1); nothing here is redistributed.
+
+[[model]]
+component = "Qwen3-4B-Instruct-2507 (Ollama tag qwen3:4b-instruct)"
+role = "translator behind the Translator port (default)"
+origin = "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507, served by Ollama"
+licence = "Apache-2.0"
+verified_on = "2026-11-02"
+status = "default"
+
+[[model]]
+component = "faster-whisper small (Systran/faster-whisper-small, CTranslate2 conversion of OpenAI Whisper small)"
+role = "speech-to-text, CPU or CUDA"
+origin = "https://huggingface.co/Systran/faster-whisper-small"
+licence = "MIT"
+verified_on = "2026-11-02"
+status = "default"
+
+[[model]]
+component = "Piper voice en_US-ljspeech-medium"
+role = "text-to-speech, English"
+origin = "https://huggingface.co/rhasspy/piper-voices (trained on LJ Speech, https://keithito.com/LJ-Speech-Dataset/)"
+licence = "Voice data: public domain (LJ Speech), as the voice card states"
+verified_on = "2026-11-02"
+status = "default"
+
+[[model]]
+component = "Piper voice ru_RU-denis-medium"
+role = "text-to-speech, Russian"
+origin = "https://huggingface.co/rhasspy/piper-voices (data: https://github.com/OHF-Voice/voice-datasets)"
+licence = "Voice data: CC0, as the voice card states"
+verified_on = "2026-11-02"
+status = "default"
+
+[[model]]
+component = "Piper voice ru_RU-irina-medium"
+role = "text-to-speech, Russian"
+origin = "https://huggingface.co/rhasspy/piper-voices (RHVoice data)"
+licence = "Unknown on the voice card"
+verified_on = "2026-11-02"
+status = "not used: licence not stated"
+
+[[engine]]
+component = "piper-tts 1.8.0 (python -m piper.http_server)"
+role = "runs the Piper voices"
+origin = "https://pypi.org/project/piper-tts/"
+licence = "GPL-3.0-or-later"
+verified_on = "2026-11-02"
+status = "separate process only: the repository speaks HTTP to it and never imports it"
+
+[[library]]
+component = "faster-whisper 1.2.1"
+role = "speech-to-text engine (optional `stt` extra)"
+origin = "https://pypi.org/project/faster-whisper/"
+licence = "MIT"
+verified_on = "2026-11-02"
+status = "imported"

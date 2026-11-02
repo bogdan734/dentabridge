@@ -32,3 +32,23 @@ def test_the_glossary_reads_in_both_directions() -> None:
     assert glossary.for_direction("en", "ru") == glossary.entries
     assert glossary.for_direction("ru", "en") == (GlossaryEntry(src="зуб*", tgt="tooth|teeth"),)
     assert glossary.for_direction("en", "de") == (), "an unverified pair has no glossary"
+
+
+def test_licences_file_has_a_dated_row_for_every_default_model_and_never_imports_piper() -> None:
+    import tomllib
+    from datetime import date
+    from pathlib import Path
+
+    root = GLOSSARY_DIR.parent
+    document = tomllib.loads((root / "LICENCES.toml").read_text(encoding="utf-8"))
+    rows = [row for kind in document.values() for row in kind]
+    assert all(date.fromisoformat(row["verified_on"]) for row in rows)
+    assert all(row["licence"] and row["origin"] for row in rows)
+    defaults = {row["component"] for row in rows if row["status"] == "default"}
+    assert any("Qwen3" in c for c in defaults)
+    assert any("faster-whisper" in c for c in defaults)
+    assert any("ljspeech" in c for c in defaults)
+    assert any("denis" in c for c in defaults)
+    source = "".join(p.read_text(encoding="utf-8") for p in Path(root / "src").rglob("*.py"))
+    assert "import piper" not in source
+    assert "from piper" not in source

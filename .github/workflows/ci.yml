@@ -17,5 +17,7 @@ jobs:
       - uses: astral-sh/setup-uv@v10.3.2
         with:
           version: "0.11.19"
-      - run: uv sync --locked
+      # the light extras the voice package imports (whisper, soundfile, sacrebleu, the LiveKit SDK);
+      # the gate then type-checks and tests them instead of skipping. torch (`train`) stays out.
+      - run: uv sync --locked --all-packages --extra stt --extra harness --extra worker
       - run: scripts/check

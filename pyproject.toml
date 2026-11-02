@@ -55,6 +55,6 @@ markers = [
 # Heavy optional libraries are treated as untyped everywhere, so mypy gives the same answer on a
 # machine that has the `train` extra and on CI that does not.
 [[tool.mypy.overrides]]
-module = ["torch", "torch.*", "torchvision", "torchvision.*", "transformers", "transformers.*", "peft", "peft.*", "accelerate", "accelerate.*", "mlx", "mlx.*", "mlx_vlm", "mlx_vlm.*"]
+module = ["torch", "torch.*", "torchvision", "torchvision.*", "transformers", "transformers.*", "peft", "peft.*", "accelerate", "accelerate.*", "huggingface_hub", "huggingface_hub.*", "safetensors", "safetensors.*", "mlx", "mlx.*", "mlx_vlm", "mlx_vlm.*"]
 ignore_missing_imports = true
 follow_imports = "skip"

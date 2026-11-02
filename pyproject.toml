@@ -25,6 +25,10 @@ extend-exclude = ["docs", "*.md"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "RUF", "PT", "C4"]
 
+[tool.ruff.lint.per-file-ignores]
+# the voice package is about Russian speech: Cyrillic letters in strings are the point, not a typo
+"packages/voice/**" = ["RUF001", "RUF002", "RUF003"]
+
 [tool.mypy]
 strict = true
 files = ["packages/*/src", "packages/*/tests", "tests"]

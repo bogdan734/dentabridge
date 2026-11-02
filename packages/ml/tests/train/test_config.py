@@ -23,9 +23,17 @@ def test_smoke_changes_only_the_length() -> None:
     assert smoke["max_steps"] == 10
 
 
+def test_vision_lane_differs_from_lean_only_in_the_vision_tower() -> None:
+    lean = load_config(CONFIG_DIR / "lean-t4.toml").model_dump()
+    vision = load_config(CONFIG_DIR / "lean-t4-vision.toml").model_dump()
+    assert {k for k in lean if lean[k] != vision[k]} == {"train_vision"}
+    assert vision["train_vision"]
+    assert not lean["train_vision"]
+
+
 def test_every_shipped_config_loads() -> None:
     paths = sorted(CONFIG_DIR.glob("*.toml"))
-    assert len(paths) >= 2
+    assert len(paths) >= 3
     assert all(isinstance(load_config(p), TrainConfig) for p in paths)
 
 

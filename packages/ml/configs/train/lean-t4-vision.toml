@@ -1,0 +1,17 @@
+# lean-t4.toml with LoRA on the vision tower as well: the second lane of a two-T4 Kaggle session.
+# The only difference is train_vision, so the comparison of the two adapters answers one question.
+base_id = "Qwen/Qwen3-VL-4B-Instruct"
+device = "cuda"
+quant = "nf4"
+dtype = "fp16"
+image_max_px = 448
+lora_r = 16
+lora_alpha = 16
+train_vision = true
+lr = 1e-4
+epochs = 2
+batch_size = 1
+grad_accum = 8
+gradient_checkpointing = true
+save_every = 500
+seed = 0

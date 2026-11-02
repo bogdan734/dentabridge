@@ -4,15 +4,18 @@
 #   scripts/kaggle/run.sh <stage>
 #
 #   setup     uv, Python 3.13, CUDA torch, the project, bitsandbytes
-#   data      download, unpack and verify the datasets
+#   data      download, unpack and verify the datasets; fetch the base weights once for all lanes
 #   smoke     ten steps of the lean recipe: seconds per step and the full-run estimate, and a
 #             broken install shows up here instead of after an hour
-#   train     the lean recipe; resumes from the newest checkpoint of RUN if there is one
+#   train     CONFIG on the training rows; resumes from the newest checkpoint of RUN if there is one
 #   merge     fold the adapter into the base weights (fp16: a T4 has no bf16)
-#   eval      score the merged model on the validation split
+#   eval      score the merged model on the validation split, then drop the merged weights
 #   zeroshot  score the untuned Instruct model with the same prompt (the baseline)
 #
-# Settings (environment): CONFIG (default lean-t4), RUN (default = CONFIG), GPU (default 0).
+# Settings (environment): CONFIG (default lean-t4), RUN (default = CONFIG), GPU (default 0), REPEAT
+# (default alphadent=3: AlphaDent is 16 % of the training photos and the only source of filling,
+# crown and abrasion, so its photos go in three times; "" turns it off).
+# A two-GPU session runs one lane per GPU, each with its own CONFIG, RUN and GPU: see the notebook.
 # Kaggle paths are the defaults; on Colab set WORK=/content SCRATCH=/content/scratch ROOT=/content/dentabridge.
 set -euo pipefail
 
@@ -21,6 +24,7 @@ SCRATCH="${SCRATCH:-/kaggle/temp}"     # thrown away with the session: venv, dat
 ROOT="${ROOT:-$WORK/dentabridge}"
 CONFIG="${CONFIG:-lean-t4}"
 RUN="${RUN:-$CONFIG}"
+REPEAT="${REPEAT-alphadent=3}"
 OUT="$WORK/out"
 VENV="$SCRATCH/venv"
 PY="$VENV/bin/python"
@@ -54,7 +58,17 @@ print("torch", torch.__version__, "|", torch.cuda.get_device_name(0))
 PY
 }
 
+build_rows() {
+  # Lanes start together: write beside, then rename, so nobody reads half a file. Same seed, same rows.
+  [ -f "$OUT/train.jsonl" ] && return
+  repeat=()
+  for pair in $REPEAT; do repeat+=(--repeat "$pair"); done
+  "$PY" -m dentabridge_ml.train sft train "${repeat[@]}" --out "$OUT/train.jsonl.$$"
+  mv "$OUT/train.jsonl.$$" "$OUT/train.jsonl"
+}
+
 stage_data() {
+  "$PY" -c "from huggingface_hub import snapshot_download; snapshot_download('$BASE')"
   if "$PY" -m dentabridge_ml.data verify >/dev/null 2>&1; then echo "data already in place"; return; fi
   "$PY" -m dentabridge_ml.data fetch "${SOURCES[@]}"
   "$PY" -m dentabridge_ml.data extract "${SOURCES[@]}"
@@ -63,7 +77,7 @@ stage_data() {
 }
 
 stage_smoke() {
-  "$PY" -m dentabridge_ml.train sft train --out "$OUT/train.jsonl"
+  build_rows
   head -n 160 "$OUT/train.jsonl" > "$OUT/smoke.jsonl"
   "$PY" -m dentabridge_ml.train run packages/ml/configs/train/smoke-t4.toml "$OUT/smoke.jsonl" --out "$OUT/smoke"
   "$PY" - "$OUT" "$CONFIG" <<'PY'
@@ -78,11 +92,12 @@ PY
 }
 
 stage_train() {
-  [ -f "$OUT/train.jsonl" ] || "$PY" -m dentabridge_ml.train sft train --out "$OUT/train.jsonl"
+  build_rows
   resume=()
   compgen -G "$OUT/$RUN/checkpoint-*" >/dev/null && resume=(--resume)
   "$PY" -m dentabridge_ml.train run "packages/ml/configs/train/$CONFIG.toml" "$OUT/train.jsonl" \
     --out "$OUT/$RUN" "${resume[@]}"
+  rm -rf "$OUT/$RUN"/checkpoint-*  # only for resuming; the adapter is saved
 }
 
 stage_merge() {
@@ -93,6 +108,7 @@ stage_merge() {
 stage_eval() {
   "$PY" -m dentabridge_ml.eval run --backend "transformers:$SCRATCH/merged-$RUN" --split val \
     --image-max-px "$(image_px)" --batch-size 8 --out-dir "$OUT/$RUN/val"
+  rm -rf "$SCRATCH/merged-$RUN"  # 8 GB; the Mac merges the adapter again from the base weights
 }
 
 stage_zeroshot() {

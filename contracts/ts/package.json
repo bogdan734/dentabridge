@@ -1,0 +1,20 @@
+{
+  "name": "@dentabridge/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Types and a typed fetch client for the DentaBridge API, generated from ../openapi.json",
+  "type": "module",
+  "types": "src/index.ts",
+  "main": "src/index.ts",
+  "scripts": {
+    "generate": "openapi-typescript ../openapi.json -o src/schema.d.ts",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "openapi-fetch": "0.17.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3"
+  }
+}

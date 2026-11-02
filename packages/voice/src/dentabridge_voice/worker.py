@@ -12,6 +12,7 @@ import itertools
 import logging
 import time
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
 from livekit import rtc
 
@@ -48,6 +49,13 @@ class Services:
     translator: Translator
     tts: TextToSpeech | None  # None: every call gets captions only
     wall: WallClock
+
+
+class UtcClock:
+    """Calendar time, for the moment a chat message was sent."""
+
+    def now(self) -> datetime:
+        return datetime.now(UTC)
 
 
 class CallClock:

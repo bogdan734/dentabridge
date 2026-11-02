@@ -10,18 +10,12 @@ import asyncio
 import logging
 import os
 from collections.abc import Sequence
-from datetime import UTC, datetime
 
 from dentabridge_voice.adapters.faster_whisper import FasterWhisperSTT
 from dentabridge_voice.adapters.ollama_translator import OllamaTranslator
 from dentabridge_voice.adapters.piper_http import VOICES, PiperHttpTTS
 from dentabridge_voice.rooms import LiveKitServer, watch_rooms
-from dentabridge_voice.worker import Services
-
-
-class UtcClock:
-    def now(self) -> datetime:
-        return datetime.now(UTC)
+from dentabridge_voice.worker import Services, UtcClock
 
 
 def _worker(args: argparse.Namespace) -> None:

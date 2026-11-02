@@ -1,0 +1,133 @@
+# One command per machine; run it through make, which writes .env first:
+#   make demo     the API in demo mode: bundled samples, frozen clock, no models, no LiveKit
+#   make mac      api, LiveKit and Piper here; Ollama and the voice worker run natively
+#   make up-cpu   everything in Docker, on the CPU
+#   make up-cuda  the cpu profile with Ollama and the voice worker on an NVIDIA GPU
+#   make down     stop every profile
+# Every port is published on 127.0.0.1 only. Keys come from .env, never from this file.
+name: dentabridge
+
+x-api: &api
+  build:
+    context: ..
+    dockerfile: deploy/docker/api.Dockerfile
+  image: dentabridge-api:local
+  ports: ["127.0.0.1:8000:8000"]
+  volumes: ["api-data:/app/var"]
+  healthcheck:
+    test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/v1/health')
+    interval: 5s
+    timeout: 3s
+    retries: 24
+
+x-voice: &voice
+  build:
+    context: ..
+    dockerfile: deploy/docker/voice.Dockerfile
+  image: dentabridge-voice:local
+  environment:
+    DENTABRIDGE_LIVEKIT_KEY: ${DENTABRIDGE_LIVEKIT_KEY:?run make to write .env}
+    DENTABRIDGE_LIVEKIT_SECRET: ${DENTABRIDGE_LIVEKIT_SECRET:?run make to write .env}
+    HF_HOME: /models/huggingface
+  volumes: ["whisper-models:/models/huggingface"]
+
+x-gpu: &gpu
+  resources:
+    reservations:
+      devices: [{driver: nvidia, count: all, capabilities: [gpu]}]
+
+services:
+  api-demo:
+    <<: *api
+    profiles: [demo]
+    environment:
+      DENTABRIDGE_MODE: demo
+      DENTABRIDGE_CALL_SECRET: ${DENTABRIDGE_CALL_SECRET:?run make to write .env}
+      DENTABRIDGE_CORS_ORIGINS: ${DENTABRIDGE_CORS_ORIGINS:-http://localhost:3000}
+
+  api:
+    <<: *api
+    profiles: [mac, cpu, cuda]
+    environment:
+      DENTABRIDGE_MODE: live
+      # what the deployed weights may claim; nothing until the release gate has run (WS01 ML9)
+      DENTABRIDGE_RELEASE_CONFIG: /app/deploy/release.json
+      DENTABRIDGE_OLLAMA_URL: ${DENTABRIDGE_OLLAMA_URL:-http://ollama:11434}
+      DENTABRIDGE_LIVEKIT_URL: ${DENTABRIDGE_LIVEKIT_URL:-ws://localhost:7880}
+      DENTABRIDGE_LIVEKIT_KEY: ${DENTABRIDGE_LIVEKIT_KEY:?run make to write .env}
+      DENTABRIDGE_LIVEKIT_SECRET: ${DENTABRIDGE_LIVEKIT_SECRET:?run make to write .env}
+      DENTABRIDGE_CALL_SECRET: ${DENTABRIDGE_CALL_SECRET:?run make to write .env}
+      DENTABRIDGE_CORS_ORIGINS: ${DENTABRIDGE_CORS_ORIGINS:-http://localhost:3000}
+    extra_hosts: ["host.docker.internal:host-gateway"]  # the mac profile's native Ollama
+
+  livekit:
+    image: livekit/livekit-server:v1.13.10
+    profiles: [mac, cpu, cuda]
+    command: ["--config", "/etc/livekit.yaml", "--bind", "0.0.0.0"]
+    environment:
+      LIVEKIT_KEYS: "${DENTABRIDGE_LIVEKIT_KEY:?run make to write .env}: ${DENTABRIDGE_LIVEKIT_SECRET:?run make to write .env}"
+    volumes: ["./livekit.yaml:/etc/livekit.yaml:ro"]
+    ports:
+      - "127.0.0.1:7880:7880"
+      - "127.0.0.1:7881:7881"
+      - "127.0.0.1:7882:7882/udp"
+
+  piper:  # GPL-3.0: its own container, spoken to over HTTP only
+    build:
+      context: .
+      dockerfile: docker/piper.Dockerfile
+    image: dentabridge-piper:local
+    profiles: [mac, cpu, cuda]
+    volumes: ["${DENTABRIDGE_PIPER_VOICES:-../var/tools/piper-voices}:/voices:ro"]
+    ports: ["127.0.0.1:5100:5100"]
+
+  ollama:
+    image: ollama/ollama:0.40.4
+    profiles: [cpu]
+    volumes: ["ollama-models:/root/.ollama"]
+
+  ollama-cuda:
+    image: ollama/ollama:0.40.4
+    profiles: [cuda]
+    volumes: ["ollama-models:/root/.ollama"]
+    deploy: *gpu
+    networks:
+      default:
+        aliases: [ollama]
+
+  voice:
+    <<: *voice
+    profiles: [cpu]
+    depends_on: [livekit, piper, ollama]
+    command: ["--livekit-url", "ws://livekit:7880", "--ollama", "http://ollama:11434", "--piper", "http://piper:5100"]
+
+  voice-cuda:
+    <<: *voice
+    build:
+      context: ..
+      dockerfile: deploy/docker/voice.Dockerfile
+      args: {CUDA: "1"}
+    image: dentabridge-voice:cuda
+    profiles: [cuda]
+    depends_on: [livekit, piper, ollama-cuda]
+    command:
+      - --livekit-url
+      - ws://livekit:7880
+      - --ollama
+      - http://ollama:11434
+      - --piper
+      - http://piper:5100
+      - --device
+      - cuda
+      - --compute-type
+      - float16
+    deploy: *gpu
+
+volumes:
+  api-data:
+  ollama-models:
+  whisper-models:

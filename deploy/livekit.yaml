@@ -1,0 +1,11 @@
+# LiveKit for one machine. Signalling on 7880, media over 7881/tcp and 7882/udp; compose publishes
+# them on 127.0.0.1 only. The keys come from LIVEKIT_KEYS (make writes them into .env), never here.
+port: 7880
+rtc:
+  tcp_port: 7881
+  udp_port: 7882
+  use_external_ip: false
+  node_ip: 127.0.0.1  # what a browser or the native voice worker on this machine connects to
+  advertise_internal_ip: true  # and the container's own address, for the dockerised voice worker
+logging:
+  level: info

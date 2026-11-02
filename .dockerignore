@@ -1,0 +1,19 @@
+# The images need packages/, seed/, deploy/ and the lock; nothing local, large or secret.
+.env
+.env.*
+.git
+.venv
+**/__pycache__
+**/.mypy_cache
+**/.pytest_cache
+**/.ruff_cache
+.hypothesis
+.claude
+data
+private
+var
+runs
+web
+docs
+contracts
+**/node_modules

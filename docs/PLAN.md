@@ -325,7 +325,7 @@ Invariants the validators enforce at construction (a violation raises Validation
 - Rules: reject empty or over 1000 chars (ValueError); a translator failure returns translation_status "failed" with tgt_text null; glossary and digit checks reuse V1 `checks.py`.
 - Tests: test_chat_event_matches_core_schema; test_digit_swap_flagged_in_chat; test_translator_failure_keeps_source; test_message_length_capped; test_worker_ignores_its_own_chat_events.
 ### D1 Compose profiles and make path [L] WS04 M4 (deps A3, A5, V3)
-- Files: deploy/compose.yaml; deploy/docker/{api,voice}.Dockerfile; deploy/livekit.yaml; mk/deploy.mk; .env.example.
+- Files: deploy/compose.yaml; deploy/docker/{api,voice,piper}.Dockerfile; deploy/livekit.yaml; deploy/release.json; mk/deploy.mk; .env.example; .dockerignore; tools/{make_env.py, models.py}; tests/test_deploy.py.
 - Profiles: demo (api only); cpu (api, ollama, livekit, piper, voice-cpu); cuda (the same with GPU reservations); mac (api, livekit and piper in Docker; voice worker and Ollama native).
 - Targets: `make demo | up-cpu | up-cuda | mac | down | models`; they start `dentabridge-api serve` and `dentabridge-voice worker`. `models` prints each gated or opt-in licence and asks before downloading it.
 - Tests: test_compose_config_valid_per_profile (`docker compose --profile X config -q`); test_no_committed_secrets (livekit keys generated into .env); test_demo_smoke [slow] (health 200 within 60 s).

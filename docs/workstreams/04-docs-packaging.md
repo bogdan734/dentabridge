@@ -2,8 +2,8 @@
 Branch ws/04-docs. D1 starts when A3, A5 and V3 are merged (M2-M4). D2 and D3 run at M5.
 
 ## Owned paths
-- deploy/ (compose.yaml, docker/{api,voice}.Dockerfile, livekit.yaml), mk/deploy.mk, .env.example
-- tools/ (render_readme.py, render_licences.py, tests/)
+- deploy/ (compose.yaml, docker/{api,voice,piper}.Dockerfile, livekit.yaml, release.json), mk/deploy.mk, .env.example, .dockerignore (root file, agreed with the lead)
+- tools/ (make_env.py, models.py, render_readme.py, render_licences.py); their tests live in tests/test_deploy.py, which the gate runs
 - README.md, docs/licences.md, docs/demo/ (script.md, shotlist.md)
 - space/ (README.md Space card, Dockerfile)
 
@@ -45,6 +45,12 @@ Branch ws/04-docs. D1 starts when A3, A5 and V3 are merged (M2-M4). D2 and D3 ru
 ## Do NOT touch
 - packages/* (ask the owning workstream for CLI or setting changes), contracts/, seed/, docs/results/ (read only), docs/model-cards/ (WS01), web/
 - Never write a number into README.md by hand.
+
+## Notes from D1 (2026-11-02)
+- `make demo|mac|up-cpu|up-cuda|down|models`; every target first writes .env with fresh LiveKit and call keys (tools/make_env.py, mode 600, never overwritten). Every port is published on 127.0.0.1 only.
+- The API runs live mode in mac, cpu and cuda (LiveKit checks token times against the real clock, so the frozen demo clock cannot open a room). `deploy/release.json` is what the deployed weights may claim: `{"assessed": []}` until the release gate (ML9) replaces it.
+- LiveKit advertises 127.0.0.1 (browser, native worker) and its container address (the dockerised worker of the cpu profile).
+- Verified on the Mac: `make demo` (health 200), `make mac` with a call opened through the API and interpreted (tests/test_deploy.py, slow). The cpu and cuda profiles validate only: the ollama/ollama image (2.8 GB) was not pulled, and there is no GPU here.
 
 ## Contract change requests
 - (none yet)

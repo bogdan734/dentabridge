@@ -31,7 +31,7 @@ select = ["E", "F", "I", "B", "UP", "SIM", "RUF", "PT", "C4"]
 
 [tool.mypy]
 strict = true
-files = ["packages/*/src", "packages/*/tests", "tests"]
+files = ["packages/*/src", "packages/*/tests", "tests", "tools"]
 # explicit bases let two packages each own tests/conftest.py without a "duplicate module" error
 explicit_package_bases = true
 mypy_path = [

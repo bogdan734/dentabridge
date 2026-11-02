@@ -13,6 +13,13 @@
       "licence": "CC-BY-4.0",
       "locked_on": "2026-10-25",
       "sha256": "0cbf050b3f5fa9ddbb41edb1676cc48253b1a69227313668d2ff4283195bc99b"
+    },
+    "mendeley_gingivitis": {
+      "bytes": 6556351198,
+      "files": 2195,
+      "licence": "CC-BY-4.0",
+      "locked_on": "2026-11-02",
+      "sha256": "d8c7b83589a5434ff8885356c5695757686076e2abb69b6f3637081e3e3fbe14"
     }
   },
   "version": 1

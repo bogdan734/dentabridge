@@ -1,12 +1,19 @@
 """Mendeley gingivitis set (3253gj88rr): intraoral photos with one YOLO box per tooth.
 
-Layout, read from the archive (the class meaning from its captions, for example "5 non-inflamed
-teeth at position 13, 12, 21, 22, 23 and 1 level of gingivitis 1 at position 11"):
+Layout and class meaning, checked on the unpacked archive (1,096 images, 0 empty label files) by
+matching the label counts with the counts in the first English caption of every image (98-99 %
+exact agreement per class):
 - `Dataset/<Split>/Images/NNNNN.jpg` with `Dataset/<Split>/Labels/NNNNN.txt` (`class cx cy w h`
-  per tooth) and `Dataset/<Split>/<Split>_captions.csv` (`FileName,#,BS1`: three English captions
-  per image, written by periodontists, UTF-8 with a BOM).
-- Class 2 is a tooth with healthy gums, classes 3, 4, 5 are gingivitis of level 1, 2, 3. Any other
-  class is refused until its meaning is checked.
+  per box) and `Dataset/<Split>/<Split>_captions.csv` (`FileName,#,BS1`: three English captions
+  per image, written by periodontists, UTF-8 with a BOM). Splits: Training 732, Validation 182,
+  Test 182.
+- Classes 0 and 1 are the upper and lower jaw (one box each in every file, not teeth). Class 2 is
+  a tooth with healthy gums, classes 3, 4, 5, 6 are gingivitis of level 1, 2, 3, 4. Any other
+  class is refused.
+- EVERY image has at least one inflamed tooth (no photo is free of gingivitis; 309 of the 12,000
+  tooth boxes are healthy, always next to inflamed ones), so image-level specificity cannot be
+  measured on this set. It is therefore not part of the v1 splits and gingivitis stays "not
+  assessed"; the loader documents what the data holds.
 - The file numbers have no patient behind them, but the publisher kept blocks of consecutive
   numbers together in one split, so a run of consecutive numbers is treated as one capture
   sequence (a patient or a visit) and never split across train and test.
@@ -26,16 +33,21 @@ from dentabridge_ml.data.records import (
 from dentabridge_ml.data.sources import SourceId
 
 SOURCE: SourceId = "mendeley_gingivitis"
+JAWS = frozenset({0, 1})
 HEALTHY = 2
-LEVELS = {3: "level_1", 4: "level_2", 5: "level_3"}
+LEVELS = {3: "level_1", 4: "level_2", 5: "level_3", 6: "level_4"}
 
 
 def _boxes(label: Path) -> tuple[bool, tuple[LabelBox, ...]]:
-    """Whether any tooth is labelled at all, and the boxes of the inflamed ones."""
+    """Whether any tooth is judged at all, and the boxes of the inflamed ones."""
     lines = non_empty_lines(label)
     boxes = []
+    teeth = False
     for line in lines:
         cls, x0, y0, x1, y1 = parse_yolo_box(line)
+        if cls in JAWS:
+            continue
+        teeth = True
         if cls in LEVELS:
             boxes.append(
                 LabelBox(
@@ -44,7 +56,7 @@ def _boxes(label: Path) -> tuple[bool, tuple[LabelBox, ...]]:
             )
         elif cls != HEALTHY:
             raise ValueError(f"unknown Mendeley class id {cls} in {label}")
-    return bool(lines), tuple(boxes)
+    return teeth, tuple(boxes)
 
 
 def _captions(folder: Path) -> dict[str, str]:

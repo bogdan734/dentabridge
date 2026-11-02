@@ -29,11 +29,13 @@ HEALTHY, LEVEL_1, LEVEL_3 = (
     "3 0.50 0.50 0.20 0.20",
     "5 0.80 0.60 0.10 0.20",
 )
+LEVEL_4 = "6 0.10 0.20 0.10 0.10"
+JAWS = ["0 0.50 0.30 0.90 0.30", "1 0.50 0.75 0.90 0.30"]  # one box per jaw in every real file
 
 
 def test_loader_reads_levels_healthy_teeth_and_captions(tmp_path: Path) -> None:
-    _write(tmp_path, "Test", "00929", [HEALTHY, LEVEL_1, LEVEL_3])
-    _write(tmp_path, "Test", "00930", [HEALTHY, HEALTHY])
+    _write(tmp_path, "Test", "00929", [*JAWS, HEALTHY, LEVEL_1, LEVEL_3, LEVEL_4])
+    _write(tmp_path, "Test", "00930", [*JAWS, HEALTHY, HEALTHY])
     _captions(tmp_path, "Test", [("00929.jpg", 1, "first"), ("00929.jpg", 2, "second")])
 
     records = {r.record_id: r for r in load_mendeley(tmp_path)}
@@ -42,7 +44,8 @@ def test_loader_reads_levels_healthy_teeth_and_captions(tmp_path: Path) -> None:
         records["mendeley_gingivitis/Test/00930"],
     )
     assert sick.codes_present() == {FindingCode.GINGIVITIS}
-    assert {b.subtype for b in sick.boxes} == {"level_1", "level_3"}, "healthy teeth get no region"
+    assert {b.subtype for b in sick.boxes} == {"level_1", "level_3", "level_4"}
+    assert len(sick.boxes) == 3, "healthy teeth and the two jaw boxes get no region"
     box = next(b for b in sick.boxes if b.subtype == "level_1")
     assert (box.x0, box.y0, box.x1, box.y1) == pytest.approx((0.4, 0.4, 0.6, 0.6))
     assert sick.path == "Dataset/Test/Images/00929.jpg"
@@ -55,6 +58,7 @@ def test_loader_reads_levels_healthy_teeth_and_captions(tmp_path: Path) -> None:
 def test_an_image_without_labelled_teeth_is_not_a_negative(tmp_path: Path) -> None:
     _write(tmp_path, "Test", "00001", [])
     _write(tmp_path, "Test", "00002", None)
+    _write(tmp_path, "Test", "00003", JAWS)  # the jaws are outlined, no tooth is judged
     assert load_mendeley(tmp_path) == []
 
 

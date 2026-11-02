@@ -7,15 +7,19 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import get_args
 
-from dentabridge_ml.data.loaders import LOADERS, load_records
+from dentabridge_ml.data.loaders import load_records
 from dentabridge_ml.data.records import ImageRecord
-from dentabridge_ml.data.sources import SOURCES, SourceId, default_root
+from dentabridge_ml.data.sources import SourceId, default_root
 from dentabridge_ml.splits.group import group, phash
 from dentabridge_ml.splits.manifest import SPLITS, SplitManifest, split, write_manifests
 
 MANIFEST_DIR = Path(__file__).resolve().parents[3] / "manifests"
 MAX_HAMMING = 2  # dHash distance for "the same photo"; teeth of different people sit at 3 and up
 MAX_COS_DIST = 0.05
+# The v1 splits. Mendeley gingivitis is loaded and documented (data/mendeley.py) but not split:
+# every one of its photos shows gingivitis, so no gingivitis-free test set exists, and its
+# numbering forms blocks of hundreds of photos that cannot be split into groups.
+V1_SOURCES: tuple[SourceId, ...] = ("aku_caries", "alphadent")
 # AlphaDent is small: 10% would leave about 22 crown positives, under the gate's minimum of 30.
 SOURCE_RATIOS: dict[str, tuple[float, float, float]] = {"alphadent": (0.7, 0.1, 0.2)}
 
@@ -50,7 +54,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--root", type=Path, default=default_root())
     args = parser.parse_args(argv)
-    chosen: list[SourceId] = args.sources or [s for s in LOADERS if SOURCES[s].published]
+    chosen: list[SourceId] = args.sources or list(V1_SOURCES)
     records, manifest = build(args.root, chosen, args.seed)
     write_manifests(manifest, MANIFEST_DIR)
     print(summary(records, manifest))

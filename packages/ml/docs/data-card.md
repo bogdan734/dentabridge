@@ -11,7 +11,7 @@ Datasets are never committed: `make data` downloads them from the publishers and
 |---|---|---|---|---|
 | AKU caries (Zenodo 14827784) | CC BY 4.0 | one phone (Samsung Galaxy A23, per the publisher) | decay boxes `D` / `d` | train / val / test |
 | AlphaDent (Zenodo 16582489) | CC BY 4.0 | Canon 6D Mark II DSLR with an intraoral mirror | abrasion, filling, crown, caries by site class 1-6 | train / val / test |
-| Mendeley gingivitis (3253gj88rr) | CC BY 4.0 | clinic camera | image-level gingivitis + 3 clinician captions | loader pending |
+| Mendeley gingivitis (3253gj88rr) | CC BY 4.0 | clinic camera | one box per tooth: healthy or gingivitis level 1-4, 3 English captions | loaded, not split (see below) |
 | Kaggle Oral Diseases | Unknown | mixed web and hospital | six classes | private local tests only |
 
 ## AKU, checked on 2026-10-25
@@ -64,6 +64,22 @@ Datasets are never committed: `make data` downloads them from the publishers and
 - Splits for AlphaDent use 70 / 10 / 20 so that the test split holds 44 crown positives (the
   release gate needs 30).
 
+## Mendeley gingivitis, checked on 2026-11-02
+
+- 1,096 images (Training 732, Validation 182, Test 182 by the publisher), no empty label file, a
+  caption file per split with three English captions per image (UTF-8 with a BOM).
+- Each label file holds one box per tooth (`class cx cy w h`) plus one box for each jaw. The class
+  meaning was derived by matching the label counts with the counts in the first caption of every
+  image: class 0 and 1 are the upper and lower jaw, 2 is a tooth with healthy gums, 3, 4, 5, 6 are
+  gingivitis of level 1, 2, 3, 4 (98-99 % exact agreement per class).
+- **Every image shows gingivitis.** 1,077 images have a tooth of level 1-3 and the other 19 only
+  level 4; no image has only healthy teeth (309 of about 12,000 tooth boxes are healthy, always
+  beside inflamed ones). Image-level sensitivity could be measured, specificity cannot.
+- The file numbers are consecutive over all three splits: they form 8 runs, the largest holds 511
+  of the 1,096 images. No patient id exists, and runs that size cannot be split into groups.
+- So the set is **not part of the v1 splits or training**, and gingivitis stays "not assessed".
+  The loader (`dentabridge_ml.data.mendeley`) and the lock keep what the data holds on record.
+
 ## Splits
 
 Grouped by participant, never by image (`dentabridge_ml.splits`). Manifests are in
@@ -72,7 +88,6 @@ val 757 / test 889. AKU is split 80 / 10 / 10, AlphaDent 70 / 10 / 20.
 
 ## Still open
 
-- Mendeley: class labels (are there healthy controls?) and the language of the captions.
-  Without negatives, specificity for gingivitis is not estimable and the release gate keeps the
-  finding "not assessed".
-- DINOv2 licence for the embeddings that group records without an id.
+- DINOv2 licence for the embeddings that would group records without an id (no source needs it
+  now: AKU and AlphaDent carry ids).
+- A gingivitis-free open photo set: none was found, so gingivitis cannot be assessed yet.

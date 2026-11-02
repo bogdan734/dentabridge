@@ -279,7 +279,10 @@ def test_merged_directory_keeps_the_original_config_and_processor_files(tmp_path
     assert (merged / "model.safetensors").stat().st_size > 0
 
 
-def test_two_steps_through_the_nf4_path_with_gradient_checkpointing(tmp_path: Path) -> None:
+@pytest.mark.parametrize("train_vision", [False, True])
+def test_two_steps_through_the_nf4_path_with_gradient_checkpointing(
+    tmp_path: Path, train_vision: bool
+) -> None:
     """The Kaggle recipe's code path (4-bit base, checkpointing, LoRA) on a tiny model, on CPU."""
     bnb = pytest.importorskip("bitsandbytes")
     processor = load_processor(str(MODEL_DIR))
@@ -291,6 +294,7 @@ def test_two_steps_through_the_nf4_path_with_gradient_checkpointing(tmp_path: Pa
             "quant": "nf4",
             "dtype": "bf16",
             "gradient_checkpointing": True,
+            "train_vision": train_vision,
         }
     )
     model = load_model(cfg)
@@ -306,5 +310,6 @@ def test_two_steps_through_the_nf4_path_with_gradient_checkpointing(tmp_path: Pa
     trainer.train()
     assert trainer.state.global_step == 2
     assert math.isfinite(trainer.state.log_history[-1]["train_loss"])
-    moved = [p for n, p in model.named_parameters() if "lora_B" in n and p.abs().sum() > 0]
+    moved = [n for n, p in model.named_parameters() if "lora_B" in n and p.abs().sum() > 0]
     assert moved, "gradients reached the adapters through the checkpointed 4-bit layers"
+    assert any("visual" in n for n in moved) == train_vision, "vision adapters learn when asked to"

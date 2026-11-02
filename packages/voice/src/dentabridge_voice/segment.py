@@ -1,8 +1,8 @@
 """Cutting a stream of microphone frames into utterances: at a pause, or after 10 seconds.
 
 The voice-activity decision per frame comes from outside (Silero in the worker, a list in tests).
-Silence before and after the speech is left out, and a blip shorter than `min_ms` is not an
-utterance.
+Silence before and after the speech is left out, a pause shorter than `pause_ms` stays inside it,
+and a blip shorter than `min_ms` is not an utterance.
 """
 
 from dataclasses import dataclass
@@ -32,25 +32,30 @@ class Segmenter:
         self._min_frames = -(-min_ms // frame_ms)
         self._max_frames = max_ms // frame_ms
         self._index = 0  # frames seen so far
-        self._speech: list[bytes] = []
-        self._silence = 0  # frames of silence since the last speech frame
+        self._speech: list[bytes] = []  # from the first speech frame to the last one
+        self._gap: list[bytes] = []  # the silence since the last speech frame
         self._start = 0
 
     def push(self, frame: bytes, is_speech: bool) -> list[Segment]:
-        """Take the next frame; return the utterances it completes (none or one)."""
+        """Take the next frame; return the utterances it completes (one at most, or one and the
+        start of the next when a pause would carry the utterance past the cap)."""
         if len(frame) != self._frame_bytes:
             raise ValueError(f"a frame is {self._frame_bytes} bytes, got {len(frame)}")
         done: list[Segment] = []
         if is_speech:
-            if not self._speech:
+            if self._speech and len(self._speech) + len(self._gap) + 1 > self._max_frames:
+                done += self._close()
+            if self._speech:
+                self._speech += self._gap  # a short pause stays inside the utterance
+            else:
                 self._start = self._index
+            self._gap = []
             self._speech.append(frame)
-            self._silence = 0
             if len(self._speech) >= self._max_frames:
                 done += self._close()
         elif self._speech:
-            self._silence += 1
-            if self._silence >= self._pause_frames:
+            self._gap.append(frame)
+            if len(self._gap) >= self._pause_frames:
                 done += self._close()
         self._index += 1
         return done
@@ -61,7 +66,7 @@ class Segmenter:
 
     def _close(self) -> list[Segment]:
         speech, start = self._speech, self._start
-        self._speech, self._silence = [], 0
+        self._speech, self._gap = [], []
         if len(speech) < self._min_frames:
             return []
         return [

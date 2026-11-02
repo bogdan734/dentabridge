@@ -20,9 +20,17 @@ def test_a_pause_cuts_the_utterance_and_silence_is_trimmed() -> None:
     assert [(s.start_ms, s.end_ms) for s in segments] == [(990, 3000), (3900, 5400)]
 
 
-def test_a_short_pause_does_not_cut() -> None:
-    segments = feed(Segmenter(RATE), [(True, 1), (False, 0.3), (True, 1), (False, 1)])
-    assert len(segments) == 1
+def test_a_short_pause_does_not_cut_and_stays_inside_the_utterance() -> None:
+    """The words after a breath belong to the same sentence, and so does the breath: the
+    recogniser hears the pause, and the utterance ends when the speech did."""
+    segments = feed(Segmenter(RATE), [(True, 0.99), (False, 0.3), (True, 0.99), (False, 1)])
+    assert [(s.start_ms, s.end_ms) for s in segments] == [(0, 2280)]
+    assert len(segments[0].pcm) == int(2.28 * RATE) * 2
+
+
+def test_a_pause_that_would_cross_the_cap_cuts_there() -> None:
+    segments = feed(Segmenter(RATE), [(True, 9.9), (False, 0.3), (True, 1), (False, 1)])
+    assert [(s.start_ms, s.end_ms) for s in segments] == [(0, 9900), (10200, 11190)]
 
 
 def test_segments_capped_at_10s() -> None:

@@ -20,7 +20,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     chosen: list[SourceId] = args.sources or [s for s in SOURCES if SOURCES[s].published]
     if args.action == "verify":
-        verify_lock(args.root, LOCK_PATH)
+        verify_lock(args.root, LOCK_PATH, args.sources or None)
     elif args.action == "lock":
         write_lock(args.root, LOCK_PATH, chosen)
     elif args.action == "fetch":

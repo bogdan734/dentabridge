@@ -1,4 +1,5 @@
 import hashlib
+import shutil
 import zipfile
 from collections.abc import Iterator
 from datetime import date
@@ -198,6 +199,21 @@ def test_lock_detects_tamper(tmp_path: Path) -> None:
     (data / "images" / "b.jpg").rename(data / "images" / "z.jpg")
     with pytest.raises(LockMismatch):
         verify_lock(tmp_path, lock)
+
+
+def test_verify_checks_only_the_named_sources(tmp_path: Path) -> None:
+    """A machine that holds some of the locked datasets (a Kaggle session) verifies those."""
+    for source in ("alphadent", "aku_caries"):
+        (tmp_path / source).mkdir()
+        (tmp_path / source / "a.jpg").write_bytes(source.encode())
+    lock = tmp_path / "data.lock.json"
+    write_lock(tmp_path, lock, ["alphadent", "aku_caries"], today=date(2026, 10, 25))
+    shutil.rmtree(tmp_path / "aku_caries")
+    with pytest.raises(LockMismatch, match="aku_caries: missing directory"):
+        verify_lock(tmp_path, lock)
+    verify_lock(tmp_path, lock, ["alphadent"])
+    with pytest.raises(LockMismatch, match="mendeley_gingivitis: not in the lock"):
+        verify_lock(tmp_path, lock, ["mendeley_gingivitis"])
 
 
 def test_tree_digest_is_stable_and_counts_bytes(tmp_path: Path) -> None:

@@ -69,10 +69,10 @@ build_rows() {
 
 stage_data() {
   "$PY" -c "from huggingface_hub import snapshot_download; snapshot_download('$BASE')"
-  if "$PY" -m dentabridge_ml.data verify >/dev/null 2>&1; then echo "data already in place"; return; fi
+  if "$PY" -m dentabridge_ml.data verify "${SOURCES[@]}" >/dev/null 2>&1; then echo "data already in place"; return; fi
   "$PY" -m dentabridge_ml.data fetch "${SOURCES[@]}"
   "$PY" -m dentabridge_ml.data extract "${SOURCES[@]}"
-  "$PY" -m dentabridge_ml.data verify
+  "$PY" -m dentabridge_ml.data verify "${SOURCES[@]}"
   rm -rf "$DENTABRIDGE_DATA_ROOT/raw"  # the archives: the session disk is finite
 }
 

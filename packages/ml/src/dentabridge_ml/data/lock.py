@@ -6,6 +6,7 @@ enough to commit; the per-file listing it is built from stays local.
 
 import hashlib
 import json
+from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import date
@@ -59,10 +60,16 @@ def write_lock(root: Path, lock: Path, sources: list[SourceId], today: date | No
     lock.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
 
 
-def verify_lock(root: Path, lock: Path) -> None:
+def verify_lock(root: Path, lock: Path, sources: Sequence[SourceId] | None = None) -> None:
+    """Every locked source, or only `sources` (a machine that holds some of the datasets)."""
     document = json.loads(lock.read_text())
     problems: list[str] = []
-    for source, entry in document["sources"].items():
+    names: Sequence[SourceId] = sources or list(document["sources"])
+    for source in names:
+        entry = document["sources"].get(source)
+        if entry is None:
+            problems.append(f"{source}: not in the lock")
+            continue
         directory = source_dir(root, source)
         if not directory.is_dir():
             problems.append(f"{source}: missing directory {directory}")

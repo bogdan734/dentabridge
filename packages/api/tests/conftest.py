@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -13,6 +14,15 @@ from dentabridge_core import VisionBackend
 from dentabridge_core.testing import FakeFareEstimator
 
 NOW = datetime(2026, 10, 25, 12, tzinfo=UTC)
+
+
+@pytest.fixture(autouse=True)
+def _no_local_configuration(monkeypatch: pytest.MonkeyPatch) -> None:
+    """`make mac` writes a .env with LiveKit keys and a developer's shell may export some
+    DENTABRIDGE_ settings; neither may change what a test sees."""
+    monkeypatch.setitem(Settings.model_config, "env_file", None)
+    for name in [n for n in os.environ if n.startswith("DENTABRIDGE_")]:
+        monkeypatch.delenv(name)
 
 
 @pytest.fixture

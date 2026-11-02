@@ -1,0 +1,54 @@
+# A scripted consultation between a Russian-speaking patient (P) and an English-speaking dentist (D):
+# 50 turns, each with the reference translation. Written for the harness and the demo replay; no real
+# person's words and no real patient audio. Terms and numbers are chosen to exercise the glossary and
+# digit checks (test_harness checks that every pair passes them).
+- {speaker: dentist, lang: en, text: "Hello, how can I help you today?", translation: "Здравствуйте, чем я могу вам помочь сегодня?"}
+- {speaker: patient, lang: ru, text: "Здравствуйте, у меня сильно болит верхний левый коренной зуб.", translation: "Hello, my upper left molar hurts a lot."}
+- {speaker: dentist, lang: en, text: "How long has the tooth been hurting?", translation: "Как давно болит зуб?"}
+- {speaker: patient, lang: ru, text: "Около трёх дней, особенно когда я пью что-то холодное.", translation: "About three days, especially when I drink something cold."}
+- {speaker: dentist, lang: en, text: "Please open your mouth. I will take an x-ray.", translation: "Пожалуйста, откройте рот. Я сделаю рентгеновский снимок."}
+- {speaker: patient, lang: ru, text: "Это безопасно? Я беременна.", translation: "Is it safe? I am pregnant."}
+- {speaker: dentist, lang: en, text: "Yes, we use a lead apron and the dose is very small.", translation: "Да, мы используем свинцовый фартук, а доза очень маленькая."}
+- {speaker: dentist, lang: en, text: "You have a deep cavity in tooth 26.", translation: "У вас глубокий кариес в зубе 26."}
+- {speaker: patient, lang: ru, text: "Мне нужно лечение корневых каналов?", translation: "Do I need a root canal treatment?"}
+- {speaker: dentist, lang: en, text: "Yes, and then a crown. It will take two visits.", translation: "Да, а потом коронка. Понадобится два визита."}
+- {speaker: patient, lang: ru, text: "Лечение болезненное?", translation: "Is the treatment painful?"}
+- {speaker: dentist, lang: en, text: "No, I will give you a local anesthetic first.", translation: "Нет, сначала я сделаю вам местную анестезию."}
+- {speaker: patient, lang: ru, text: "У меня аллергия на пенициллин.", translation: "I am allergic to penicillin."}
+- {speaker: dentist, lang: en, text: "Then I will prescribe a different antibiotic.", translation: "Тогда я назначу другой антибиотик."}
+- {speaker: dentist, lang: en, text: "Take one tablet twice a day after meals.", translation: "Принимайте по одной таблетке два раза в день после еды."}
+- {speaker: patient, lang: ru, text: "Сколько это будет стоить?", translation: "How much will it cost?"}
+- {speaker: dentist, lang: en, text: "The crown costs 280 dollars and the root canal treatment costs 150.", translation: "Коронка стоит 280 долларов, а лечение корневых каналов стоит 150."}
+- {speaker: patient, lang: ru, text: "Можно оплатить картой?", translation: "Can I pay by card?"}
+- {speaker: dentist, lang: en, text: "Yes. Your gums are also swollen and bleeding.", translation: "Да. Кроме того, ваши десны опухли и кровоточат."}
+- {speaker: dentist, lang: en, text: "You have early gingivitis, so we should clean your teeth.", translation: "У вас начальный гингивит, поэтому нам нужно почистить вам зубы."}
+- {speaker: patient, lang: ru, text: "У меня диабет и повышенное давление.", translation: "I have diabetes and high blood pressure."}
+- {speaker: dentist, lang: en, text: "Thank you, I will note that. Do not eat for two hours after the anesthesia.", translation: "Спасибо, я это запишу. Не ешьте в течение двух часов после анестезии."}
+- {speaker: patient, lang: ru, text: "Вчера у меня выпала пломба.", translation: "My filling fell out yesterday."}
+- {speaker: dentist, lang: en, text: "I will place a new filling today.", translation: "Сегодня я поставлю новую пломбу."}
+- {speaker: patient, lang: ru, text: "Через сколько дней мне нужно прийти снова?", translation: "In how many days do I need to come again?"}
+- {speaker: dentist, lang: en, text: "Please come back for a follow-up appointment in 10 days.", translation: "Пожалуйста, приходите на повторный приём через 10 дней."}
+- {speaker: patient, lang: ru, text: "У меня зуб мудрости растёт криво и болит.", translation: "My wisdom tooth is growing crooked and it hurts."}
+- {speaker: dentist, lang: en, text: "It is an impacted tooth. I recommend extraction.", translation: "Это ретинированный зуб. Я рекомендую удаление."}
+- {speaker: patient, lang: ru, text: "Это опасно?", translation: "Is it dangerous?"}
+- {speaker: dentist, lang: en, text: "No, but you may have swelling and some bleeding afterwards.", translation: "Нет, но после этого возможны отёк и небольшое кровотечение."}
+- {speaker: patient, lang: ru, text: "Что мне делать, если кровь не останавливается?", translation: "What should I do if the bleeding does not stop?"}
+- {speaker: dentist, lang: en, text: "Press a clean gauze on the wound for 20 minutes and call us.", translation: "Прижмите чистую салфетку к ране на 20 минут и позвоните нам."}
+- {speaker: patient, lang: ru, text: "Мне можно принимать ибупрофен?", translation: "Can I take ibuprofen?"}
+- {speaker: dentist, lang: en, text: "Yes, 400 milligrams every 8 hours, but only with food.", translation: "Да, 400 миллиграммов каждые 8 часов, но только во время еды."}
+- {speaker: patient, lang: ru, text: "У меня чувствительные зубы, когда я чищу их утром.", translation: "My teeth are sensitive when I brush them in the morning."}
+- {speaker: dentist, lang: en, text: "I recommend a special toothpaste and a soft toothbrush.", translation: "Я рекомендую специальную зубную пасту и мягкую зубную щётку."}
+- {speaker: patient, lang: ru, text: "Сколько стоит отбеливание?", translation: "How much does whitening cost?"}
+- {speaker: dentist, lang: en, text: "Professional whitening is 200 dollars for both jaws.", translation: "Профессиональное отбеливание стоит 200 долларов на обе челюсти."}
+- {speaker: patient, lang: ru, text: "Я хочу поставить имплант вместо зуба 36.", translation: "I want an implant in place of tooth 36."}
+- {speaker: dentist, lang: en, text: "An implant needs two visits and several months for the bone to heal.", translation: "Для импланта нужно два визита и несколько месяцев, чтобы кость зажила."}
+- {speaker: patient, lang: ru, text: "Можно сделать операцию под общим наркозом?", translation: "Can the surgery be done under general anesthesia?"}
+- {speaker: dentist, lang: en, text: "Yes, with sedation, but you must not eat or drink for six hours before.", translation: "Да, с седацией, но за шесть часов до этого нельзя есть и пить."}
+- {speaker: patient, lang: ru, text: "У меня температура и болит щека.", translation: "I have a fever and my cheek hurts."}
+- {speaker: dentist, lang: en, text: "That may be an abscess. We need to treat the infection first.", translation: "Возможно, это абсцесс. Сначала нужно вылечить инфекцию."}
+- {speaker: patient, lang: ru, text: "Мне нужно принимать антибиотики?", translation: "Do I need to take antibiotics?"}
+- {speaker: dentist, lang: en, text: "Yes, 500 milligrams three times a day for five days.", translation: "Да, по 500 миллиграммов три раза в день в течение пяти дней."}
+- {speaker: patient, lang: ru, text: "Могу ли я прийти завтра, если боль усилится?", translation: "Can I come tomorrow if the pain gets worse?"}
+- {speaker: dentist, lang: en, text: "Of course. In an emergency call this number at any time.", translation: "Конечно. В экстренном случае звоните по этому номеру в любое время."}
+- {speaker: patient, lang: ru, text: "Спасибо большое, вы мне очень помогли.", translation: "Thank you very much, you helped me a lot."}
+- {speaker: dentist, lang: en, text: "You are welcome. Take care and see you soon.", translation: "Пожалуйста. Берегите себя и до скорой встречи."}

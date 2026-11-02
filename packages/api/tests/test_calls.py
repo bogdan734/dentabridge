@@ -328,3 +328,14 @@ def test_a_corrupt_manifest_is_a_server_error_not_a_leak(make_client: Any, repla
     (replays / "demo" / "manifest.json").write_text("{not json")
     response = make_client(replays_dir=replays).get("/v1/replays/demo")
     assert (response.status_code, code_of(response)) == (500, ErrorCode.INTERNAL_ERROR)
+
+
+def test_the_committed_demo_replay_is_served_and_its_audio_is_there(make_client: Any) -> None:
+    replays = Path(__file__).resolve().parents[2] / "voice" / "replays"
+    client = make_client(replays_dir=replays)
+    manifest = ReplayManifest.model_validate(client.get("/v1/replays/demo").json())
+    assert manifest.n == len(manifest.events) > 0
+    for track in manifest.tracks:
+        audio = client.get(f"/v1/replays/demo/{track.url}")
+        assert (audio.status_code, audio.headers["content-type"]) == (200, "audio/ogg"), track.url
+        assert audio.content.startswith(b"OggS")

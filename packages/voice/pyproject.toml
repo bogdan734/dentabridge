@@ -9,6 +9,11 @@ dependencies = ["dentabridge-core"]
 stt = [
     "faster-whisper>=1.1",
 ]
+harness = [
+    "pyyaml>=6",
+    "sacrebleu>=2.4",
+    "soundfile>=0.12",
+]
 
 [build-system]
 requires = ["uv_build>=0.11.19,<0.12.0"]

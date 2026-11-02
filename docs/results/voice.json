@@ -1,0 +1,27 @@
+{
+  "profile": "mac-native",
+  "recorded_on": "2026-11-02",
+  "hardware": "Apple M3 Max, 36 GB",
+  "load_average": 13.26953125,
+  "audio": "synthetic speech from Piper voices, not human recordings",
+  "models": {
+    "speech to text": "faster-whisper small (int8, cpu)",
+    "translator": "qwen3:4b-instruct through Ollama",
+    "voices": "en_US-ljspeech-medium, ru_RU-denis-medium through Piper"
+  },
+  "report": {
+    "n": 50,
+    "n_silent": 0,
+    "stage_ms": {
+      "stt": 952.5289899921418,
+      "translate": 319.74494334220884,
+      "tts_first": 68.1621741104126
+    },
+    "p50_ms": 1340.7111670970917,
+    "p95_ms": 1544.8173664331437,
+    "wer": 0.10050251256281408,
+    "chrf": 64.46032332625269,
+    "glossary_acc": 0.9772727272727273,
+    "digit_acc": 1.0
+  }
+}

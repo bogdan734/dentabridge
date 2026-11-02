@@ -117,3 +117,32 @@ def test_sft_file_is_one_json_row_per_line_and_reads_back(tmp_path: Path) -> Non
     assert write_sft(rows, out) == len(rows)
     assert len(out.read_text(encoding="utf-8").splitlines()) == len(rows)
     assert read_sft(out) == rows
+
+
+def test_a_repeated_source_returns_with_fresh_prompts_and_unique_ids() -> None:
+    records = _records(12)
+    aku = ImageRecord(
+        record_id="aku_caries/a0", source="aku_caries", path="a0.jpg", width=9, height=9
+    )
+    entries = [
+        *_train_entries(records),
+        SplitEntry(
+            record_id=aku.record_id,
+            source="aku_caries",
+            split="train",
+            group="p:a0",
+            group_method="patient_id",
+        ),
+    ]
+    rows = build_rows(
+        {**records, aku.record_id: aku},
+        entries,
+        negatives_frac=0.0,
+        seed=1,
+        repeat={"alphadent": 3},
+    )
+    assert len(rows) == 3 * 10 + 1, "alphadent three times, aku once"
+    assert len({r.id for r in rows}) == len(rows)
+    copies = [r for r in rows if r.id.split("#")[0] == "alphadent/r5"]
+    assert sorted(r.id for r in copies) == ["alphadent/r5", "alphadent/r5#x1", "alphadent/r5#x2"]
+    assert any(len({r.prompt for r in rows if r.id.split("#")[0] == rid}) > 1 for rid in records)

@@ -20,7 +20,9 @@ _FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL)
 
 
 class ParseError(ValueError):
-    pass
+    def __init__(self, message: str, raw: str | None = None) -> None:
+        super().__init__(message)
+        self.raw = raw  # the model's answer as written, kept for the failure analysis
 
 
 class ReleaseConfig(BaseModel):
@@ -61,7 +63,7 @@ def _load(raw: str) -> _Answer:
     try:
         return _Answer.model_validate(json.loads(text))
     except (json.JSONDecodeError, ValidationError) as error:
-        raise ParseError(f"not the agreed JSON: {error}") from error
+        raise ParseError(f"not the agreed JSON: {error}", raw) from error
 
 
 def answer_codes(raw: str) -> list[FindingCode]:
@@ -76,7 +78,7 @@ def parse_output(
     latency_ms: float = 0.0,
 ) -> VisionOutput:
     if release.needs_scores and token_scores is None:
-        raise ParseError("this release needs token scores and the backend gave none")
+        raise ParseError("this release needs token scores and the backend gave none", raw)
     answer = _load(raw)
     try:
         return VisionOutput(
@@ -86,7 +88,7 @@ def parse_output(
             latency_ms=latency_ms,
         )
     except ValidationError as error:
-        raise ParseError(f"answer breaks the output contract: {error}") from error
+        raise ParseError(f"answer breaks the output contract: {error}", raw) from error
 
 
 def _finding(

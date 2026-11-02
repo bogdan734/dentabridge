@@ -6,7 +6,13 @@ from PIL import Image
 
 from dentabridge_core import Finding, FindingCode, ModelInfo, Region, VisionOutput
 from dentabridge_ml.data.records import ImageRecord, LabelBox
-from dentabridge_ml.eval.predict import predict, read_predictions, research_release, sanitise
+from dentabridge_ml.eval.predict import (
+    PredictionRow,
+    predict,
+    read_predictions,
+    research_release,
+    sanitise,
+)
 from dentabridge_ml.eval.report import build_result
 from dentabridge_ml.serving.parse import ParseError
 from dentabridge_ml.splits.manifest import SplitEntry, SplitName
@@ -25,7 +31,7 @@ class ScriptedBackend:
     async def analyse(self, image, modality):  # type: ignore[no-untyped-def]
         answer = self._answers[image.sha256]
         if answer is None:
-            raise ParseError("not the agreed JSON")
+            raise ParseError("not the agreed JSON", raw="{oops")
         return answer
 
 
@@ -96,7 +102,13 @@ def test_report_matches_a_hand_count_and_scores_only_labelled_codes(tmp_path: Pa
     assert (caries.n_pos, caries.n_neg) == (4, 4)
     assert (caries.sens, caries.spec) == (0.75, 0.75)
     assert result.json_valid_rate == 7 / 8
-    assert caries.ece is None, "one unparseable answer has no score, so no calibration claim"
+    assert (rows[7].error, rows[7].raw) == ("not the agreed JSON", "{oops")
+    assert all(r.raw is None for r in rows[:7])
+    # calibration uses the 7 answers that carry a score: four said 0.9 (three of them right),
+    # three said 0.1 (one of them wrong), so ECE = (4 * 0.15 + 3 * 0.2333) / 7
+    assert caries.n_scored == 7
+    assert caries.ece == pytest.approx(1.3 / 7)
+    assert caries.aurc == pytest.approx((0.25 + 0.2 + 1 / 3 + 2 / 7) / 7)
     filling = next(c for c in result.codes if c.code == FindingCode.FILLING)
     assert (filling.n_pos, filling.n_neg, filling.sens, filling.spec) == (0, 0, None, None)
 
@@ -174,7 +186,10 @@ class BatchBackend:
 
     async def analyse_many(self, images, modality):  # type: ignore[no-untyped-def]
         self.batches.append(len(images))
-        return [self._answers[i.sha256] or ParseError("not the agreed JSON") for i in images]
+        return [
+            self._answers[i.sha256] or ParseError("not the agreed JSON", raw="{oops")
+            for i in images
+        ]
 
 
 def test_batches_give_the_same_rows_as_one_at_a_time(tmp_path: Path) -> None:
@@ -218,3 +233,17 @@ def test_the_research_release_asks_only_what_the_trained_sources_label() -> None
 
 def test_a_private_source_never_widens_the_release() -> None:
     assert research_release({"aku_caries", "kaggle_oral_private"}).assessed == {FindingCode.CARIES}
+
+
+def test_answers_without_scores_make_no_calibration_claim(tmp_path: Path) -> None:
+    records, entries = _world(tmp_path)
+    unscored = VisionOutput(
+        image_quality="ok",
+        findings=(Finding(code=CARIES, status="not_seen"),),
+        latency_ms=1.0,
+    )
+    rows = [PredictionRow(record_id=r.record_id, output=unscored) for r in records]
+    result = build_result("m", "val", {r.record_id: r for r in records}, entries, rows)
+    caries = next(c for c in result.codes if c.code == CARIES)
+    assert (caries.n_scored, caries.ece, caries.aurc) == (0, None, None)
+    assert (caries.sens, caries.spec) == (0.0, 1.0), "decisions still count without scores"

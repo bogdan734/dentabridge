@@ -31,6 +31,7 @@ class PredictionRow(BaseModel):
     record_id: str
     output: VisionOutput | None = None
     error: str | None = None  # a ParseError: the model did not answer in the agreed format
+    raw: str | None = None  # what it wrote instead, for the failure analysis
 
 
 @runtime_checkable
@@ -102,7 +103,9 @@ async def predict(
             results = [await _answer(backend, image) for image in images]
         for record, result in zip(chunk, results, strict=True):
             if isinstance(result, ParseError):
-                rows.append(PredictionRow(record_id=record.record_id, error=str(result)))
+                rows.append(
+                    PredictionRow(record_id=record.record_id, error=str(result), raw=result.raw)
+                )
             else:
                 rows.append(PredictionRow(record_id=record.record_id, output=result))
     out.write_text("".join(r.model_dump_json() + "\n" for r in rows), encoding="utf-8")

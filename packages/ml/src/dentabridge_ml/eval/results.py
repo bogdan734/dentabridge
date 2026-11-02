@@ -21,6 +21,7 @@ class CodeResult(_Frozen):
     spec_ci: tuple[float, float] | None = None
     ece: float | None = None
     aurc: float | None = None
+    n_scored: int = Field(default=0, ge=0)  # the answers ECE and AURC were computed on
 
 
 class SplitResult(_Frozen):
@@ -48,15 +49,16 @@ def _value(value: float | None, interval: tuple[float, float] | None = None) -> 
 
 def render_markdown(result: SplitResult) -> str:
     """The README and model-card table: 95 % cluster-bootstrap intervals, dashes where a number
-    cannot be given (no positives, no negatives, no score)."""
+    cannot be given (no positives, no negatives, no score). ECE and AURC cover the `scored`
+    answers, so a model that often breaks the format is visibly judged on fewer of them."""
     valid = f"{result.json_valid_rate * 100:.1f} %"
     lines = [
         f"# {result.model_id} on {result.split}",
         "",
         f"{result.n_images} images, {valid} of answers were valid JSON.",
         "",
-        "| finding | positives | negatives | sensitivity | specificity | ECE | AURC |",
-        "|---|---|---|---|---|---|---|",
+        "| finding | positives | negatives | sensitivity | specificity | ECE | AURC | scored |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     for c in result.codes:
         cells = [
@@ -67,6 +69,7 @@ def render_markdown(result: SplitResult) -> str:
             _value(c.spec, c.spec_ci),
             _value(c.ece),
             _value(c.aurc),
+            str(c.n_scored),
         ]
         lines.append("| " + " | ".join(cells) + " |")
     return "\n".join(lines) + "\n"

@@ -16,6 +16,13 @@ from dentabridge_ml.train.config import load_config
 from dentabridge_ml.train.data import build_rows, write_sft
 
 
+def _repeat(text: str) -> tuple[str, int]:
+    source, _, times = text.partition("=")
+    if source not in get_args(SourceId) or not times.isdecimal() or int(times) < 1:
+        raise argparse.ArgumentTypeError(f"{text!r}: expected SOURCE=N with N >= 1")
+    return source, int(times)
+
+
 def _sft(args: argparse.Namespace) -> int:
     entries = [
         e
@@ -24,7 +31,9 @@ def _sft(args: argparse.Namespace) -> int:
     ]
     sources = sorted({e.source for e in entries})
     records = {r.record_id: r for s in sources for r in load_records(s, args.root)}
-    rows = build_rows(records, entries, args.negatives, args.seed)[: args.limit]
+    rows = build_rows(records, entries, args.negatives, args.seed, repeat=dict(args.repeat))[
+        : args.limit
+    ]
     print(f"{write_sft(rows, args.out)} rows -> {args.out}")
     return 0
 
@@ -55,6 +64,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     sft.add_argument("--root", type=Path, default=default_root())
     sft.add_argument(
         "--sources", nargs="+", choices=get_args(SourceId), help="only these (default: all)"
+    )
+    sft.add_argument(
+        "--repeat",
+        type=_repeat,
+        action="append",
+        default=[],
+        metavar="SOURCE=N",
+        help="put this source's photos in N times (rare classes), each copy with its own prompt",
     )
     sft.add_argument("--negatives", type=float, default=0.15, help="degraded photos per real one")
     sft.add_argument("--seed", type=int, default=0)

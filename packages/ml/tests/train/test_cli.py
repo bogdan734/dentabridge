@@ -63,6 +63,18 @@ def test_sft_can_be_limited_to_some_sources(manifests: Path, tmp_path: Path) -> 
     assert {r.id.split("/")[0] for r in rows} == {"aku_caries"}
 
 
+def test_sft_repeat_multiplies_one_source(manifests: Path, tmp_path: Path) -> None:
+    out = tmp_path / "repeated.jsonl"
+    _sft(manifests, out, "--negatives", "0", "--repeat", "alphadent=3")
+    rows = read_sft(out)
+    assert sum(r.id.startswith("alphadent/") for r in rows) == 18
+    assert sum(r.id.startswith("aku_caries/") for r in rows) == 6
+    with pytest.raises(SystemExit):
+        _sft(manifests, out, "--repeat", "alphadent")
+    with pytest.raises(SystemExit):
+        _sft(manifests, out, "--repeat", "alphadent=0")
+
+
 def test_sft_limit_keeps_a_pilot_small(manifests: Path, tmp_path: Path) -> None:
     out = tmp_path / "pilot.jsonl"
     _sft(manifests, out, "--limit", "4")

@@ -7,6 +7,7 @@ extra is written to disk. The loss covers the answer only, never the prompt or t
 
 import json
 import random
+from collections import Counter
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -56,15 +57,22 @@ def build_rows(
     negatives_frac: float,
     seed: int,
     subsets: bool = True,
+    repeat: Mapping[str, int] | None = None,
 ) -> list[SftRow]:
+    """`repeat` maps a source to how many times its photos go in: each copy draws its own subset
+    of asked codes, so the repeats differ in prompt and answer."""
     rng = random.Random(seed)
-    chosen = [records[e.record_id] for e in entries]
+    times = repeat or {}
+    chosen = [records[e.record_id] for e in entries for _ in range(times.get(e.source, 1))]
+    copies: Counter[str] = Counter()
     rows: list[SftRow] = []
     for record in chosen:
         asked = _asked(record, rng, subsets)
+        copy = copies[record.record_id]
+        copies[record.record_id] += 1
         rows.append(
             SftRow(
-                id=record.record_id,
+                id=record.record_id if copy == 0 else f"{record.record_id}#x{copy}",
                 image=f"{record.source}/{record.path}",
                 prompt=build_prompt(asked, "intraoral_photo"),
                 answer=target_json(record, asked),

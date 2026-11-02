@@ -113,3 +113,14 @@ def test_answer_codes_follow_the_order_of_the_answer() -> None:
 def test_answer_codes_refuse_what_parse_output_refuses() -> None:
     with pytest.raises(ParseError):
         answer_codes("I see a cavity.")
+
+
+def test_a_parse_error_keeps_the_raw_answer_for_the_failure_analysis() -> None:
+    raw = '{"image_quality": "ok", "findings": ['
+    with pytest.raises(ParseError) as truncated:
+        parse_output(raw, None, RELEASE)
+    assert truncated.value.raw == raw
+    wrong_scale = _answer({"code": "caries", "status": "possible", "regions": [[1, 2, 3, 4001]]})
+    with pytest.raises(ParseError) as out_of_range:
+        parse_output(wrong_scale, None, RELEASE)
+    assert out_of_range.value.raw == wrong_scale

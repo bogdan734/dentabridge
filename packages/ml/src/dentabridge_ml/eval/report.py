@@ -3,6 +3,8 @@
 A finding is scored only on images whose source labels it, so a code a source never labelled is
 neither a hit nor a miss there. An answer that was not valid JSON counts as "not possible":
 the conservative reading, reported next to the valid-answer rate rather than hidden by it.
+Calibration (ECE, AURC) needs a score, which only a valid answer carries: it is computed on those
+answers alone and `n_scored` says how many that was.
 """
 
 from collections.abc import Mapping, Sequence
@@ -51,10 +53,9 @@ def build_result(
         decided = [_possible(p, code) for p, _ in rows]
         preds = [pred for pred, _ in decided]
         stats = binary_stats(preds, labels, code, [group_of[p.record_id] for p, _ in rows], seed)
-        scores = [score for _, score in decided]
-        calibrated = all(s is not None for s in scores)
-        y = np.array(labels, dtype=bool)
-        s_arr = np.array([s for s in scores if s is not None], dtype=np.float64)
+        scored = [i for i, (_, score) in enumerate(decided) if score is not None]
+        y = np.array([labels[i] for i in scored], dtype=bool)
+        s_arr = np.array([decided[i][1] for i in scored], dtype=np.float64)
         codes.append(
             CodeResult(
                 code=code,
@@ -64,8 +65,9 @@ def build_result(
                 spec=stats.spec,
                 sens_ci=stats.sens_ci,
                 spec_ci=stats.spec_ci,
-                ece=ece(s_arr, y) if calibrated else None,
-                aurc=_aurc(s_arr, y, preds) if calibrated else None,
+                ece=ece(s_arr, y) if scored else None,
+                aurc=_aurc(s_arr, y, [preds[i] for i in scored]) if scored else None,
+                n_scored=len(scored),
             )
         )
     valid = sum(p.output is not None for p in predictions)

@@ -37,6 +37,7 @@ def test_markdown_shows_intervals_and_dashes_for_what_cannot_be_said() -> None:
                 sens_ci=(0.4, 0.9),
                 spec=None,
                 ece=0.05,
+                n_scored=38,
             ),
             CodeResult(code=FindingCode.FILLING, n_pos=0, n_neg=0),
         ),
@@ -44,8 +45,8 @@ def test_markdown_shows_intervals_and_dashes_for_what_cannot_be_said() -> None:
     lines = render_markdown(result).splitlines()
     assert lines[0] == "# m on val"
     assert "40 images, 97.5 % of answers were valid JSON" in lines[2]
-    assert "| caries | 10 | 30 | 0.70 (0.40-0.90) | — | 0.05 | — |" in lines
-    assert "| filling | 0 | 0 | — | — | — | — |" in lines
+    assert "| caries | 10 | 30 | 0.70 (0.40-0.90) | — | 0.05 | — | 38 |" in lines
+    assert "| filling | 0 | 0 | — | — | — | — | 0 |" in lines
 
 
 @pytest.fixture

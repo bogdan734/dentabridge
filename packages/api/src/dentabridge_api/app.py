@@ -13,7 +13,18 @@ from dentabridge_api.db.session import init_schema, make_engine, session_factory
 from dentabridge_api.errors import install_error_handlers
 from dentabridge_api.idempotency import IdempotencyStore
 from dentabridge_api.ratelimit import DEFAULT_BUDGETS, RateLimiter
-from dentabridge_api.routes import analyses, bookings, catalogue, consents, meta, quotes, samples
+from dentabridge_api.routes import (
+    analyses,
+    bookings,
+    call_context,
+    calls,
+    catalogue,
+    consents,
+    meta,
+    quotes,
+    replays,
+    samples,
+)
 from dentabridge_api.samples import SampleCatalogue
 from dentabridge_api.seed import ClinicSeed, load_clinics
 from dentabridge_api.settings import Settings
@@ -88,6 +99,10 @@ def create_app(
         bookings.writing,
         bookings.idempotent,
         bookings.reading,
+        calls.idempotent,
+        calls.writing,
+        call_context.router,
+        replays.router,
     ):
         app.include_router(router, prefix="/v1")
     return app

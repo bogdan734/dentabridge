@@ -119,3 +119,16 @@ class BookingRow(Base):
     snapshot_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     snapshot_purge_after: Mapped[datetime | None] = mapped_column(UtcDateTime(), nullable=True)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime())
+
+
+class CallSessionRow(Base):
+    __tablename__ = "call_sessions"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True
+    )  # uuid5 of the booking: one call each
+    booking_id: Mapped[str] = mapped_column(String(36), unique=True)
+    patient_language: Mapped[str] = mapped_column(String(16))
+    dentist_language: Mapped[str] = mapped_column(String(16))
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime())
+    expires_at: Mapped[datetime] = mapped_column(UtcDateTime())

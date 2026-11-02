@@ -55,8 +55,14 @@ def install_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(RequestValidationError)
     async def _validation(request: Request, error: RequestValidationError) -> JSONResponse:
-        fields = ", ".join(".".join(str(part) for part in e["loc"]) for e in error.errors())
-        return error_response(request, ApiError(422, ErrorCode.VALIDATION_ERROR, fields))
+        problems = error.errors()
+        fields = ", ".join(".".join(str(part) for part in e["loc"]) for e in problems)
+        refused = any(
+            e["loc"][-1:] == ("ai_disclosure_acknowledged",) and e["type"] == "literal_error"
+            for e in problems
+        )
+        code = ErrorCode.DISCLOSURE_NOT_ACKNOWLEDGED if refused else ErrorCode.VALIDATION_ERROR
+        return error_response(request, ApiError(422, code, fields))
 
     @app.exception_handler(StarletteHTTPException)
     async def _http(request: Request, error: StarletteHTTPException) -> JSONResponse:

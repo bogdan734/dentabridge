@@ -1,65 +1,26 @@
 import json
-from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
 
-import httpx
 import pytest
 
 from dentabridge_api.booking.slots import generate_slots
 from dentabridge_api.clock import FrozenClock
 from dentabridge_api.seed import ClinicSeed, DentistSeed, TreatmentSeed, Window, load_clinics
-from dentabridge_core import ErrorCode, ErrorResponse, TreatmentCode
-
-CLINIC = "alfama-demo-dental"
-_keys = iter(range(1, 10_000))
-
-
-def key() -> dict[str, str]:
-    return {"Idempotency-Key": f"booking-{next(_keys):05d}"}
-
-
-def code_of(response: httpx.Response) -> ErrorCode:
-    return ErrorResponse.model_validate(response.json()).code
-
-
-def quote(client: Any, **changes: object) -> dict[str, Any]:
-    body = {
-        "clinic_id": CLINIC,
-        "treatment_codes": ["crown"],
-        "origin_iata": "LHR",
-        "depart_date": "2026-11-10",
-        "return_date": "2026-11-20",
-        "travellers": 1,
-        "currency": "EUR",
-        **changes,
-    }
-    response = client.post("/v1/quotes", json=body)
-    assert response.status_code == 201, response.text
-    result: dict[str, Any] = response.json()
-    return result
-
-
-def first_slot(
-    client: Any, clinic: str = CLINIC, start: str = "2026-11-11", end: str = "2026-11-14"
-) -> dict[str, Any]:
-    slots = client.get(f"/v1/clinics/{clinic}/slots", params={"from": start, "to": end}).json()
-    assert slots, "the seed schedule has slots in the window"
-    result: dict[str, Any] = slots[0]
-    return result
-
-
-def hold(client: Any, slot_id: str) -> httpx.Response:
-    response: httpx.Response = client.post("/v1/holds", json={"slot_id": slot_id}, headers=key())
-    return response
-
-
-def book(client: Any, hold_id: str, quote_id: str, **extra: str) -> httpx.Response:
-    response: httpx.Response = client.post(
-        "/v1/bookings", json={"hold_id": hold_id, "quote_id": quote_id, **extra}, headers=key()
-    )
-    return response
+from dentabridge_api.testing import (
+    CLINIC,
+    an_analysis,
+    book,
+    code_of,
+    consent,
+    field_names,
+    first_slot,
+    hold,
+    key,
+    quote,
+)
+from dentabridge_core import ErrorCode, TreatmentCode
 
 
 def test_seed_all_fictional(make_client: Any) -> None:
@@ -91,16 +52,6 @@ def test_no_country_city_or_currency_literals_in_code() -> None:
     names = {n for c in load_clinics().values() for n in (c.city, c.name)}
     text = "".join(p.read_text() for root in roots for p in root.rglob("*.py"))
     assert not [n for n in names if n in text]
-
-
-def _field_names(value: Any) -> Iterator[str]:
-    if isinstance(value, dict):
-        for name, item in value.items():
-            yield name
-            yield from _field_names(item)
-    elif isinstance(value, list):
-        for item in value:
-            yield from _field_names(item)
 
 
 def window_clinic(timezone: str, hours: str) -> ClinicSeed:
@@ -314,26 +265,6 @@ def test_the_same_key_books_once(make_client: Any) -> None:
     assert again.json() == first.json()
 
 
-def consent(client: Any, purpose: str) -> str:
-    response = client.post(
-        "/v1/consents",
-        json={
-            "purpose": purpose,
-            "health_data_explicit": True,
-            "text_version": "v1",
-            "locale": "en",
-        },
-    )
-    return str(response.json()["consent_id"])
-
-
-def an_analysis(client: Any) -> str:
-    response = client.post(
-        "/v1/analyses/sample", json={"sample_id": "one", "locale": "en"}, headers=key()
-    )
-    return str(response.json()["analysis_id"])
-
-
 def test_share_requires_own_consent_403(make_client: Any) -> None:
     client = make_client()
     q = quote(client)
@@ -380,7 +311,7 @@ def test_sharing_copies_the_snapshot_and_it_goes_on_cancel(make_client: Any) -> 
         assert row.snapshot_json is not None
         snapshot = json.loads(row.snapshot_json)
         assert snapshot["analysis_id"] == analysis
-        photo_keys = [k for k in _field_names(snapshot) if "image" in k and k != "image_quality"]
+        photo_keys = [k for k in field_names(snapshot) if "image" in k and k != "image_quality"]
         assert not photo_keys, "observations only: no photo and no reference to one"
     client.post(f"/v1/bookings/{booking['booking_id']}/cancel")
     with sessions() as session:

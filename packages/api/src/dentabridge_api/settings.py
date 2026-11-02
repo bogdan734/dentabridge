@@ -2,9 +2,9 @@
 
 import secrets
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Self
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
@@ -41,3 +41,12 @@ class Settings(BaseSettings):
         if "*" in value:
             raise ValueError("a wildcard origin is refused: list the origins that may call the API")
         return value
+
+    @model_validator(mode="after")
+    def _livekit_all_or_nothing(self) -> Self:
+        given = [self.livekit_url, self.livekit_key, self.livekit_secret]
+        if any(given) and not all(given):
+            raise ValueError(
+                "livekit_url, livekit_key and livekit_secret are set together or not at all"
+            )
+        return self

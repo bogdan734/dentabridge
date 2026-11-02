@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import Field
 
-from dentabridge_core import Contract, CountryCode, FindingCode, Iata, Modality
+from dentabridge_core import Contract, CountryCode, FindingCode, Iata, LanguageTag, Modality
 
 
 class Health(Contract):
@@ -45,3 +45,8 @@ class City(Contract):
 
 class HoldRequest(Contract):
     slot_id: UUID
+
+
+class CallSessionRequest(Contract):
+    patient_language: LanguageTag
+    dentist_language: LanguageTag

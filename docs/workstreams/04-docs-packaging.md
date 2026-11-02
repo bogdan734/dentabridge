@@ -52,5 +52,10 @@ Branch ws/04-docs. D1 starts when A3, A5 and V3 are merged (M2-M4). D2 and D3 ru
 - LiveKit advertises 127.0.0.1 (browser, native worker) and its container address (the dockerised worker of the cpu profile).
 - Verified on the Mac: `make demo` (health 200), `make mac` with a call opened through the API and interpreted (tests/test_deploy.py, slow). The cpu and cuda profiles validate only: the ollama/ollama image (2.8 GB) was not pulled, and there is no GPU here.
 
+## Notes from D2 (2026-11-02)
+- README.md carries two generated blocks (`results:voice`, `results:vision`) filled by `tools/render_readme.py` from docs/results; docs/licences.md is rendered by `tools/render_licences.py` from the three LICENCES.toml files. `make docs` rewrites both; tests/test_docs.py fails when either drifts, when a measured-looking number is typed by hand, when the docs claims linter objects, or when a relative link breaks.
+- The first training run's validation results (tuned and untuned) are kept as docs/results/ml/run1-*.json and .md, copied from the Kaggle output, because the README's image-model table renders from them.
+- Not done: the Hugging Face Space and the demo kit (D3), and the model-card numbers (ML10).
+
 ## Contract change requests
 - (none yet)

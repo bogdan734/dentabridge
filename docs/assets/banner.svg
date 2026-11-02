@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" role="img" aria-labelledby="t d">
+  <title id="t">DentaBridge</title>
+  <desc id="d">A tooth, and a bridge of five steps: photo, observations, quote, booking, live call.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="0.55" stop-color="#0f2f3a"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+    <linearGradient id="tooth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#bff3ec"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.78" cy="0.15" r="0.6">
+      <stop offset="0" stop-color="#2dd4bf" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#2dd4bf" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1280" height="320" rx="22" fill="url(#bg)"/>
+  <rect width="1280" height="320" rx="22" fill="url(#glow)"/>
+
+  <!-- tooth -->
+  <g transform="translate(64 78) scale(1.5)">
+    <path d="M60 10 C42 -2 8 6 8 42 C8 68 24 74 27 98 C29 114 37 120 44 120 C52 120 52 100 60 100 C68 100 68 120 76 120 C83 120 91 114 93 98 C96 74 112 68 112 42 C112 6 78 -2 60 10 Z"
+          fill="url(#tooth)" stroke="#5eead4" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M36 32 C40 24 50 21 58 24" fill="none" stroke="#99f6e4" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+  </g>
+
+  <!-- title -->
+  <text x="268" y="148" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="68" font-weight="700" fill="#ffffff" letter-spacing="-1">DentaBridge</text>
+  <text x="270" y="194" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="23" fill="#99f6e4">Open-source research prototype</text>
+  <text x="270" y="228" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="20" fill="#cbd5e1">tooth photo, quote, booking, live-translated video call</text>
+
+  <!-- the bridge: five steps on an arch -->
+  <path d="M820 235 Q1020 150 1220 235" fill="none" stroke="#5eead4" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+  <g fill="#0b1220" stroke="#5eead4" stroke-width="3">
+    <circle cx="820" cy="235" r="9"/>
+    <circle cx="920" cy="203" r="9"/>
+    <circle cx="1020" cy="192.5" r="9"/>
+    <circle cx="1120" cy="203" r="9"/>
+    <circle cx="1220" cy="235" r="9"/>
+  </g>
+  <g font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="15" fill="#e2e8f0" text-anchor="middle">
+    <text x="820" y="268">photo</text>
+    <text x="920" y="248">observations</text>
+    <text x="1020" y="238">quote</text>
+    <text x="1120" y="248">booking</text>
+    <text x="1220" y="268">live call</text>
+  </g>
+  <text x="1216" y="38" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="14" fill="#99f6e4" text-anchor="end" opacity="0.85">not a medical device</text>
+</svg>

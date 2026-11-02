@@ -1,7 +1,6 @@
 """The one-command path (D1): compose profiles, the make targets, and the keys in .env."""
 
 import asyncio
-import importlib.util
 import json
 import os
 import re
@@ -9,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import time
+from collections.abc import Callable
 from datetime import date, timedelta
 from pathlib import Path
 from types import ModuleType
@@ -45,15 +45,6 @@ def env_values(path: Path) -> dict[str, str]:
     lines = path.read_text(encoding="utf-8").splitlines()
     pairs = (line.partition("=") for line in lines if "=" in line and not line.startswith("#"))
     return {name: value for name, _, value in pairs}
-
-
-def tool(name: str) -> ModuleType:
-    spec = importlib.util.spec_from_file_location(name, ROOT / "tools" / f"{name}.py")
-    assert spec is not None
-    assert spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
 
 
 def make_env(example: Path, out: Path) -> None:
@@ -115,7 +106,7 @@ def test_the_make_path_names_every_profile() -> None:
     assert {"demo", "mac", "up-cpu", "up-cuda", "down", "models"} <= targets
 
 
-def test_every_download_shows_its_dated_licence_row() -> None:
+def test_every_download_shows_its_dated_licence_row(tool: Callable[[str], ModuleType]) -> None:
     models = tool("models")
     for download in models.DOWNLOADS:
         row = models.licence_row(download.component)
@@ -124,7 +115,10 @@ def test_every_download_shows_its_dated_licence_row() -> None:
 
 
 def test_nothing_is_downloaded_without_a_yes(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    tool: Callable[[str], ModuleType],
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     models = tool("models")
     ran: list[tuple[str, ...]] = []

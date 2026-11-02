@@ -705,6 +705,12 @@ export interface components {
             /** Final */
             final: boolean;
             /**
+             * Translation Status
+             * @default ok
+             * @enum {string}
+             */
+            translation_status: "ok" | "failed";
+            /**
              * Glossary Missing
              * @default []
              */

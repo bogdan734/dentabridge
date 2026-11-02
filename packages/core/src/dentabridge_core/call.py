@@ -91,13 +91,22 @@ class CaptionEvent(Contract):
     src_lang: LanguageTag
     tgt_lang: LanguageTag
     src_text: str
-    tgt_text: str  # may be empty while the event is not final
+    tgt_text: str  # empty while the event is not final, and when the translation failed
     final: bool
+    translation_status: TranslationStatus = "ok"
     glossary_missing: tuple[str, ...] = ()
     digits_ok: bool
     audio: AudioMode
     t_speech_end_ms: int = Field(ge=0)
     t_first_audio_ms: int | None = Field(default=None, ge=0)
+
+    @model_validator(mode="after")
+    def _failure_is_final_and_silent(self) -> Self:
+        if self.translation_status == "failed" and (
+            self.tgt_text or not self.final or self.audio != "captions_only"
+        ):
+            raise ValueError("a failed translation is final, silent and has no target text")
+        return self
 
 
 class ReplayTrack(Contract):

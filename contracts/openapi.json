@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "DentaBridge API",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "paths": {
     "/v1/health": {
@@ -1774,6 +1774,15 @@
             "type": "boolean",
             "title": "Final"
           },
+          "translation_status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "failed"
+            ],
+            "title": "Translation Status",
+            "default": "ok"
+          },
           "glossary_missing": {
             "items": {
               "type": "string"
@@ -1822,6 +1831,7 @@
           "src_text",
           "tgt_text",
           "final",
+          "translation_status",
           "glossary_missing",
           "digits_ok",
           "audio",

@@ -71,6 +71,15 @@
           "title": "Tgt Text",
           "type": "string"
         },
+        "translation_status": {
+          "default": "ok",
+          "enum": [
+            "ok",
+            "failed"
+          ],
+          "title": "Translation Status",
+          "type": "string"
+        },
         "utterance_id": {
           "minLength": 1,
           "title": "Utterance Id",

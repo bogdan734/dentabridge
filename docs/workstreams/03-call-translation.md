@@ -54,4 +54,4 @@ Branch ws/03-call. Starts after tag `m0`. EN<->RU is verified; other pairs are c
 - packages/core (file a change request below), packages/api, packages/pricing, packages/ml, contracts/, deploy/, space/, tools/, README.md, web/
 
 ## Contract change requests
-- (none yet)
+- cr1 (V3, done in contract 1.1.0): `CaptionEvent.translation_status: "ok" | "failed"` (default "ok"). When the translator fails after the source caption went out, the worker closes that caption as failed (final, empty tgt_text, captions_only), so the listener is told instead of waiting on a partial caption.

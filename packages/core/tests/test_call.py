@@ -9,6 +9,7 @@ from dentabridge_core import (
     AiDisclosure,
     CallSession,
     CallTokenRequest,
+    CaptionEvent,
     ChatEvent,
     ReplayManifest,
 )
@@ -104,6 +105,32 @@ def test_chat_translation_matches_status() -> None:
     with pytest.raises(ValidationError, match="exactly when"):
         _chat(translation_status="failed")
     assert _chat(translation_status="failed", tgt_text=None).tgt_text is None
+
+
+def _caption(**changes: object) -> CaptionEvent:
+    data: dict[str, object] = {
+        "utterance_id": "patient-1",
+        "speaker": "patient",
+        "src_lang": "ru",
+        "tgt_lang": "en",
+        "src_text": "Болит зуб 36",
+        "tgt_text": "Tooth 36 hurts",
+        "final": True,
+        "digits_ok": True,
+        "audio": "spoken",
+        "t_speech_end_ms": 1200,
+    }
+    data.update(changes)
+    return CaptionEvent.model_validate(data)
+
+
+def test_a_caption_is_a_translation_unless_it_says_it_failed() -> None:
+    assert _caption().translation_status == "ok"
+    failed = {"translation_status": "failed", "tgt_text": "", "audio": "captions_only"}
+    assert _caption(**failed).tgt_text == ""
+    for wrong in ({"tgt_text": "Tooth 36 hurts"}, {"final": False}, {"audio": "spoken"}):
+        with pytest.raises(ValidationError, match="failed translation"):
+            _caption(**{**failed, **wrong})
 
 
 def test_replay_p95_not_below_p50() -> None:

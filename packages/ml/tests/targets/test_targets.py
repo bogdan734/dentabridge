@@ -6,11 +6,13 @@ from PIL import Image
 
 from dentabridge_core import FindingCode, VisionOutput
 from dentabridge_ml.data.records import ImageRecord, LabelBox
+from dentabridge_ml.serving.parse import ReleaseConfig, parse_output
 from dentabridge_ml.targets.degrade import DEGRADE_KINDS, REASON, degrade
 from dentabridge_ml.targets.prompt import build_prompt
 from dentabridge_ml.targets.sft import MAX_REGIONS, target_json, unusable_json
 
 CARIES, FILLING = FindingCode.CARIES, FindingCode.FILLING
+RELEASE = ReleaseConfig(assessed=frozenset({CARIES, FILLING}))
 
 
 def _record(*boxes: LabelBox, source: str = "alphadent") -> ImageRecord:
@@ -36,7 +38,7 @@ def _picture() -> Image.Image:
 
 
 def _parse(answer: str) -> VisionOutput:
-    return VisionOutput.model_validate({**json.loads(answer), "latency_ms": 0.0})
+    return parse_output(answer, None, RELEASE)  # the strict parser serving uses, not a lenient one
 
 
 def test_target_limited_to_source_coverage() -> None:
@@ -51,13 +53,21 @@ def test_target_parses_as_vision_output() -> None:
     output = _parse(answer)
     assert output.image_quality == "ok"
     assert {f.code: f.status for f in output.findings} == {CARIES: "possible", FILLING: "not_seen"}
+    (region,) = output.findings[0].regions
+    assert (region.x0, region.y0, region.x1, region.y1) == (0.123, 0.1, 0.5, 0.4)
 
 
 def test_possible_carries_rounded_boxes_and_not_seen_none() -> None:
     answer = json.loads(target_json(_record(_box(CARIES)), frozenset({CARIES, FILLING})))
     caries, filling = answer["findings"]
-    assert caries["regions"] == [{"x0": 0.123, "y0": 0.1, "x1": 0.5, "y1": 0.4}]
+    assert caries["regions"] == [[123, 100, 500, 400]], "integers 0-1000, the scale Qwen grounds in"
     assert filling == {"code": "filling", "status": "not_seen", "regions": []}
+
+
+def test_a_box_thinner_than_a_thousandth_is_dropped_not_written_degenerate() -> None:
+    sliver = LabelBox(code=CARIES, x0=0.3001, y0=0.2, x1=0.3004, y1=0.4)
+    answer = json.loads(target_json(_record(sliver, _box(CARIES)), frozenset({CARIES})))
+    assert answer["findings"][0]["regions"] == [[123, 100, 500, 400]]
 
 
 def test_regions_are_capped_to_the_largest_boxes() -> None:
@@ -69,8 +79,8 @@ def test_regions_are_capped_to_the_largest_boxes() -> None:
     answer = json.loads(target_json(_record(*boxes), frozenset({CARIES})))
     regions = answer["findings"][0]["regions"]
     assert len(regions) == MAX_REGIONS
-    assert min(r["x1"] for r in regions) == 0.2  # the narrowest kept box is i = 4
-    assert [r["y0"] for r in regions] == sorted(r["y0"] for r in regions)
+    assert min(r[2] for r in regions) == 200  # the narrowest kept box is i = 4
+    assert [r[1] for r in regions] == sorted(r[1] for r in regions)
 
 
 def test_findings_follow_catalogue_order_whatever_the_set_order() -> None:
@@ -138,3 +148,10 @@ def test_degrade_kinds_do_what_their_reason_says() -> None:
     assert _mean(degrade(picture, "overexposed", 1)) > _mean(picture) * 0.9
     assert _edge_energy(degrade(picture, "crop_no_teeth", 1)) < _edge_energy(picture) / 2
     assert set(REASON) == set(DEGRADE_KINDS)
+
+
+def test_the_prompt_asks_for_integer_boxes_the_parser_reads() -> None:
+    prompt = build_prompt(frozenset({CARIES}), "intraoral_photo")
+    assert '"regions": [[x0, y0, x1, y1]]' in prompt
+    assert "integers from 0 to 1000" in prompt
+    assert "fractions" not in prompt

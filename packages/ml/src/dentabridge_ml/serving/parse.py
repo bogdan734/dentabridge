@@ -11,7 +11,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, ValidationError
 
 from dentabridge_core import Finding, FindingCode, Region, VisionOutput
 from dentabridge_core.analysis import ImageQuality, QualityReason
@@ -37,19 +37,14 @@ class ReleaseConfig(BaseModel):
         return cls.model_validate_json(path.read_text(encoding="utf-8"))
 
 
-class _Region(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    x0: float
-    y0: float
-    x1: float
-    y1: float
+_Box = tuple[StrictInt, StrictInt, StrictInt, StrictInt]  # [x0, y0, x1, y1] in thousandths
 
 
 class _Finding(BaseModel):
     model_config = ConfigDict(extra="forbid")
     code: FindingCode
     status: Literal["possible", "not_seen"]
-    regions: list[_Region] = Field(default_factory=list)
+    regions: list[_Box] = Field(default_factory=list)
 
 
 class _Answer(BaseModel):
@@ -103,5 +98,12 @@ def _finding(
     status = item.status
     if score is not None and item.code in release.thresholds:
         status = "possible" if score >= release.thresholds[item.code] else "not_seen"
-    regions = tuple(Region(**r.model_dump()) for r in item.regions) if status == "possible" else ()
+    regions = (
+        tuple(
+            Region(x0=x0 / 1000, y0=y0 / 1000, x1=x1 / 1000, y1=y1 / 1000)
+            for x0, y0, x1, y1 in item.regions
+        )
+        if status == "possible"
+        else ()
+    )
     return Finding(code=item.code, status=status, score=score, regions=regions)

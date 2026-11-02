@@ -28,10 +28,11 @@ from dentabridge_ml.targets.prompt import build_prompt, fit_image
 
 MAX_NEW_TOKENS = 700
 TOP_LOGPROBS = 5
-_REGION = {
-    "type": "object",
-    "properties": {k: {"type": "number"} for k in ("x0", "y0", "x1", "y1")},
-    "required": ["x0", "y0", "x1", "y1"],
+_BOX = {  # [x0, y0, x1, y1] in thousandths of the image side
+    "type": "array",
+    "items": {"type": "integer", "minimum": 0, "maximum": 1000},
+    "minItems": 4,
+    "maxItems": 4,
 }
 
 
@@ -49,7 +50,7 @@ def answer_schema(codes: frozenset[FindingCode]) -> dict[str, Any]:
                     "properties": {
                         "code": {"enum": ordered},
                         "status": {"enum": ["possible", "not_seen"]},
-                        "regions": {"type": "array", "items": _REGION},
+                        "regions": {"type": "array", "items": _BOX},
                     },
                     "required": ["code", "status", "regions"],
                 },

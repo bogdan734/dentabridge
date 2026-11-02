@@ -6,7 +6,7 @@ from dentabridge_core import FindingCode
 from dentabridge_ml.serving.parse import ParseError, ReleaseConfig, answer_codes, parse_output
 
 C, F = FindingCode.CARIES, FindingCode.FILLING
-BOX = {"x0": 0.1, "y0": 0.2, "x1": 0.5, "y1": 0.6}
+BOX = [100, 200, 500, 600]  # thousandths of the image width and height
 RELEASE = ReleaseConfig(assessed=frozenset({C, F}))
 
 
@@ -37,10 +37,18 @@ INVALID = [
         {
             "code": "caries",
             "status": "possible",
-            "regions": [{"x0": 0.6, "y0": 0.1, "x1": 0.2, "y1": 0.4}],
+            "regions": [[600, 100, 200, 400]],  # x1 before x0
         }
     ),
     _answer({"code": "caries", "status": "not_seen"}, {"code": "caries", "status": "possible"}),
+    _answer(
+        {"code": "caries", "status": "possible", "regions": [[0.1, 0.2, 0.5, 0.6]]}
+    ),  # fractions
+    _answer({"code": "caries", "status": "possible", "regions": [[100, 200, 500, 1001]]}),
+    _answer({"code": "caries", "status": "possible", "regions": [[100, 200, 500]]}),
+    _answer(
+        {"code": "caries", "status": "possible", "regions": [{"x0": 1, "y0": 2, "x1": 3, "y1": 4}]}
+    ),
 ]
 
 
@@ -63,7 +71,7 @@ def test_release_marks_unshipped_codes_not_assessed() -> None:
     )
     findings = {f.code: f for f in parse_output(raw, None, RELEASE).findings}
     assert findings[C].status == "possible"
-    assert findings[C].regions[0].x1 == 0.5
+    assert findings[C].regions[0].x1 == 0.5, "thousandths become fractions"
     assert findings[FindingCode.GINGIVITIS].status == "not_assessed"
     assert findings[FindingCode.GINGIVITIS].regions == ()
 

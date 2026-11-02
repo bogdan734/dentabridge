@@ -7,21 +7,19 @@ from dentabridge_core.analysis import QualityReason
 from dentabridge_ml.data.records import ImageRecord, LabelBox
 from dentabridge_ml.data.sources import SOURCES
 
-PRECISION = 3
+SCALE = 1000  # boxes are integers in thousandths of the image side: the scale Qwen3-VL grounds in
 MAX_REGIONS = 6  # the largest boxes per finding: the answer must stay short enough to train on
 
 
-def _region(box: LabelBox) -> dict[str, float]:
-    return {
-        "x0": round(box.x0, PRECISION),
-        "y0": round(box.y0, PRECISION),
-        "x1": round(box.x1, PRECISION),
-        "y1": round(box.y1, PRECISION),
-    }
+def _region(box: LabelBox) -> list[int] | None:
+    """[x0, y0, x1, y1] in thousandths, or None when rounding leaves no area."""
+    x0, y0, x1, y1 = (round(v * SCALE) for v in (box.x0, box.y0, box.x1, box.y1))
+    return [x0, y0, x1, y1] if x1 > x0 and y1 > y0 else None
 
 
 def _largest(boxes: list[LabelBox]) -> list[LabelBox]:
-    ranked = sorted(boxes, key=lambda b: (b.x1 - b.x0) * (b.y1 - b.y0), reverse=True)
+    drawable = [b for b in boxes if _region(b) is not None]
+    ranked = sorted(drawable, key=lambda b: (b.x1 - b.x0) * (b.y1 - b.y0), reverse=True)
     return sorted(ranked[:MAX_REGIONS], key=lambda b: (b.y0, b.x0))
 
 
@@ -41,7 +39,7 @@ def target_json(rec: ImageRecord, assess: frozenset[FindingCode]) -> str:
             {
                 "code": code.value,
                 "status": "possible" if present else "not_seen",
-                "regions": [_region(b) for b in _largest(boxes)],
+                "regions": [_region(b) for b in _largest(boxes)],  # all drawable
             }
         )
     answer: dict[str, object] = {

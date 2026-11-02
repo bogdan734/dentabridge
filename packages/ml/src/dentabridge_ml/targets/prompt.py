@@ -17,7 +17,7 @@ SCHEMA = (
     '{"image_quality": "ok" | "unusable", '
     '"quality_reason": null | "blurry" | "dark" | "no_teeth" | "not_dental", '
     '"findings": [{"code": string, "status": "possible" | "not_seen", '
-    '"regions": [{"x0": number, "y0": number, "x1": number, "y1": number}]}]}'
+    '"regions": [[x0, y0, x1, y1]]}]}'
 )
 
 
@@ -29,8 +29,9 @@ def build_prompt(assess: frozenset[FindingCode], modality: Modality) -> str:
     return (
         f"This is a {VIEW_NAME[modality]}. Reply with JSON only, matching this schema: {SCHEMA}. "
         f"Judge only these findings: {codes}. "
-        '"possible" means a region that may show the finding, given as boxes in image fractions '
-        '(0 to 1, origin top left); "not_seen" means none was noticed. '
+        '"possible" means a region that may show the finding, given as boxes [x0, y0, x1, y1] in '
+        "integers from 0 to 1000 (thousandths of the image width and height, origin top left); "
+        '"not_seen" means none was noticed. '
         'If the image cannot be judged, set image_quality to "unusable", give the reason and '
         "return no findings."
     )

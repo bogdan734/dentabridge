@@ -1,0 +1,23 @@
+{
+  "step": "samples",
+  "request": {
+    "method": "GET",
+    "path": "/v1/samples"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "ratelimit-limit": "120",
+      "ratelimit-remaining": "117",
+      "ratelimit-reset": "60"
+    },
+    "body": [
+      {
+        "id": "demo-photo",
+        "attribution": "Synthetic placeholder, no person",
+        "licence": "CC0"
+      }
+    ]
+  }
+}

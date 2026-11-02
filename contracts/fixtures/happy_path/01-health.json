@@ -1,0 +1,22 @@
+{
+  "step": "health",
+  "request": {
+    "method": "GET",
+    "path": "/v1/health"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "ratelimit-limit": "120",
+      "ratelimit-remaining": "119",
+      "ratelimit-reset": "60"
+    },
+    "body": {
+      "status": "ok",
+      "contract_version": "1.0.0",
+      "mode": "demo",
+      "vision_backend": "scripted"
+    }
+  }
+}

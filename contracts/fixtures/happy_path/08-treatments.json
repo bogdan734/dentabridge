@@ -1,0 +1,24 @@
+{
+  "step": "treatments",
+  "request": {
+    "method": "GET",
+    "path": "/v1/treatments"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "ratelimit-limit": "120",
+      "ratelimit-remaining": "114",
+      "ratelimit-reset": "60"
+    },
+    "body": [
+      "consultation",
+      "filling",
+      "crown",
+      "root_canal",
+      "implant",
+      "scaling"
+    ]
+  }
+}

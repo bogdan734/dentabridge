@@ -1,7 +1,7 @@
 """A hold keeps one slot for ten minutes. Expiry is checked lazily against the clock."""
 
 from datetime import datetime, timedelta
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from dentabridge_api.db.models import BookingRow, HoldRow
 from dentabridge_api.errors import ApiError
+from dentabridge_api.ids import new_id
 from dentabridge_core import ErrorCode, Hold, Slot
 
 HOLD_FOR = timedelta(minutes=10)
@@ -29,7 +30,7 @@ def create_hold(session: Session, slot: Slot, now: datetime) -> Hold:
     if taken is not None:
         raise ApiError(409, ErrorCode.SLOT_UNAVAILABLE)
     row = HoldRow(
-        id=str(uuid4()),
+        id=str(new_id()),
         slot_id=slot_key,
         clinic_id=slot.clinic_id,
         dentist_id=slot.dentist_id,

@@ -1,0 +1,26 @@
+{
+  "step": "token-patient",
+  "request": {
+    "method": "POST",
+    "path": "/v1/calls/b98865d7-dfd5-589e-82b4-e6b30d31ea4e/tokens",
+    "body": {
+      "role": "patient",
+      "ai_disclosure_acknowledged": true
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json",
+      "ratelimit-limit": "30",
+      "ratelimit-remaining": "23",
+      "ratelimit-reset": "60"
+    },
+    "body": {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6ImRiLTAwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwNSIsImNhblB1Ymxpc2giOnRydWUsImNhblN1YnNjcmliZSI6dHJ1ZSwiY2FuUHVibGlzaERhdGEiOnRydWUsImNhblB1Ymxpc2hTb3VyY2VzIjpbIm1pY3JvcGhvbmUiXX0sInJvb21Db25maWciOnsibWV0YWRhdGEiOiJ7XCJzZXNzaW9uX2lkXCI6XCJiOTg4NjVkNy1kZmQ1LTU4OWUtODJiNC1lNmIzMGQzMWVhNGVcIixcImxhbmd1YWdlc1wiOntcInBhdGllbnRcIjpcInJ1XCIsXCJkZW50aXN0XCI6XCJlblwifSxcIm1vZGVcIjpcImNvbnNlY3V0aXZlXCIsXCJnbG9zc2FyeV9pZFwiOlwiZGVudGFsLWVuLXJ1XCJ9In0sInN1YiI6InBhdGllbnQtYjk4ODY1ZDctZGZkNS01ODllLTgyYjQtZTZiMzBkMzFlYTRlIiwiaXNzIjoiZGVudGFicmlkZ2UiLCJuYmYiOjE3OTI5Mjk2MDAsImV4cCI6MTc5MjkzNjgwMH0.hnq6tKJA3IQy76MdImg1nacsEZoq6o7w0_sLsWlV5aA",
+      "livekit_url": null,
+      "identity": "patient-b98865d7-dfd5-589e-82b4-e6b30d31ea4e",
+      "expires_at": "2026-10-25T14:00:00Z"
+    }
+  }
+}

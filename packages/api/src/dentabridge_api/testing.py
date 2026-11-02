@@ -110,9 +110,9 @@ def consent(client: Any, purpose: str) -> str:
     return str(response.json()["consent_id"])
 
 
-def an_analysis(client: Any) -> str:
+def an_analysis(client: Any, sample_id: str = "one") -> str:
     response = client.post(
-        "/v1/analyses/sample", json={"sample_id": "one", "locale": "en"}, headers=key()
+        "/v1/analyses/sample", json={"sample_id": sample_id, "locale": "en"}, headers=key()
     )
     return str(response.json()["analysis_id"])
 

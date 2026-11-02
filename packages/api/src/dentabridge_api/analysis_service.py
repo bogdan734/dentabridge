@@ -1,9 +1,9 @@
 """One analysis: the backend's observations, the demo urgency rules, then the patient text."""
 
 from datetime import timedelta
-from uuid import uuid4
 
 from dentabridge_api.clock import Clock
+from dentabridge_api.ids import new_id
 from dentabridge_core import (
     AnalysisResult,
     Finding,
@@ -45,7 +45,7 @@ async def run_analysis(
     note, note_status = guard_note(output.note_en)
     now = clock.now()
     return AnalysisResult(
-        analysis_id=uuid4(),
+        analysis_id=new_id(),
         modality=modality,
         model=backend.model,
         image_quality=output.image_quality,

@@ -1,0 +1,26 @@
+{
+  "step": "slot-unavailable",
+  "request": {
+    "method": "POST",
+    "path": "/v1/holds",
+    "headers": {
+      "Idempotency-Key": "fixture-hold-again"
+    },
+    "body": {
+      "slot_id": "b40065f3-4c33-5ad7-9894-23750d58abea"
+    }
+  },
+  "response": {
+    "status": 409,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "code": "slot_unavailable",
+      "message_key": "error.slot_unavailable",
+      "detail": null,
+      "request_id": "fixture-05",
+      "retry_after_s": null
+    }
+  }
+}

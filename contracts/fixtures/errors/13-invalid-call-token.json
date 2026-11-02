@@ -1,0 +1,23 @@
+{
+  "step": "invalid-call-token",
+  "request": {
+    "method": "GET",
+    "path": "/v1/calls/c4b12bbd-769d-5fae-b42b-db516d192e24/context",
+    "headers": {
+      "Authorization": "Bearer not-a-token"
+    }
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "code": "invalid_call_token",
+      "message_key": "error.invalid_call_token",
+      "detail": null,
+      "request_id": "fixture-13",
+      "retry_after_s": null
+    }
+  }
+}

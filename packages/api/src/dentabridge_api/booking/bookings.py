@@ -2,7 +2,7 @@
 
 import json
 from datetime import datetime, timedelta
-from uuid import UUID, uuid4
+from uuid import UUID
 from zoneinfo import ZoneInfo
 
 from sqlalchemy.exc import IntegrityError
@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from dentabridge_api.booking.slots import SLOT
 from dentabridge_api.db.models import AnalysisRow, BookingRow, ConsentRow, HoldRow, QuoteRow
 from dentabridge_api.errors import ApiError
+from dentabridge_api.ids import new_id
 from dentabridge_api.seed import ClinicSeed
 from dentabridge_core import (
     Booking,
@@ -84,7 +85,7 @@ def confirm(
             raise ApiError(410, ErrorCode.ANALYSIS_EXPIRED)
         snapshot = analysis.result_json  # observations only: no photo is ever stored
 
-    booking_id = uuid4()
+    booking_id = new_id()
     end = hold.start + SLOT
     row = BookingRow(
         id=str(booking_id),

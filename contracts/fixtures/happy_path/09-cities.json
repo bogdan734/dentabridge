@@ -1,0 +1,52 @@
+{
+  "step": "cities",
+  "request": {
+    "method": "GET",
+    "path": "/v1/cities",
+    "query": {
+      "q": "lon",
+      "limit": 5
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "ratelimit-limit": "120",
+      "ratelimit-remaining": "113",
+      "ratelimit-reset": "60"
+    },
+    "body": [
+      {
+        "iata": "LNV",
+        "city": "Londolovit",
+        "airport": "Londolovit Airport",
+        "country_code": "PG"
+      },
+      {
+        "iata": "LCY",
+        "city": "London",
+        "airport": "London City Airport",
+        "country_code": "GB"
+      },
+      {
+        "iata": "LGW",
+        "city": "London",
+        "airport": "London Gatwick Airport",
+        "country_code": "GB"
+      },
+      {
+        "iata": "LHR",
+        "city": "London",
+        "airport": "London Heathrow Airport",
+        "country_code": "GB"
+      },
+      {
+        "iata": "YXU",
+        "city": "London",
+        "airport": "London International Airport",
+        "country_code": "CA"
+      }
+    ]
+  }
+}

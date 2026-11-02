@@ -12,6 +12,7 @@ from dentabridge_api.context import RequestContext
 from dentabridge_api.db.session import init_schema, make_engine, session_factory
 from dentabridge_api.errors import install_error_handlers
 from dentabridge_api.idempotency import IdempotencyStore
+from dentabridge_api.openapi import install_openapi
 from dentabridge_api.ratelimit import DEFAULT_BUDGETS, RateLimiter
 from dentabridge_api.routes import (
     analyses,
@@ -29,7 +30,7 @@ from dentabridge_api.samples import SampleCatalogue
 from dentabridge_api.seed import ClinicSeed, load_clinics
 from dentabridge_api.settings import Settings
 from dentabridge_api.uploads import FORM_OVERHEAD, MAX_UPLOAD_BYTES
-from dentabridge_core import CONTRACT_VERSION, FareEstimator, VisionBackend
+from dentabridge_core import CONTRACT_VERSION, ErrorResponse, FareEstimator, VisionBackend
 from dentabridge_core.policy import DEFAULT_TABLE_PATH, load_table
 from dentabridge_pricing.airports import Airport, load_airports
 from dentabridge_pricing.fx import FxSnapshot, load_fx
@@ -56,7 +57,12 @@ def create_app(
     fx: FxSnapshot | None = None,
     hotels: HotelTable | None = None,
 ) -> FastAPI:
-    app = FastAPI(title="DentaBridge API", version=CONTRACT_VERSION)
+    app = FastAPI(
+        title="DentaBridge API",
+        version=CONTRACT_VERSION,
+        responses={"default": {"description": "Any failure", "model": ErrorResponse}},
+    )
+    install_openapi(app)
     engine = make_engine(settings.db_url)
     init_schema(engine)
     app.state.settings = settings

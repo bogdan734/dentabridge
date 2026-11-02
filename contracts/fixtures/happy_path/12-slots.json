@@ -1,0 +1,270 @@
+{
+  "step": "slots",
+  "request": {
+    "method": "GET",
+    "path": "/v1/clinics/alfama-demo-dental/slots",
+    "query": {
+      "from": "2026-11-11",
+      "to": "2026-11-14"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "ratelimit-limit": "120",
+      "ratelimit-remaining": "111",
+      "ratelimit-reset": "60"
+    },
+    "body": [
+      {
+        "slot_id": "b40065f3-4c33-5ad7-9894-23750d58abea",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-11T09:00:00Z",
+        "end": "2026-11-11T10:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "51143689-aba6-5022-ae20-b4c20a3f6e3e",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-11T10:00:00Z",
+        "end": "2026-11-11T11:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "6568cf52-a30a-56d6-81af-ae5547d0d653",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-11T11:00:00Z",
+        "end": "2026-11-11T12:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "d7531a8e-71ca-59b7-817e-e0443f81419c",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-11T12:00:00Z",
+        "end": "2026-11-11T13:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "1a34a515-1e97-5921-88f2-cd6326a21113",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-12T09:00:00Z",
+        "end": "2026-11-12T10:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "2495ecb3-f937-5687-9e98-331d24d8a96d",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-12T10:00:00Z",
+        "end": "2026-11-12T11:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "59414a47-775f-532d-926e-3d81d414a7a6",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-tomas-ribeiro",
+        "start": "2026-11-12T10:00:00Z",
+        "end": "2026-11-12T11:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "ce00c2e2-fc63-5d00-8b6e-2f96044ceb83",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-12T11:00:00Z",
+        "end": "2026-11-12T12:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "dead3723-6af8-5a9d-bbc7-48204bd05053",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-tomas-ribeiro",
+        "start": "2026-11-12T11:00:00Z",
+        "end": "2026-11-12T12:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "7798274e-e57f-51f7-81ec-48be48c461da",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-12T12:00:00Z",
+        "end": "2026-11-12T13:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "ca1b2710-75ea-5370-b711-19e1cd98d375",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-tomas-ribeiro",
+        "start": "2026-11-12T12:00:00Z",
+        "end": "2026-11-12T13:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "736f4dcf-f07a-548a-9b60-dca12ef72969",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-tomas-ribeiro",
+        "start": "2026-11-12T13:00:00Z",
+        "end": "2026-11-12T14:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "82a373f7-3626-559e-b60c-521556840446",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-12T14:00:00Z",
+        "end": "2026-11-12T15:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "a805e749-c634-530b-94a4-17b404693f2c",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-12T15:00:00Z",
+        "end": "2026-11-12T16:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "295c4cf2-fdc1-5e63-bff6-c5590b70aaed",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-tomas-ribeiro",
+        "start": "2026-11-12T15:00:00Z",
+        "end": "2026-11-12T16:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "90d09c2c-0bc7-5343-b70c-85f1066c9b47",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-12T16:00:00Z",
+        "end": "2026-11-12T17:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "2fbe3b11-e23d-5f43-8769-6ea17e64b2ab",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-tomas-ribeiro",
+        "start": "2026-11-12T16:00:00Z",
+        "end": "2026-11-12T17:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "3bebb3a7-c425-5243-a9d2-4afd9a453d61",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-12T17:00:00Z",
+        "end": "2026-11-12T18:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "9ef6a8c9-11e4-5251-98ed-e7b34a27819d",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-tomas-ribeiro",
+        "start": "2026-11-12T17:00:00Z",
+        "end": "2026-11-12T18:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "6cc111f4-abfe-5241-b13c-a5f0b7d8ebca",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-tomas-ribeiro",
+        "start": "2026-11-12T18:00:00Z",
+        "end": "2026-11-12T19:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "59696a5e-be49-5b15-9820-2750879c3bc3",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-13T09:00:00Z",
+        "end": "2026-11-13T10:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "f7301e73-a9e7-5b06-acce-c5eb5a9e7568",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-13T10:00:00Z",
+        "end": "2026-11-13T11:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "6f99a0be-e22f-5243-af1f-80688baeea97",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-13T11:00:00Z",
+        "end": "2026-11-13T12:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "dd709a16-c3a7-5701-b185-5988bffc6994",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-13T12:00:00Z",
+        "end": "2026-11-13T13:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "c809734f-8b05-59a0-a11f-7c58cb9ef073",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-13T14:00:00Z",
+        "end": "2026-11-13T15:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "0495e800-990e-5713-8958-719d493c7bd5",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-13T15:00:00Z",
+        "end": "2026-11-13T16:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "8b614efa-daf3-515e-9f66-1105af7354ed",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-13T16:00:00Z",
+        "end": "2026-11-13T17:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "8447d043-2287-5bf2-846e-f261dabee9bf",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-tomas-ribeiro",
+        "start": "2026-11-14T09:00:00Z",
+        "end": "2026-11-14T10:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "a58a3baa-60b3-515a-b288-c5ad0cc94a40",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-tomas-ribeiro",
+        "start": "2026-11-14T10:00:00Z",
+        "end": "2026-11-14T11:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "7564132f-ccc3-55f5-abd4-764cee17d741",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-tomas-ribeiro",
+        "start": "2026-11-14T11:00:00Z",
+        "end": "2026-11-14T12:00:00Z",
+        "status": "available"
+      },
+      {
+        "slot_id": "7ed39d0c-641a-5ae4-84f1-4422df064367",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-tomas-ribeiro",
+        "start": "2026-11-14T12:00:00Z",
+        "end": "2026-11-14T13:00:00Z",
+        "status": "available"
+      }
+    ]
+  }
+}

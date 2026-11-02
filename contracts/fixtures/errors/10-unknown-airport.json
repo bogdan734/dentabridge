@@ -1,0 +1,31 @@
+{
+  "step": "unknown-airport",
+  "request": {
+    "method": "POST",
+    "path": "/v1/quotes",
+    "body": {
+      "clinic_id": "alfama-demo-dental",
+      "treatment_codes": [
+        "crown"
+      ],
+      "origin_iata": "QQQ",
+      "depart_date": "2026-11-10",
+      "return_date": "2026-11-20",
+      "travellers": 1,
+      "currency": "EUR"
+    }
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "code": "unknown_airport",
+      "message_key": "error.unknown_airport",
+      "detail": "unknown airport QQQ",
+      "request_id": "fixture-10",
+      "retry_after_s": null
+    }
+  }
+}

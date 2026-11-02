@@ -1,0 +1,44 @@
+{
+  "step": "call-session",
+  "request": {
+    "method": "POST",
+    "path": "/v1/bookings/00000000-0000-4000-8000-000000000005/call",
+    "headers": {
+      "Idempotency-Key": "fixture-call-session"
+    },
+    "body": {
+      "patient_language": "ru",
+      "dentist_language": "en"
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json",
+      "ratelimit-limit": "30",
+      "ratelimit-remaining": "24",
+      "ratelimit-reset": "60"
+    },
+    "body": {
+      "session_id": "b98865d7-dfd5-589e-82b4-e6b30d31ea4e",
+      "booking_id": "00000000-0000-4000-8000-000000000005",
+      "room": "db-00000000-0000-4000-8000-000000000005",
+      "languages": {
+        "patient": "ru",
+        "dentist": "en"
+      },
+      "pair_status": "verified",
+      "mode": "consecutive",
+      "ai_disclosure": {
+        "synthetic_voice": true,
+        "machine_translation": true,
+        "not_medical_interpreter": true,
+        "must_acknowledge": true,
+        "basis": "EU AI Act Art. 50",
+        "text_key": "ai_disclosure.body"
+      },
+      "recording": false,
+      "expires_at": "2026-11-11T12:00:00Z"
+    }
+  }
+}

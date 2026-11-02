@@ -1,0 +1,52 @@
+{
+  "step": "booking",
+  "request": {
+    "method": "POST",
+    "path": "/v1/bookings",
+    "headers": {
+      "Idempotency-Key": "fixture-booking"
+    },
+    "body": {
+      "hold_id": "00000000-0000-4000-8000-000000000003",
+      "quote_id": "1d3dd311-a156-5d9d-9cfb-8c0b0aeafd0f",
+      "analysis_id": "00000000-0000-4000-8000-000000000002",
+      "share_consent_id": "00000000-0000-4000-8000-000000000004"
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json",
+      "ratelimit-limit": "30",
+      "ratelimit-remaining": "25",
+      "ratelimit-reset": "60"
+    },
+    "body": {
+      "booking_id": "00000000-0000-4000-8000-000000000005",
+      "slot": {
+        "slot_id": "b40065f3-4c33-5ad7-9894-23750d58abea",
+        "clinic_id": "alfama-demo-dental",
+        "dentist_id": "dr-ines-marques",
+        "start": "2026-11-11T09:00:00Z",
+        "end": "2026-11-11T10:00:00Z",
+        "status": "booked"
+      },
+      "quote_id": "1d3dd311-a156-5d9d-9cfb-8c0b0aeafd0f",
+      "status": "confirmed",
+      "tickets": [
+        {
+          "kind": "flight",
+          "reference": "DEMO-FLT-00000000",
+          "chip": "SIMULATED"
+        },
+        {
+          "kind": "hotel",
+          "reference": "DEMO-HTL-00000000",
+          "chip": "SIMULATED"
+        }
+      ],
+      "shared_analysis_id": "00000000-0000-4000-8000-000000000002",
+      "simulated": true
+    }
+  }
+}

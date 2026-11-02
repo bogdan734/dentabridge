@@ -1,0 +1,30 @@
+{
+  "step": "rate-limited",
+  "request": {
+    "method": "POST",
+    "path": "/v1/consents",
+    "body": {
+      "purpose": "photo_analysis",
+      "health_data_explicit": true,
+      "text_version": "v1",
+      "locale": "en"
+    }
+  },
+  "response": {
+    "status": 429,
+    "headers": {
+      "content-type": "application/json",
+      "retry-after": "60",
+      "ratelimit-limit": "30",
+      "ratelimit-remaining": "0",
+      "ratelimit-reset": "60"
+    },
+    "body": {
+      "code": "rate_limited",
+      "message_key": "error.rate_limited",
+      "detail": null,
+      "request_id": "fixture-16",
+      "retry_after_s": 60
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "step": "wrong-role",
+  "request": {
+    "method": "GET",
+    "path": "/v1/calls/c4b12bbd-769d-5fae-b42b-db516d192e24/context",
+    "headers": {
+      "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6ImRiLTAwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwNiIsImNhblB1Ymxpc2giOnRydWUsImNhblN1YnNjcmliZSI6dHJ1ZSwiY2FuUHVibGlzaERhdGEiOnRydWUsImNhblB1Ymxpc2hTb3VyY2VzIjpbIm1pY3JvcGhvbmUiXX0sInJvb21Db25maWciOnsibWV0YWRhdGEiOiJ7XCJzZXNzaW9uX2lkXCI6XCJjNGIxMmJiZC03NjlkLTVmYWUtYjQyYi1kYjUxNmQxOTJlMjRcIixcImxhbmd1YWdlc1wiOntcInBhdGllbnRcIjpcInJ1XCIsXCJkZW50aXN0XCI6XCJlblwifSxcIm1vZGVcIjpcImNvbnNlY3V0aXZlXCIsXCJnbG9zc2FyeV9pZFwiOlwiZGVudGFsLWVuLXJ1XCJ9In0sInN1YiI6InBhdGllbnQtYzRiMTJiYmQtNzY5ZC01ZmFlLWI0MmItZGI1MTZkMTkyZTI0IiwiaXNzIjoiZGVudGFicmlkZ2UiLCJuYmYiOjE3OTI5Mjk2MDAsImV4cCI6MTc5MjkzNjgwMH0.2igeBpEeH3TmLmh39QHcJ3jQDHNVBo4kdFfdkOBi5EY"
+    }
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "code": "wrong_role",
+      "message_key": "error.wrong_role",
+      "detail": null,
+      "request_id": "fixture-14",
+      "retry_after_s": null
+    }
+  }
+}

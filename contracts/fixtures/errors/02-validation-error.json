@@ -1,0 +1,21 @@
+{
+  "step": "validation-error",
+  "request": {
+    "method": "POST",
+    "path": "/v1/consents",
+    "body": {}
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "code": "validation_error",
+      "message_key": "error.validation_error",
+      "detail": "body.purpose, body.health_data_explicit, body.text_version, body.locale",
+      "request_id": "fixture-02",
+      "retry_after_s": null
+    }
+  }
+}

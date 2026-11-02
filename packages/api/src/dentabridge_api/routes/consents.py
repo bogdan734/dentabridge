@@ -1,10 +1,10 @@
 from datetime import timedelta
-from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Request
 
 from dentabridge_api.db.models import ConsentRow
 from dentabridge_api.errors import ApiError
+from dentabridge_api.ids import new_id
 from dentabridge_api.purge import purge_expired
 from dentabridge_api.ratelimit import rate_limited
 from dentabridge_core import ConsentRecord, ConsentRequest, ErrorCode
@@ -23,7 +23,7 @@ def create_consent(body: ConsentRequest, request: Request) -> ConsentRecord:
     now = state.clock.now()
     record = ConsentRecord(
         **body.model_dump(),
-        consent_id=uuid4(),
+        consent_id=new_id(),
         given_at=now,
         expires_at=now + timedelta(hours=state.settings.result_ttl_h),
     )

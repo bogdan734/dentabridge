@@ -1,0 +1,17 @@
+{
+  "step": "sample-image",
+  "request": {
+    "method": "GET",
+    "path": "/v1/samples/demo-photo/image"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "image/jpeg"
+    },
+    "body": {
+      "bytes": 1830,
+      "sha256": "94a1ec5580b953e5d46b9608cb53d868eea760581de6428add76462881fd6184"
+    }
+  }
+}

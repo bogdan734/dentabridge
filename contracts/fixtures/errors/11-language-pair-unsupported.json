@@ -1,0 +1,27 @@
+{
+  "step": "language-pair-unsupported",
+  "request": {
+    "method": "POST",
+    "path": "/v1/bookings/00000000-0000-4000-8000-000000000006/call",
+    "headers": {
+      "Idempotency-Key": "fixture-call-same"
+    },
+    "body": {
+      "patient_language": "en",
+      "dentist_language": "en"
+    }
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "code": "language_pair_unsupported",
+      "message_key": "error.language_pair_unsupported",
+      "detail": "the dentist speaks en, pt; the call translates between two languages",
+      "request_id": "fixture-11",
+      "retry_after_s": null
+    }
+  }
+}

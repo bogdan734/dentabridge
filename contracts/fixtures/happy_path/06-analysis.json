@@ -1,0 +1,152 @@
+{
+  "step": "analysis",
+  "request": {
+    "method": "POST",
+    "path": "/v1/analyses/sample",
+    "headers": {
+      "Idempotency-Key": "fixture-analysis"
+    },
+    "body": {
+      "sample_id": "demo-photo",
+      "locale": "en"
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json",
+      "ratelimit-limit": "10",
+      "ratelimit-remaining": "9",
+      "ratelimit-reset": "60"
+    },
+    "body": {
+      "analysis_id": "00000000-0000-4000-8000-000000000002",
+      "modality": "intraoral_photo",
+      "model": {
+        "model_id": "scripted",
+        "version": "1",
+        "backend": "fixture",
+        "card_url": null
+      },
+      "image_quality": "ok",
+      "quality_reason": null,
+      "findings": [
+        {
+          "code": "caries",
+          "status": "possible",
+          "score": 0.71,
+          "subtype": null,
+          "regions": [
+            {
+              "x0": 0.42,
+              "y0": 0.38,
+              "x1": 0.58,
+              "y1": 0.55
+            }
+          ]
+        },
+        {
+          "code": "filling",
+          "status": "not_seen",
+          "score": 0.08,
+          "subtype": null,
+          "regions": []
+        },
+        {
+          "code": "crown",
+          "status": "not_assessed",
+          "score": null,
+          "subtype": null,
+          "regions": []
+        },
+        {
+          "code": "abrasion",
+          "status": "not_assessed",
+          "score": null,
+          "subtype": null,
+          "regions": []
+        },
+        {
+          "code": "gingivitis",
+          "status": "not_assessed",
+          "score": null,
+          "subtype": null,
+          "regions": []
+        },
+        {
+          "code": "calculus",
+          "status": "not_assessed",
+          "score": null,
+          "subtype": null,
+          "regions": []
+        },
+        {
+          "code": "ulcer",
+          "status": "not_assessed",
+          "score": null,
+          "subtype": null,
+          "regions": []
+        },
+        {
+          "code": "discolouration",
+          "status": "not_assessed",
+          "score": null,
+          "subtype": null,
+          "regions": []
+        },
+        {
+          "code": "hypodontia",
+          "status": "not_assessed",
+          "score": null,
+          "subtype": null,
+          "regions": []
+        },
+        {
+          "code": "malocclusion",
+          "status": "not_assessed",
+          "score": null,
+          "subtype": null,
+          "regions": []
+        },
+        {
+          "code": "periapical_lesion",
+          "status": "not_assessed",
+          "score": null,
+          "subtype": null,
+          "regions": []
+        },
+        {
+          "code": "impacted_tooth",
+          "status": "not_assessed",
+          "score": null,
+          "subtype": null,
+          "regions": []
+        }
+      ],
+      "urgency": {
+        "level": "soon",
+        "rule_id": "R2",
+        "table_version": "v1",
+        "review_status": "illustrative_not_clinically_reviewed",
+        "triggered_by": [
+          "caries"
+        ]
+      },
+      "patient_text": {
+        "locale": "en",
+        "observations": [
+          "A region that may show tooth decay (caries) was noticed. This tool cannot rule out other causes.",
+          "No filling was noticed."
+        ],
+        "urgency_line": "Demo hint: consider booking a visit with a dentist soon.",
+        "see_dentist_line": "Please see a dentist about anything that worries you, whatever this tool shows.",
+        "not_assessed_line": "Not assessed by this tool: crowns, tooth wear, gum inflammation, tartar (calculus), mouth ulcers, tooth discolouration, missing teeth, bite alignment.",
+        "disclaimer": "This tool shows what an image model noticed in the photo. It can be wrong, it cannot rule out any condition, and it is not medical advice."
+      },
+      "vlm_note": null,
+      "vlm_note_status": "absent",
+      "created_at": "2026-10-25T12:00:00Z",
+      "expires_at": "2026-10-26T12:00:00Z"
+    }
+  }
+}

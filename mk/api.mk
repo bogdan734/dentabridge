@@ -1,4 +1,4 @@
-.PHONY: api-placeholder
+.PHONY: contracts
 
-api-placeholder: ## Placeholder, owned by WS02 (api, pricing)
-	@echo "api-placeholder: owned by WS02, not implemented yet" >&2; exit 1
+contracts: ## Regenerate contracts/ (OpenAPI document and recorded fixtures); a diff fails the tests
+	uv run python -m dentabridge_api.export contracts

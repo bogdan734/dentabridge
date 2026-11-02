@@ -1,0 +1,27 @@
+{
+  "step": "booking-cancelled",
+  "request": {
+    "method": "POST",
+    "path": "/v1/bookings/00000000-0000-4000-8000-000000000006/call",
+    "headers": {
+      "Idempotency-Key": "fixture-call-cancelled"
+    },
+    "body": {
+      "patient_language": "ru",
+      "dentist_language": "en"
+    }
+  },
+  "response": {
+    "status": 409,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "code": "booking_cancelled",
+      "message_key": "error.booking_cancelled",
+      "detail": null,
+      "request_id": "fixture-15",
+      "retry_after_s": null
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "step": "idempotency-key-reuse",
+  "request": {
+    "method": "POST",
+    "path": "/v1/holds",
+    "headers": {
+      "Idempotency-Key": "fixture-setup-hold"
+    },
+    "body": {
+      "slot_id": "51143689-aba6-5022-ae20-b4c20a3f6e3e"
+    }
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "code": "idempotency_key_reuse",
+      "message_key": "error.idempotency_key_reuse",
+      "detail": null,
+      "request_id": "fixture-06",
+      "retry_after_s": null
+    }
+  }
+}

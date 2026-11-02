@@ -1,0 +1,122 @@
+{
+  "step": "quote",
+  "request": {
+    "method": "POST",
+    "path": "/v1/quotes",
+    "body": {
+      "clinic_id": "alfama-demo-dental",
+      "treatment_codes": [
+        "crown"
+      ],
+      "origin_iata": "LHR",
+      "depart_date": "2026-11-10",
+      "return_date": "2026-11-20",
+      "travellers": 1,
+      "currency": "EUR"
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json",
+      "ratelimit-limit": "30",
+      "ratelimit-remaining": "28",
+      "ratelimit-reset": "60"
+    },
+    "body": {
+      "quote_id": "1d3dd311-a156-5d9d-9cfb-8c0b0aeafd0f",
+      "request": {
+        "clinic_id": "alfama-demo-dental",
+        "treatment_codes": [
+          "crown"
+        ],
+        "origin_iata": "LHR",
+        "depart_date": "2026-11-10",
+        "return_date": "2026-11-20",
+        "travellers": 1,
+        "currency": "EUR"
+      },
+      "lines": [
+        {
+          "kind": "treatment",
+          "trips": 1,
+          "amount": {
+            "low": {
+              "amount_minor": 40204,
+              "currency": "EUR"
+            },
+            "mid": {
+              "amount_minor": 40204,
+              "currency": "EUR"
+            },
+            "high": {
+              "amount_minor": 40204,
+              "currency": "EUR"
+            }
+          },
+          "chip": "SAMPLE",
+          "basis_key": "clinic_sample_price"
+        },
+        {
+          "kind": "flight",
+          "trips": 1,
+          "amount": {
+            "low": {
+              "amount_minor": 27861,
+              "currency": "EUR"
+            },
+            "mid": {
+              "amount_minor": 39802,
+              "currency": "EUR"
+            },
+            "high": {
+              "amount_minor": 61693,
+              "currency": "EUR"
+            }
+          },
+          "chip": "ESTIMATE",
+          "basis_key": "hand_set_v0"
+        },
+        {
+          "kind": "hotel",
+          "trips": 1,
+          "amount": {
+            "low": {
+              "amount_minor": 26803,
+              "currency": "EUR"
+            },
+            "mid": {
+              "amount_minor": 40204,
+              "currency": "EUR"
+            },
+            "high": {
+              "amount_minor": 62539,
+              "currency": "EUR"
+            }
+          },
+          "chip": "ESTIMATE",
+          "basis_key": "hotel_tier_standard"
+        }
+      ],
+      "total": {
+        "low": {
+          "amount_minor": 94868,
+          "currency": "EUR"
+        },
+        "mid": {
+          "amount_minor": 120210,
+          "currency": "EUR"
+        },
+        "high": {
+          "amount_minor": 164436,
+          "currency": "EUR"
+        }
+      },
+      "total_chip": "ESTIMATE",
+      "fx_as_of": "2026-10-23",
+      "fare_model_version": "offline-v0",
+      "fare_mdape": null,
+      "valid_until": "2026-10-26T12:00:00Z"
+    }
+  }
+}

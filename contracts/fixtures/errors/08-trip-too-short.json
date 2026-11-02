@@ -1,0 +1,31 @@
+{
+  "step": "trip-too-short",
+  "request": {
+    "method": "POST",
+    "path": "/v1/quotes",
+    "body": {
+      "clinic_id": "alfama-demo-dental",
+      "treatment_codes": [
+        "crown"
+      ],
+      "origin_iata": "LHR",
+      "depart_date": "2026-11-10",
+      "return_date": "2026-11-11",
+      "travellers": 1,
+      "currency": "EUR"
+    }
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "code": "trip_too_short",
+      "message_key": "error.trip_too_short",
+      "detail": "the treatment needs 5 nights per trip",
+      "request_id": "fixture-08",
+      "retry_after_s": null
+    }
+  }
+}

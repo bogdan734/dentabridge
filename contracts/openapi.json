@@ -1,0 +1,2991 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DentaBridge API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/v1/health": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Get Health",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/meta": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Get Meta",
+        "operationId": "getMeta",
+        "parameters": [
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "en",
+                "ru"
+              ],
+              "type": "string",
+              "default": "en",
+              "title": "Locale"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Meta"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/consents": {
+      "post": {
+        "tags": [
+          "consents"
+        ],
+        "summary": "Create Consent",
+        "operationId": "createConsent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentRecord"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/samples": {
+      "get": {
+        "tags": [
+          "samples"
+        ],
+        "summary": "List Samples",
+        "operationId": "listSamples",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SampleImage"
+                  },
+                  "type": "array",
+                  "title": "Response Listsamples"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/samples/{sample_id}/image": {
+      "get": {
+        "tags": [
+          "samples"
+        ],
+        "summary": "Get Sample Image",
+        "operationId": "getSampleImage",
+        "parameters": [
+          {
+            "name": "sample_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sample Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "image/jpeg": {}
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/analyses/{analysis_id}": {
+      "get": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Get Analysis",
+        "operationId": "getAnalysis",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Delete Analysis",
+        "operationId": "deleteAnalysis",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/analyses": {
+      "post": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Create Analysis",
+        "operationId": "createAnalysis",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_createAnalysis"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{8,64}$"
+            },
+            "description": "Retrying with the same key and body returns the first answer."
+          }
+        ]
+      }
+    },
+    "/v1/analyses/sample": {
+      "post": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Create Sample Analysis",
+        "operationId": "createSampleAnalysis",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyseSampleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{8,64}$"
+            },
+            "description": "Retrying with the same key and body returns the first answer."
+          }
+        ]
+      }
+    },
+    "/v1/treatments": {
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "List Treatments",
+        "operationId": "listTreatments",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TreatmentCode"
+                  },
+                  "type": "array",
+                  "title": "Response Listtreatments"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cities": {
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Search",
+        "operationId": "searchCities",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "title": "Q"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/City"
+                  },
+                  "title": "Response Searchcities"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/clinics": {
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "List Clinics",
+        "operationId": "listClinics",
+        "parameters": [
+          {
+            "name": "treatment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TreatmentCode"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Treatment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClinicSummary"
+                  },
+                  "title": "Response Listclinics"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/clinics/{clinic_id}": {
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Get Clinic",
+        "operationId": "getClinic",
+        "parameters": [
+          {
+            "name": "clinic_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Clinic Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicSummary"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/clinics/{clinic_id}/slots": {
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "List Slots",
+        "operationId": "listSlots",
+        "parameters": [
+          {
+            "name": "clinic_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Clinic Id"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Slot"
+                  },
+                  "title": "Response Listslots"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/quotes": {
+      "post": {
+        "tags": [
+          "quotes"
+        ],
+        "summary": "Create Quote",
+        "operationId": "createQuote",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Quote"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/quotes/{quote_id}": {
+      "get": {
+        "tags": [
+          "quotes"
+        ],
+        "summary": "Get Quote",
+        "operationId": "getQuote",
+        "parameters": [
+          {
+            "name": "quote_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Quote Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Quote"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/holds/{hold_id}": {
+      "delete": {
+        "tags": [
+          "booking"
+        ],
+        "summary": "Delete Hold",
+        "operationId": "releaseHold",
+        "parameters": [
+          {
+            "name": "hold_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Hold Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/bookings/{booking_id}/cancel": {
+      "post": {
+        "tags": [
+          "booking"
+        ],
+        "summary": "Cancel Booking",
+        "operationId": "cancelBooking",
+        "parameters": [
+          {
+            "name": "booking_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Booking Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Booking"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/holds": {
+      "post": {
+        "tags": [
+          "booking"
+        ],
+        "summary": "Post Hold",
+        "operationId": "createHold",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HoldRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Hold"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{8,64}$"
+            },
+            "description": "Retrying with the same key and body returns the first answer."
+          }
+        ]
+      }
+    },
+    "/v1/bookings": {
+      "post": {
+        "tags": [
+          "booking"
+        ],
+        "summary": "Post Booking",
+        "operationId": "createBooking",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Booking"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{8,64}$"
+            },
+            "description": "Retrying with the same key and body returns the first answer."
+          }
+        ]
+      }
+    },
+    "/v1/bookings/{booking_id}": {
+      "get": {
+        "tags": [
+          "booking"
+        ],
+        "summary": "Get Booking",
+        "operationId": "getBooking",
+        "parameters": [
+          {
+            "name": "booking_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Booking Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Booking"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/bookings/{booking_id}/call": {
+      "post": {
+        "tags": [
+          "calls"
+        ],
+        "summary": "Post Call",
+        "operationId": "createCallSession",
+        "parameters": [
+          {
+            "name": "booking_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Booking Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{8,64}$"
+            },
+            "description": "Retrying with the same key and body returns the first answer."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CallSessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CallSession"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calls/{session_id}/tokens": {
+      "post": {
+        "tags": [
+          "calls"
+        ],
+        "summary": "Post Token",
+        "operationId": "createCallToken",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CallTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CallToken"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calls/{session_id}/context": {
+      "get": {
+        "tags": [
+          "calls"
+        ],
+        "summary": "Get Context",
+        "operationId": "getCallContext",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CallContext"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/replays/{replay_id}": {
+      "get": {
+        "tags": [
+          "replays"
+        ],
+        "summary": "Get Replay",
+        "operationId": "getReplay",
+        "parameters": [
+          {
+            "name": "replay_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+              "title": "Replay Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplayManifest"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/replays/{replay_id}/audio/{file}": {
+      "get": {
+        "tags": [
+          "replays"
+        ],
+        "summary": "Get Replay Audio",
+        "operationId": "getReplayAudio",
+        "parameters": [
+          {
+            "name": "replay_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+              "title": "Replay Id"
+            }
+          },
+          {
+            "name": "file",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+              "title": "File"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "default": {
+            "description": "Any failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AiDisclosure": {
+        "properties": {
+          "synthetic_voice": {
+            "type": "boolean",
+            "const": true,
+            "title": "Synthetic Voice"
+          },
+          "machine_translation": {
+            "type": "boolean",
+            "const": true,
+            "title": "Machine Translation"
+          },
+          "not_medical_interpreter": {
+            "type": "boolean",
+            "const": true,
+            "title": "Not Medical Interpreter"
+          },
+          "must_acknowledge": {
+            "type": "boolean",
+            "const": true,
+            "title": "Must Acknowledge"
+          },
+          "basis": {
+            "type": "string",
+            "const": "EU AI Act Art. 50",
+            "title": "Basis"
+          },
+          "text_key": {
+            "type": "string",
+            "title": "Text Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "synthetic_voice",
+          "machine_translation",
+          "not_medical_interpreter",
+          "must_acknowledge",
+          "basis",
+          "text_key"
+        ],
+        "title": "AiDisclosure",
+        "description": "What the user must acknowledge before joining (EU AI Act Art. 50)."
+      },
+      "AnalyseSampleRequest": {
+        "properties": {
+          "sample_id": {
+            "type": "string",
+            "title": "Sample Id"
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ru"
+            ],
+            "title": "Locale"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sample_id",
+          "locale"
+        ],
+        "title": "AnalyseSampleRequest"
+      },
+      "AnalysisResult": {
+        "properties": {
+          "analysis_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Analysis Id"
+          },
+          "modality": {
+            "type": "string",
+            "enum": [
+              "intraoral_photo",
+              "panoramic_xray"
+            ],
+            "title": "Modality"
+          },
+          "model": {
+            "$ref": "#/components/schemas/ModelInfo"
+          },
+          "image_quality": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "unusable"
+            ],
+            "title": "Image Quality"
+          },
+          "quality_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "blurry",
+                  "dark",
+                  "no_teeth",
+                  "not_dental"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Reason"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            },
+            "type": "array",
+            "title": "Findings"
+          },
+          "urgency": {
+            "$ref": "#/components/schemas/UrgencyHint"
+          },
+          "patient_text": {
+            "$ref": "#/components/schemas/PatientText"
+          },
+          "vlm_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vlm Note"
+          },
+          "vlm_note_status": {
+            "type": "string",
+            "enum": [
+              "absent",
+              "passed",
+              "rejected"
+            ],
+            "title": "Vlm Note Status",
+            "default": "absent"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "analysis_id",
+          "modality",
+          "model",
+          "image_quality",
+          "quality_reason",
+          "findings",
+          "urgency",
+          "patient_text",
+          "vlm_note",
+          "vlm_note_status",
+          "created_at",
+          "expires_at"
+        ],
+        "title": "AnalysisResult"
+      },
+      "Body_createAnalysis": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          },
+          "consent_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consent Id"
+          },
+          "modality": {
+            "type": "string",
+            "enum": [
+              "intraoral_photo",
+              "panoramic_xray"
+            ],
+            "title": "Modality"
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ru"
+            ],
+            "title": "Locale"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file",
+          "consent_id",
+          "modality",
+          "locale"
+        ],
+        "title": "Body_createAnalysis"
+      },
+      "Booking": {
+        "properties": {
+          "booking_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Booking Id"
+          },
+          "slot": {
+            "$ref": "#/components/schemas/Slot"
+          },
+          "quote_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Quote Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "tickets": {
+            "items": {
+              "$ref": "#/components/schemas/MockTicket"
+            },
+            "type": "array",
+            "title": "Tickets",
+            "default": []
+          },
+          "shared_analysis_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shared Analysis Id"
+          },
+          "simulated": {
+            "type": "boolean",
+            "const": true,
+            "title": "Simulated"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "booking_id",
+          "slot",
+          "quote_id",
+          "status",
+          "tickets",
+          "shared_analysis_id",
+          "simulated"
+        ],
+        "title": "Booking"
+      },
+      "BookingRequest": {
+        "properties": {
+          "hold_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Hold Id"
+          },
+          "quote_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Quote Id"
+          },
+          "analysis_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Id"
+          },
+          "share_consent_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Share Consent Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "hold_id",
+          "quote_id"
+        ],
+        "title": "BookingRequest"
+      },
+      "CallContext": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Session Id"
+          },
+          "booking_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Booking Id"
+          },
+          "slot": {
+            "$ref": "#/components/schemas/Slot"
+          },
+          "patient_locale": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ru"
+            ],
+            "title": "Patient Locale"
+          },
+          "analysis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnalysisResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "session_id",
+          "booking_id",
+          "slot",
+          "patient_locale",
+          "analysis"
+        ],
+        "title": "CallContext",
+        "description": "What the dentist's panel shows. It never holds an image."
+      },
+      "CallSession": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Session Id"
+          },
+          "booking_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Booking Id"
+          },
+          "room": {
+            "type": "string",
+            "title": "Room"
+          },
+          "languages": {
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+            },
+            "propertyNames": {
+              "enum": [
+                "patient",
+                "dentist"
+              ]
+            },
+            "type": "object",
+            "title": "Languages"
+          },
+          "pair_status": {
+            "type": "string",
+            "enum": [
+              "verified",
+              "unverified"
+            ],
+            "title": "Pair Status"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "consecutive",
+              "captions_only"
+            ],
+            "title": "Mode"
+          },
+          "ai_disclosure": {
+            "$ref": "#/components/schemas/AiDisclosure"
+          },
+          "recording": {
+            "type": "boolean",
+            "const": false,
+            "title": "Recording"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "session_id",
+          "booking_id",
+          "room",
+          "languages",
+          "pair_status",
+          "mode",
+          "ai_disclosure",
+          "recording",
+          "expires_at"
+        ],
+        "title": "CallSession"
+      },
+      "CallSessionRequest": {
+        "properties": {
+          "patient_language": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+            "title": "Patient Language"
+          },
+          "dentist_language": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+            "title": "Dentist Language"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "patient_language",
+          "dentist_language"
+        ],
+        "title": "CallSessionRequest"
+      },
+      "CallToken": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "livekit_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Livekit Url"
+          },
+          "identity": {
+            "type": "string",
+            "title": "Identity"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "token",
+          "livekit_url",
+          "identity",
+          "expires_at"
+        ],
+        "title": "CallToken"
+      },
+      "CallTokenRequest": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "dentist"
+            ],
+            "title": "Role"
+          },
+          "ai_disclosure_acknowledged": {
+            "type": "boolean",
+            "const": true,
+            "title": "Ai Disclosure Acknowledged"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "role",
+          "ai_disclosure_acknowledged"
+        ],
+        "title": "CallTokenRequest"
+      },
+      "CaptionEvent": {
+        "properties": {
+          "utterance_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Utterance Id"
+          },
+          "speaker": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "dentist"
+            ],
+            "title": "Speaker"
+          },
+          "src_lang": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+            "title": "Src Lang"
+          },
+          "tgt_lang": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+            "title": "Tgt Lang"
+          },
+          "src_text": {
+            "type": "string",
+            "title": "Src Text"
+          },
+          "tgt_text": {
+            "type": "string",
+            "title": "Tgt Text"
+          },
+          "final": {
+            "type": "boolean",
+            "title": "Final"
+          },
+          "glossary_missing": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Glossary Missing",
+            "default": []
+          },
+          "digits_ok": {
+            "type": "boolean",
+            "title": "Digits Ok"
+          },
+          "audio": {
+            "type": "string",
+            "enum": [
+              "spoken",
+              "captions_only"
+            ],
+            "title": "Audio"
+          },
+          "t_speech_end_ms": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "T Speech End Ms"
+          },
+          "t_first_audio_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T First Audio Ms"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "utterance_id",
+          "speaker",
+          "src_lang",
+          "tgt_lang",
+          "src_text",
+          "tgt_text",
+          "final",
+          "glossary_missing",
+          "digits_ok",
+          "audio",
+          "t_speech_end_ms",
+          "t_first_audio_ms"
+        ],
+        "title": "CaptionEvent"
+      },
+      "City": {
+        "properties": {
+          "iata": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "title": "Iata"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "airport": {
+            "type": "string",
+            "title": "Airport"
+          },
+          "country_code": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "title": "Country Code"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "iata",
+          "city",
+          "airport",
+          "country_code"
+        ],
+        "title": "City"
+      },
+      "ClinicSummary": {
+        "properties": {
+          "clinic_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "title": "Clinic Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "country_code": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "title": "Country Code"
+          },
+          "airport_iata": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "title": "Airport Iata"
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone"
+          },
+          "languages": {
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Languages"
+          },
+          "dentists": {
+            "items": {
+              "$ref": "#/components/schemas/DentistSummary"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Dentists"
+          },
+          "treatments": {
+            "items": {
+              "$ref": "#/components/schemas/TreatmentPrice"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Treatments"
+          },
+          "is_fictional": {
+            "type": "boolean",
+            "const": true,
+            "title": "Is Fictional"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "clinic_id",
+          "name",
+          "city",
+          "country_code",
+          "airport_iata",
+          "timezone",
+          "languages",
+          "dentists",
+          "treatments",
+          "is_fictional"
+        ],
+        "title": "ClinicSummary"
+      },
+      "ConsentRecord": {
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "photo_analysis",
+              "share_with_clinic"
+            ],
+            "title": "Purpose"
+          },
+          "health_data_explicit": {
+            "type": "boolean",
+            "const": true,
+            "title": "Health Data Explicit"
+          },
+          "text_version": {
+            "type": "string",
+            "title": "Text Version"
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ru"
+            ],
+            "title": "Locale"
+          },
+          "consent_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consent Id"
+          },
+          "given_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Given At"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "purpose",
+          "health_data_explicit",
+          "text_version",
+          "locale",
+          "consent_id",
+          "given_at",
+          "expires_at"
+        ],
+        "title": "ConsentRecord"
+      },
+      "ConsentRequest": {
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "photo_analysis",
+              "share_with_clinic"
+            ],
+            "title": "Purpose"
+          },
+          "health_data_explicit": {
+            "type": "boolean",
+            "const": true,
+            "title": "Health Data Explicit"
+          },
+          "text_version": {
+            "type": "string",
+            "title": "Text Version"
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ru"
+            ],
+            "title": "Locale"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "purpose",
+          "health_data_explicit",
+          "text_version",
+          "locale"
+        ],
+        "title": "ConsentRequest"
+      },
+      "DentistSummary": {
+        "properties": {
+          "dentist_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "title": "Dentist Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "languages": {
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Languages"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "dentist_id",
+          "display_name",
+          "languages"
+        ],
+        "title": "DentistSummary"
+      },
+      "ErrorCode": {
+        "type": "string",
+        "enum": [
+          "image_unreadable",
+          "consent_required",
+          "uploads_disabled",
+          "consent_expired",
+          "payload_too_large",
+          "unsupported_media_type",
+          "backend_unavailable",
+          "not_found",
+          "gone",
+          "trip_too_short",
+          "currency_unsupported",
+          "unknown_airport",
+          "slot_unavailable",
+          "hold_expired",
+          "quote_mismatch",
+          "outside_trip",
+          "quote_expired",
+          "analysis_expired",
+          "share_consent_required",
+          "booking_cancelled",
+          "language_pair_unsupported",
+          "disclosure_not_acknowledged",
+          "invalid_call_token",
+          "wrong_role",
+          "idempotency_key_required",
+          "idempotency_in_progress",
+          "idempotency_key_reuse",
+          "validation_error",
+          "rate_limited",
+          "internal_error"
+        ],
+        "title": "ErrorCode"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/ErrorCode"
+          },
+          "message_key": {
+            "type": "string",
+            "title": "Message Key"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "retry_after_s": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retry After S"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message_key",
+          "detail",
+          "request_id",
+          "retry_after_s"
+        ],
+        "title": "ErrorResponse"
+      },
+      "Finding": {
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/FindingCode"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "possible",
+              "not_seen",
+              "not_assessed"
+            ],
+            "title": "Status"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "subtype": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtype"
+          },
+          "regions": {
+            "items": {
+              "$ref": "#/components/schemas/Region"
+            },
+            "type": "array",
+            "title": "Regions",
+            "default": []
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "status",
+          "score",
+          "subtype",
+          "regions"
+        ],
+        "title": "Finding"
+      },
+      "FindingCode": {
+        "type": "string",
+        "enum": [
+          "caries",
+          "filling",
+          "crown",
+          "abrasion",
+          "gingivitis",
+          "calculus",
+          "ulcer",
+          "discolouration",
+          "hypodontia",
+          "malocclusion",
+          "periapical_lesion",
+          "impacted_tooth"
+        ],
+        "title": "FindingCode"
+      },
+      "Health": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok",
+            "title": "Status"
+          },
+          "contract_version": {
+            "type": "string",
+            "title": "Contract Version"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "demo",
+              "live"
+            ],
+            "title": "Mode"
+          },
+          "vision_backend": {
+            "type": "string",
+            "title": "Vision Backend"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "contract_version",
+          "mode",
+          "vision_backend"
+        ],
+        "title": "Health"
+      },
+      "Hold": {
+        "properties": {
+          "hold_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Hold Id"
+          },
+          "slot_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Slot Id"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "hold_id",
+          "slot_id",
+          "expires_at"
+        ],
+        "title": "Hold"
+      },
+      "HoldRequest": {
+        "properties": {
+          "slot_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Slot Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "slot_id"
+        ],
+        "title": "HoldRequest"
+      },
+      "Meta": {
+        "properties": {
+          "uploads_enabled": {
+            "type": "boolean",
+            "title": "Uploads Enabled"
+          },
+          "assessable": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/FindingCode"
+              },
+              "type": "array"
+            },
+            "propertyNames": {
+              "enum": [
+                "intraoral_photo",
+                "panoramic_xray"
+              ]
+            },
+            "type": "object",
+            "title": "Assessable"
+          },
+          "texts": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Texts"
+          },
+          "verified_pairs": {
+            "items": {
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "type": "array",
+              "maxItems": 2,
+              "minItems": 2
+            },
+            "type": "array",
+            "title": "Verified Pairs"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Currencies",
+            "description": "Only currencies the dated FX snapshot holds"
+          },
+          "fx_as_of": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fx As Of"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "uploads_enabled",
+          "assessable",
+          "texts",
+          "verified_pairs",
+          "currencies",
+          "fx_as_of"
+        ],
+        "title": "Meta"
+      },
+      "MockTicket": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "flight",
+              "hotel"
+            ],
+            "title": "Kind"
+          },
+          "reference": {
+            "type": "string",
+            "pattern": "^DEMO-[A-Z0-9-]+$",
+            "title": "Reference"
+          },
+          "chip": {
+            "type": "string",
+            "const": "SIMULATED",
+            "title": "Chip"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "reference",
+          "chip"
+        ],
+        "title": "MockTicket"
+      },
+      "ModelInfo": {
+        "properties": {
+          "model_id": {
+            "type": "string",
+            "title": "Model Id"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "backend": {
+            "type": "string",
+            "enum": [
+              "ollama",
+              "mlx",
+              "transformers",
+              "fixture"
+            ],
+            "title": "Backend"
+          },
+          "card_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Card Url"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "model_id",
+          "version",
+          "backend",
+          "card_url"
+        ],
+        "title": "ModelInfo"
+      },
+      "Money": {
+        "properties": {
+          "amount_minor": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Amount Minor"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "title": "Currency"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "amount_minor",
+          "currency"
+        ],
+        "title": "Money"
+      },
+      "PatientText": {
+        "properties": {
+          "locale": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ru"
+            ],
+            "title": "Locale"
+          },
+          "observations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Observations"
+          },
+          "urgency_line": {
+            "type": "string",
+            "title": "Urgency Line"
+          },
+          "see_dentist_line": {
+            "type": "string",
+            "title": "See Dentist Line"
+          },
+          "not_assessed_line": {
+            "type": "string",
+            "title": "Not Assessed Line"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "locale",
+          "observations",
+          "urgency_line",
+          "see_dentist_line",
+          "not_assessed_line",
+          "disclaimer"
+        ],
+        "title": "PatientText"
+      },
+      "PriceRange": {
+        "properties": {
+          "low": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "mid": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "high": {
+            "$ref": "#/components/schemas/Money"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "low",
+          "mid",
+          "high"
+        ],
+        "title": "PriceRange"
+      },
+      "Quote": {
+        "properties": {
+          "quote_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Quote Id"
+          },
+          "request": {
+            "$ref": "#/components/schemas/QuoteRequest"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/QuoteLine"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Lines"
+          },
+          "total": {
+            "$ref": "#/components/schemas/PriceRange"
+          },
+          "total_chip": {
+            "type": "string",
+            "const": "ESTIMATE",
+            "title": "Total Chip"
+          },
+          "fx_as_of": {
+            "type": "string",
+            "format": "date",
+            "title": "Fx As Of"
+          },
+          "fare_model_version": {
+            "type": "string",
+            "title": "Fare Model Version"
+          },
+          "fare_mdape": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fare Mdape"
+          },
+          "valid_until": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Valid Until"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "quote_id",
+          "request",
+          "lines",
+          "total",
+          "total_chip",
+          "fx_as_of",
+          "fare_model_version",
+          "fare_mdape",
+          "valid_until"
+        ],
+        "title": "Quote"
+      },
+      "QuoteLine": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "treatment",
+              "flight",
+              "hotel"
+            ],
+            "title": "Kind"
+          },
+          "trips": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Trips"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/PriceRange"
+          },
+          "chip": {
+            "type": "string",
+            "enum": [
+              "ESTIMATE",
+              "SAMPLE",
+              "SIMULATED"
+            ],
+            "title": "Chip"
+          },
+          "basis_key": {
+            "type": "string",
+            "title": "Basis Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "trips",
+          "amount",
+          "chip",
+          "basis_key"
+        ],
+        "title": "QuoteLine"
+      },
+      "QuoteRequest": {
+        "properties": {
+          "clinic_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "title": "Clinic Id"
+          },
+          "treatment_codes": {
+            "items": {
+              "$ref": "#/components/schemas/TreatmentCode"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Treatment Codes"
+          },
+          "origin_iata": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "title": "Origin Iata"
+          },
+          "depart_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Depart Date"
+          },
+          "return_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Return Date"
+          },
+          "travellers": {
+            "type": "integer",
+            "maximum": 6.0,
+            "minimum": 1.0,
+            "title": "Travellers"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "title": "Currency"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "clinic_id",
+          "treatment_codes",
+          "origin_iata",
+          "depart_date",
+          "return_date",
+          "travellers",
+          "currency"
+        ],
+        "title": "QuoteRequest"
+      },
+      "Region": {
+        "properties": {
+          "x0": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "X0"
+          },
+          "y0": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Y0"
+          },
+          "x1": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "X1"
+          },
+          "y1": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Y1"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "x0",
+          "y0",
+          "x1",
+          "y1"
+        ],
+        "title": "Region",
+        "description": "Box in image fractions with the origin at the top left."
+      },
+      "ReplayManifest": {
+        "properties": {
+          "replay_id": {
+            "type": "string",
+            "title": "Replay Id"
+          },
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/ReplayTrack"
+            },
+            "type": "array",
+            "title": "Tracks"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/CaptionEvent"
+            },
+            "type": "array",
+            "title": "Events"
+          },
+          "latency_p50_ms": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Latency P50 Ms"
+          },
+          "latency_p95_ms": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Latency P95 Ms"
+          },
+          "n": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "N"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "replay_id",
+          "tracks",
+          "events",
+          "latency_p50_ms",
+          "latency_p95_ms",
+          "n"
+        ],
+        "title": "ReplayManifest"
+      },
+      "ReplayTrack": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "dentist"
+            ],
+            "title": "Role"
+          },
+          "lang": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+            "title": "Lang"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "role",
+          "lang",
+          "url"
+        ],
+        "title": "ReplayTrack"
+      },
+      "SampleImage": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "attribution": {
+            "type": "string",
+            "title": "Attribution"
+          },
+          "licence": {
+            "type": "string",
+            "title": "Licence"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "attribution",
+          "licence"
+        ],
+        "title": "SampleImage"
+      },
+      "Slot": {
+        "properties": {
+          "slot_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Slot Id"
+          },
+          "clinic_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "title": "Clinic Id"
+          },
+          "dentist_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "title": "Dentist Id"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "held",
+              "booked"
+            ],
+            "title": "Status"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "slot_id",
+          "clinic_id",
+          "dentist_id",
+          "start",
+          "end",
+          "status"
+        ],
+        "title": "Slot"
+      },
+      "TreatmentCode": {
+        "type": "string",
+        "enum": [
+          "consultation",
+          "filling",
+          "crown",
+          "root_canal",
+          "implant",
+          "scaling"
+        ],
+        "title": "TreatmentCode"
+      },
+      "TreatmentPrice": {
+        "properties": {
+          "treatment_code": {
+            "$ref": "#/components/schemas/TreatmentCode"
+          },
+          "price": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "chip": {
+            "type": "string",
+            "const": "SAMPLE",
+            "title": "Chip"
+          },
+          "trips": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Trips"
+          },
+          "nights_per_trip": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Nights Per Trip"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "treatment_code",
+          "price",
+          "chip",
+          "trips",
+          "nights_per_trip"
+        ],
+        "title": "TreatmentPrice"
+      },
+      "UrgencyHint": {
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": [
+              "routine",
+              "soon",
+              "prompt",
+              "retake_photo"
+            ],
+            "title": "Level"
+          },
+          "rule_id": {
+            "type": "string",
+            "title": "Rule Id"
+          },
+          "table_version": {
+            "type": "string",
+            "title": "Table Version"
+          },
+          "review_status": {
+            "type": "string",
+            "enum": [
+              "illustrative_not_clinically_reviewed",
+              "reviewed"
+            ],
+            "title": "Review Status"
+          },
+          "triggered_by": {
+            "items": {
+              "$ref": "#/components/schemas/FindingCode"
+            },
+            "type": "array",
+            "title": "Triggered By",
+            "default": []
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "level",
+          "rule_id",
+          "table_version",
+          "review_status",
+          "triggered_by"
+        ],
+        "title": "UrgencyHint"
+      }
+    }
+  }
+}

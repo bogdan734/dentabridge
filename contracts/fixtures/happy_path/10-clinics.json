@@ -1,0 +1,370 @@
+{
+  "step": "clinics",
+  "request": {
+    "method": "GET",
+    "path": "/v1/clinics",
+    "query": {
+      "treatment": "crown"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "ratelimit-limit": "120",
+      "ratelimit-remaining": "112",
+      "ratelimit-reset": "60"
+    },
+    "body": [
+      {
+        "clinic_id": "alfama-demo-dental",
+        "name": "Alfama Demo Dental",
+        "city": "Lisbon",
+        "country_code": "PT",
+        "airport_iata": "LIS",
+        "timezone": "Europe/Lisbon",
+        "languages": [
+          "en",
+          "pt"
+        ],
+        "dentists": [
+          {
+            "dentist_id": "dr-ines-marques",
+            "display_name": "Dr. Ines Marques (demo)",
+            "languages": [
+              "en",
+              "pt"
+            ]
+          },
+          {
+            "dentist_id": "dr-tomas-ribeiro",
+            "display_name": "Dr. Tomas Ribeiro (demo)",
+            "languages": [
+              "en",
+              "pt",
+              "es"
+            ]
+          }
+        ],
+        "treatments": [
+          {
+            "treatment_code": "consultation",
+            "price": {
+              "amount_minor": 5000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 1
+          },
+          {
+            "treatment_code": "scaling",
+            "price": {
+              "amount_minor": 7000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 1
+          },
+          {
+            "treatment_code": "filling",
+            "price": {
+              "amount_minor": 11000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 2
+          },
+          {
+            "treatment_code": "root_canal",
+            "price": {
+              "amount_minor": 38000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 3
+          },
+          {
+            "treatment_code": "crown",
+            "price": {
+              "amount_minor": 45000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 5
+          },
+          {
+            "treatment_code": "implant",
+            "price": {
+              "amount_minor": 140000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 2,
+            "nights_per_trip": 5
+          }
+        ],
+        "is_fictional": true
+      },
+      {
+        "clinic_id": "galata-demo-dental",
+        "name": "Galata Demo Dental",
+        "city": "Istanbul",
+        "country_code": "TR",
+        "airport_iata": "IST",
+        "timezone": "Europe/Istanbul",
+        "languages": [
+          "en",
+          "tr",
+          "ru"
+        ],
+        "dentists": [
+          {
+            "dentist_id": "dr-selin-aydin",
+            "display_name": "Dr. Selin Aydin (demo)",
+            "languages": [
+              "en",
+              "tr",
+              "ru"
+            ]
+          }
+        ],
+        "treatments": [
+          {
+            "treatment_code": "consultation",
+            "price": {
+              "amount_minor": 3000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 1
+          },
+          {
+            "treatment_code": "scaling",
+            "price": {
+              "amount_minor": 4500,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 1
+          },
+          {
+            "treatment_code": "filling",
+            "price": {
+              "amount_minor": 7000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 2
+          },
+          {
+            "treatment_code": "root_canal",
+            "price": {
+              "amount_minor": 25000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 3
+          },
+          {
+            "treatment_code": "crown",
+            "price": {
+              "amount_minor": 28000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 5
+          },
+          {
+            "treatment_code": "implant",
+            "price": {
+              "amount_minor": 70000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 2,
+            "nights_per_trip": 5
+          }
+        ],
+        "is_fictional": true
+      },
+      {
+        "clinic_id": "sukhumvit-demo-dental",
+        "name": "Sukhumvit Demo Dental",
+        "city": "Bangkok",
+        "country_code": "TH",
+        "airport_iata": "BKK",
+        "timezone": "Asia/Bangkok",
+        "languages": [
+          "en",
+          "th"
+        ],
+        "dentists": [
+          {
+            "dentist_id": "dr-nattaya-chai",
+            "display_name": "Dr. Nattaya Chai (demo)",
+            "languages": [
+              "en",
+              "th"
+            ]
+          }
+        ],
+        "treatments": [
+          {
+            "treatment_code": "consultation",
+            "price": {
+              "amount_minor": 3500,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 1
+          },
+          {
+            "treatment_code": "scaling",
+            "price": {
+              "amount_minor": 4000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 1
+          },
+          {
+            "treatment_code": "filling",
+            "price": {
+              "amount_minor": 6000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 2
+          },
+          {
+            "treatment_code": "root_canal",
+            "price": {
+              "amount_minor": 26000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 3
+          },
+          {
+            "treatment_code": "crown",
+            "price": {
+              "amount_minor": 30000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 5
+          },
+          {
+            "treatment_code": "implant",
+            "price": {
+              "amount_minor": 90000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 2,
+            "nights_per_trip": 5
+          }
+        ],
+        "is_fictional": true
+      },
+      {
+        "clinic_id": "harbour-demo-dental",
+        "name": "Harbour Demo Dental",
+        "city": "Sydney",
+        "country_code": "AU",
+        "airport_iata": "SYD",
+        "timezone": "Australia/Sydney",
+        "languages": [
+          "en"
+        ],
+        "dentists": [
+          {
+            "dentist_id": "dr-oliver-grant",
+            "display_name": "Dr. Oliver Grant (demo)",
+            "languages": [
+              "en"
+            ]
+          }
+        ],
+        "treatments": [
+          {
+            "treatment_code": "consultation",
+            "price": {
+              "amount_minor": 12000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 1
+          },
+          {
+            "treatment_code": "scaling",
+            "price": {
+              "amount_minor": 16000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 1
+          },
+          {
+            "treatment_code": "filling",
+            "price": {
+              "amount_minor": 25000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 2
+          },
+          {
+            "treatment_code": "root_canal",
+            "price": {
+              "amount_minor": 90000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 3
+          },
+          {
+            "treatment_code": "crown",
+            "price": {
+              "amount_minor": 110000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 1,
+            "nights_per_trip": 5
+          },
+          {
+            "treatment_code": "implant",
+            "price": {
+              "amount_minor": 340000,
+              "currency": "USD"
+            },
+            "chip": "SAMPLE",
+            "trips": 2,
+            "nights_per_trip": 5
+          }
+        ],
+        "is_fictional": true
+      }
+    ]
+  }
+}

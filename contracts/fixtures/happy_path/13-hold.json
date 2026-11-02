@@ -1,0 +1,27 @@
+{
+  "step": "hold",
+  "request": {
+    "method": "POST",
+    "path": "/v1/holds",
+    "headers": {
+      "Idempotency-Key": "fixture-hold"
+    },
+    "body": {
+      "slot_id": "b40065f3-4c33-5ad7-9894-23750d58abea"
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json",
+      "ratelimit-limit": "30",
+      "ratelimit-remaining": "27",
+      "ratelimit-reset": "60"
+    },
+    "body": {
+      "hold_id": "00000000-0000-4000-8000-000000000003",
+      "slot_id": "b40065f3-4c33-5ad7-9894-23750d58abea",
+      "expires_at": "2026-10-25T12:10:00Z"
+    }
+  }
+}

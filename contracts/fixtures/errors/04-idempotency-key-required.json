@@ -1,0 +1,23 @@
+{
+  "step": "idempotency-key-required",
+  "request": {
+    "method": "POST",
+    "path": "/v1/holds",
+    "body": {
+      "slot_id": "00000000-0000-4000-8000-000000000000"
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "code": "idempotency_key_required",
+      "message_key": "error.idempotency_key_required",
+      "detail": null,
+      "request_id": "fixture-04",
+      "retry_after_s": null
+    }
+  }
+}

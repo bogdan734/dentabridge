@@ -1,0 +1,29 @@
+{
+  "step": "share-consent-required",
+  "request": {
+    "method": "POST",
+    "path": "/v1/bookings",
+    "headers": {
+      "Idempotency-Key": "fixture-booking-wrong-consent"
+    },
+    "body": {
+      "hold_id": "00000000-0000-4000-8000-000000000005",
+      "quote_id": "1d3dd311-a156-5d9d-9cfb-8c0b0aeafd0f",
+      "analysis_id": "00000000-0000-4000-8000-000000000003",
+      "share_consent_id": "00000000-0000-4000-8000-000000000004"
+    }
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "code": "share_consent_required",
+      "message_key": "error.share_consent_required",
+      "detail": null,
+      "request_id": "fixture-07",
+      "retry_after_s": null
+    }
+  }
+}

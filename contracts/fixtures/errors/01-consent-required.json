@@ -1,0 +1,29 @@
+{
+  "step": "consent-required",
+  "request": {
+    "method": "POST",
+    "path": "/v1/analyses",
+    "headers": {
+      "Idempotency-Key": "fixture-upload"
+    },
+    "multipart": {
+      "consent_id": "00000000-0000-4000-8000-000000000000",
+      "modality": "intraoral_photo",
+      "locale": "en",
+      "file": "<jpeg>"
+    }
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "code": "consent_required",
+      "message_key": "error.consent_required",
+      "detail": null,
+      "request_id": "fixture-01",
+      "retry_after_s": null
+    }
+  }
+}

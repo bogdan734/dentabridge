@@ -23,6 +23,13 @@ from dentabridge_api.errors import ApiError
 from dentabridge_core import ErrorCode
 
 KEY = re.compile(r"^[A-Za-z0-9-]{8,64}$")
+KEY_PARAMETER = {  # what the route class reads by hand, declared for the generated client
+    "name": "Idempotency-Key",
+    "in": "header",
+    "required": True,
+    "schema": {"type": "string", "pattern": KEY.pattern},
+    "description": "Retrying with the same key and body returns the first answer.",
+}
 
 
 @dataclass(frozen=True)
@@ -99,6 +106,11 @@ async def fingerprint(request: Request) -> str:
 
 class IdempotentRoute(APIRoute):
     """Routes on a router with this class require an Idempotency-Key and replay on a repeat."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        extra = kwargs.pop("openapi_extra", None) or {}
+        parameters = [*extra.get("parameters", []), KEY_PARAMETER]
+        super().__init__(*args, openapi_extra={**extra, "parameters": parameters}, **kwargs)
 
     def get_route_handler(self) -> Callable[[Request], Coroutine[Any, Any, Response]]:
         original = super().get_route_handler()

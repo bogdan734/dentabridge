@@ -1,0 +1,24 @@
+{
+  "step": "disclosure-not-acknowledged",
+  "request": {
+    "method": "POST",
+    "path": "/v1/calls/c4b12bbd-769d-5fae-b42b-db516d192e24/tokens",
+    "body": {
+      "role": "patient",
+      "ai_disclosure_acknowledged": false
+    }
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "code": "disclosure_not_acknowledged",
+      "message_key": "error.disclosure_not_acknowledged",
+      "detail": "body.ai_disclosure_acknowledged",
+      "request_id": "fixture-12",
+      "retry_after_s": null
+    }
+  }
+}

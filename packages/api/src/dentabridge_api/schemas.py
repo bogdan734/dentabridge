@@ -2,10 +2,11 @@
 
 from datetime import date
 from typing import Literal
+from uuid import UUID
 
 from pydantic import Field
 
-from dentabridge_core import Contract, FindingCode, Modality
+from dentabridge_core import Contract, CountryCode, FindingCode, Iata, Modality
 
 
 class Health(Contract):
@@ -33,3 +34,14 @@ class SampleImage(Contract):
 class AnalyseSampleRequest(Contract):
     sample_id: str
     locale: Literal["en", "ru"]
+
+
+class City(Contract):
+    iata: Iata
+    city: str
+    airport: str
+    country_code: CountryCode
+
+
+class HoldRequest(Contract):
+    slot_id: UUID

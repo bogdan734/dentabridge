@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import DateTime, Dialect, Integer, String, Text, TypeDecorator
+from sqlalchemy import DateTime, Dialect, Index, Integer, String, Text, TypeDecorator, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -58,4 +58,64 @@ class IdempotencyRow(Base):
     state: Mapped[str] = mapped_column(String(16))  # "in_progress" | "done"
     status: Mapped[int] = mapped_column(Integer, default=0)
     body: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime())
+
+
+class QuoteRow(Base):
+    __tablename__ = "quotes"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    clinic_id: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime())
+    valid_until: Mapped[datetime] = mapped_column(UtcDateTime())
+    quote_json: Mapped[str] = mapped_column(Text)
+
+
+class HoldRow(Base):
+    __tablename__ = "holds"
+    __table_args__ = (
+        Index(
+            "ux_active_hold_per_slot",
+            "slot_id",
+            unique=True,
+            sqlite_where=text("state = 'active'"),
+            postgresql_where=text("state = 'active'"),
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    slot_id: Mapped[str] = mapped_column(String(36))
+    clinic_id: Mapped[str] = mapped_column(String(64))
+    dentist_id: Mapped[str] = mapped_column(String(64))
+    start: Mapped[datetime] = mapped_column(UtcDateTime())
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime())
+    expires_at: Mapped[datetime] = mapped_column(UtcDateTime())
+    state: Mapped[str] = mapped_column(String(12))  # active | consumed | released | expired
+
+
+class BookingRow(Base):
+    __tablename__ = "bookings"
+    __table_args__ = (
+        Index(
+            "ux_confirmed_booking_per_slot",
+            "slot_id",
+            unique=True,
+            sqlite_where=text("status = 'confirmed'"),
+            postgresql_where=text("status = 'confirmed'"),
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    slot_id: Mapped[str] = mapped_column(String(36))
+    clinic_id: Mapped[str] = mapped_column(String(64))
+    dentist_id: Mapped[str] = mapped_column(String(64))
+    start: Mapped[datetime] = mapped_column(UtcDateTime())
+    end: Mapped[datetime] = mapped_column(UtcDateTime())
+    quote_id: Mapped[str] = mapped_column(String(36))
+    hold_id: Mapped[str] = mapped_column(String(36))
+    status: Mapped[str] = mapped_column(String(12))  # confirmed | cancelled
+    tickets_json: Mapped[str] = mapped_column(Text)
+    shared_analysis_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    snapshot_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    snapshot_purge_after: Mapped[datetime | None] = mapped_column(UtcDateTime(), nullable=True)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime())

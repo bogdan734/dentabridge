@@ -29,6 +29,6 @@ def get_meta(request: Request, locale: Literal["en", "ru"] = "en") -> Meta:
         assessable={m: sorted(codes, key=lambda c: c.value) for m, codes in ASSESSABLE.items()},
         texts=dict(texts(locale)),
         verified_pairs=sorted(VERIFIED_PAIRS),
-        currencies=[],
-        fx_as_of=None,
+        currencies=state.fx.currencies(),
+        fx_as_of=state.fx.as_of,
     )

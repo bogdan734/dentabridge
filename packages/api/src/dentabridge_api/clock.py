@@ -24,3 +24,8 @@ class FrozenClock:
 
     def advance(self, by: timedelta) -> None:
         self._at += by
+
+    def set(self, at: datetime) -> None:
+        if at.tzinfo is None:
+            raise ValueError("a clock needs an aware datetime")
+        self._at = at

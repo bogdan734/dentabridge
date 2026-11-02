@@ -15,6 +15,8 @@ import httpx
 SAMPLE_RATE = 22_050  # the "medium" Piper voices
 CHUNK_MS = 100
 TIMEOUT_S = 30.0
+# the default voices: public-domain and CC0 training data (LICENCES.toml)
+VOICES = {"en": "en_US-ljspeech-medium", "ru": "ru_RU-denis-medium"}
 
 
 class PiperHttpTTS:

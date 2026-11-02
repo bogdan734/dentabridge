@@ -5,6 +5,9 @@ description = "Live voice and chat translation for calls"
 requires-python = ">=3.13,<3.14"
 dependencies = ["dentabridge-core"]
 
+[project.scripts]
+dentabridge-voice = "dentabridge_voice.__main__:main"
+
 [project.optional-dependencies]
 stt = [
     "faster-whisper>=1.1",
@@ -13,6 +16,11 @@ harness = [
     "pyyaml>=6",
     "sacrebleu>=2.4",
     "soundfile>=0.12",
+]
+worker = [
+    "faster-whisper>=1.1",
+    "livekit==1.1.21",
+    "livekit-api>=1.0",
 ]
 
 [build-system]

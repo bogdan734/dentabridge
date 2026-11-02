@@ -1,7 +1,9 @@
 import re
 
+import pytest
+
 from dentabridge_core import GlossaryEntry
-from dentabridge_voice.glossary import GLOSSARY_DIR, Glossary, load_glossary
+from dentabridge_voice.glossary import GLOSSARY_DIR, Glossary, glossary_for, load_glossary
 
 
 def test_the_shipped_glossary_is_en_ru_with_about_two_hundred_terms() -> None:
@@ -52,3 +54,10 @@ def test_licences_file_has_a_dated_row_for_every_default_model_and_never_imports
     source = "".join(p.read_text(encoding="utf-8") for p in Path(root / "src").rglob("*.py"))
     assert "import piper" not in source
     assert "from piper" not in source
+
+
+def test_the_call_glossary_is_found_by_the_id_in_the_room_metadata() -> None:
+    assert glossary_for("dental-en-ru") == load_glossary(GLOSSARY_DIR / "en-ru.tsv")
+    for unknown in ("dental-de-en", "en-ru", "dental-../en-ru"):
+        with pytest.raises(ValueError, match="no glossary"):
+            glossary_for(unknown)

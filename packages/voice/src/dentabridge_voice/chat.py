@@ -3,10 +3,11 @@
 import logging
 from uuid import uuid4
 
-from dentabridge_core import ChatEvent, Role, Translator
+from dentabridge_core import CallRoomMetadata, ChatEvent, Role, Translator
 from dentabridge_voice.checks import digits_preserved, matched_entries, missing_terms
 from dentabridge_voice.glossary import Glossary
 from dentabridge_voice.ports import WallClock
+from dentabridge_voice.routing import ParticipantInfo, direction_of
 
 MAX_CHARS = 1000
 log = logging.getLogger("dentabridge_voice")
@@ -51,3 +52,19 @@ class ChatTranslator:
                 "digits_ok": digits_preserved(text, translation.text),
             }
         )
+
+
+async def relay_chat(
+    raw: str, sender: ParticipantInfo, meta: CallRoomMetadata, chat: ChatTranslator
+) -> ChatEvent | None:
+    """A message from the `chat.in.v1` stream, translated for `chat.v1`. None when the sender is
+    not one of the call's two people (the interpreter itself included) or the message is empty or
+    too long: a stream from the room is not ours to fail on."""
+    direction = direction_of(sender, meta)
+    if direction is None:
+        return None
+    try:
+        return await chat.handle(raw, direction.role, direction.src, direction.tgt)
+    except ValueError:
+        log.warning("a chat message from the %s was empty or too long", direction.role)
+        return None

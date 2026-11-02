@@ -41,6 +41,14 @@ licence = "Unknown on the voice card"
 verified_on = "2026-11-02"
 status = "not used: licence not stated"
 
+[[model]]
+component = "Silero VAD v6 (silero_vad_v6.onnx, shipped inside faster-whisper)"
+role = "voice activity detection in the call worker: where an utterance ends"
+origin = "https://github.com/snakers4/silero-vad, the copy in the faster-whisper package"
+licence = "MIT"
+verified_on = "2026-11-02"
+status = "default"
+
 [[engine]]
 component = "piper-tts 1.8.0 (python -m piper.http_server)"
 role = "runs the Piper voices"
@@ -56,3 +64,27 @@ origin = "https://pypi.org/project/faster-whisper/"
 licence = "MIT"
 verified_on = "2026-11-02"
 status = "imported"
+
+[[engine]]
+component = "livekit-server v1.13.10 (Docker image livekit/livekit-server:v1.13.10)"
+role = "the call's media and data server"
+origin = "https://github.com/livekit/livekit"
+licence = "Apache-2.0"
+verified_on = "2026-11-02"
+status = "separate process"
+
+[[library]]
+component = "livekit 1.1.21 (rtc SDK) and livekit-api"
+role = "the call worker's room client and server API (optional `worker` extra)"
+origin = "https://github.com/livekit/python-sdks"
+licence = "Apache-2.0"
+verified_on = "2026-11-02"
+status = "imported"
+
+[[library]]
+component = "livekit-agents 1.7 and later"
+role = "agent framework the plan first named for the worker"
+origin = "https://pypi.org/project/livekit-agents/"
+licence = "Apache-2.0, but it requires livekit-local-inference (Apache-2.0 AND LicenseRef-LiveKit-Model: turn-detector weights)"
+verified_on = "2026-11-02"
+status = "not used: a hard dependency carries weights under a licence that is not open source"

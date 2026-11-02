@@ -2,12 +2,14 @@ import asyncio
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import Any
+from uuid import UUID
 
 import pytest
 
-from dentabridge_core import ChatEvent, GlossaryEntry, Translation
-from dentabridge_voice.chat import MAX_CHARS, ChatTranslator
+from dentabridge_core import CallRoomMetadata, ChatEvent, GlossaryEntry, Translation
+from dentabridge_voice.chat import MAX_CHARS, ChatTranslator, relay_chat
 from dentabridge_voice.glossary import Glossary
+from dentabridge_voice.routing import ParticipantInfo
 
 NOW = datetime(2026, 11, 2, 12, tzinfo=UTC)
 GLOSSARY = Glossary(langs=("en", "ru"), entries=(GlossaryEntry(src="tooth|teeth", tgt="зуб*"),))
@@ -88,3 +90,38 @@ def test_a_message_of_exactly_the_cap_is_translated() -> None:
 def test_every_message_gets_its_own_id() -> None:
     translator: Any = Translating("да")
     assert chat("a", translator).message_id != chat("a", translator).message_id
+
+
+SESSION = UUID("00000000-0000-4000-8000-000000000001")
+CALL = CallRoomMetadata.model_validate(
+    {
+        "session_id": SESSION,
+        "languages": {"patient": "ru", "dentist": "en"},
+        "mode": "consecutive",
+        "glossary_id": "dental-en-ru",
+    }
+)
+
+
+def relay(raw: str, sender: ParticipantInfo) -> ChatEvent | None:
+    handler = ChatTranslator(Translating("Tooth 36 hurts"), GLOSSARY, FixedClock())
+    return asyncio.run(relay_chat(raw, sender, CALL, handler))
+
+
+def test_worker_ignores_its_own_chat_events() -> None:
+    assert relay("Tooth 36 hurts", ParticipantInfo(f"interpreter-{SESSION}", is_agent=True)) is None
+    assert relay("hello", ParticipantInfo(f"patient-{UUID(int=9)}", is_agent=False)) is None
+    event = relay("Болит зуб 36", ParticipantInfo(f"patient-{SESSION}", is_agent=False))
+    assert event is not None
+    assert (event.sender, event.src_lang, event.tgt_lang, event.tgt_text) == (
+        "patient",
+        "ru",
+        "en",
+        "Tooth 36 hurts",
+    )
+
+
+def test_a_message_out_of_bounds_is_dropped_by_the_worker() -> None:
+    patient = ParticipantInfo(f"patient-{SESSION}", is_agent=False)
+    assert relay("   ", patient) is None
+    assert relay("x" * (MAX_CHARS + 1), patient) is None

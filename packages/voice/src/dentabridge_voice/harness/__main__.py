@@ -17,7 +17,7 @@ from pathlib import Path
 from dentabridge_core import Role
 from dentabridge_voice.adapters.faster_whisper import FasterWhisperSTT
 from dentabridge_voice.adapters.ollama_translator import OllamaTranslator
-from dentabridge_voice.adapters.piper_http import PiperHttpTTS
+from dentabridge_voice.adapters.piper_http import VOICES, PiperHttpTTS
 from dentabridge_voice.glossary import GLOSSARY_DIR, load_glossary
 from dentabridge_voice.harness.audio import RATE, to_16k, to_pcm16
 from dentabridge_voice.harness.results import VoiceResults, render_markdown
@@ -25,7 +25,6 @@ from dentabridge_voice.harness.run import Clip, load_script, record_replay, run_
 from dentabridge_voice.pipeline import Pipeline
 from dentabridge_voice.ports import Utterance
 
-VOICES = {"en": "en_US-ljspeech-medium", "ru": "ru_RU-denis-medium"}
 WARM_UP = 2
 
 

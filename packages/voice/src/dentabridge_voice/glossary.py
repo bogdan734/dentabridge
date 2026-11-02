@@ -1,5 +1,6 @@
 """The dental glossary: one file per language pair, read in either direction."""
 
+import re
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
@@ -7,6 +8,7 @@ from pydantic import BaseModel, ConfigDict
 from dentabridge_core import GlossaryEntry
 
 GLOSSARY_DIR = Path(__file__).resolve().parents[2] / "glossary"
+_CALL_ID = re.compile(r"dental-([a-z]{2,3}-[a-z]{2,3})")
 
 
 class Glossary(BaseModel):
@@ -45,3 +47,13 @@ def load_glossary(path: Path) -> Glossary:
         langs=(langs[0], langs[1]),
         entries=tuple(GlossaryEntry(src=src, tgt=tgt) for src, tgt in body),
     )
+
+
+def glossary_for(glossary_id: str) -> Glossary:
+    """The glossary a call's room metadata names: "dental-en-ru" is glossary/en-ru.tsv (the API
+    names it after the call's two languages, sorted)."""
+    match = _CALL_ID.fullmatch(glossary_id)
+    path = GLOSSARY_DIR / f"{match[1]}.tsv" if match else None
+    if path is None or not path.is_file():
+        raise ValueError(f"no glossary {glossary_id!r} in {GLOSSARY_DIR}")
+    return load_glossary(path)

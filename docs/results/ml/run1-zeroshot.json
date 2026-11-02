@@ -1,0 +1,87 @@
+{
+  "model_id": "Qwen/Qwen3-VL-4B-Instruct",
+  "split": "val",
+  "n_images": 757,
+  "json_valid_rate": 0.4187582562747688,
+  "codes": [
+    {
+      "code": "caries",
+      "n_pos": 302,
+      "n_neg": 455,
+      "sens": 0.052980132450331126,
+      "spec": 0.9406593406593406,
+      "sens_ci": [
+        0.030303030303030304,
+        0.07740042322085666
+      ],
+      "spec_ci": [
+        0.9119496855345912,
+        0.9661026514137047
+      ],
+      "ece": null,
+      "aurc": null
+    },
+    {
+      "code": "filling",
+      "n_pos": 65,
+      "n_neg": 66,
+      "sens": 0.0,
+      "spec": 1.0,
+      "sens_ci": [
+        0.0,
+        0.0
+      ],
+      "spec_ci": [
+        1.0,
+        1.0
+      ],
+      "ece": null,
+      "aurc": null
+    },
+    {
+      "code": "crown",
+      "n_pos": 21,
+      "n_neg": 110,
+      "sens": 0.0,
+      "spec": 0.990909090909091,
+      "sens_ci": [
+        0.0,
+        0.0
+      ],
+      "spec_ci": [
+        0.970873786407767,
+        1.0
+      ],
+      "ece": null,
+      "aurc": null
+    },
+    {
+      "code": "abrasion",
+      "n_pos": 112,
+      "n_neg": 19,
+      "sens": 0.0,
+      "spec": 1.0,
+      "sens_ci": [
+        0.0,
+        0.0
+      ],
+      "spec_ci": [
+        1.0,
+        1.0
+      ],
+      "ece": null,
+      "aurc": null
+    },
+    {
+      "code": "gingivitis",
+      "n_pos": 0,
+      "n_neg": 0,
+      "sens": null,
+      "spec": null,
+      "sens_ci": null,
+      "spec_ci": null,
+      "ece": null,
+      "aurc": null
+    }
+  ]
+}

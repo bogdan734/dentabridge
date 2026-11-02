@@ -1,0 +1,87 @@
+{
+  "model_id": "/kaggle/temp/merged-lean-t4",
+  "split": "val",
+  "n_images": 757,
+  "json_valid_rate": 0.8718626155878467,
+  "codes": [
+    {
+      "code": "caries",
+      "n_pos": 302,
+      "n_neg": 455,
+      "sens": 0.5132450331125827,
+      "spec": 0.9736263736263736,
+      "sens_ci": [
+        0.4496645183386263,
+        0.5820031168767169
+      ],
+      "spec_ci": [
+        0.9584177927927928,
+        0.9871272029951602
+      ],
+      "ece": null,
+      "aurc": null
+    },
+    {
+      "code": "filling",
+      "n_pos": 65,
+      "n_neg": 66,
+      "sens": 0.07692307692307693,
+      "spec": 0.9696969696969697,
+      "sens_ci": [
+        0.01818181818181818,
+        0.13848101265822774
+      ],
+      "spec_ci": [
+        0.9166666666666666,
+        1.0
+      ],
+      "ece": null,
+      "aurc": null
+    },
+    {
+      "code": "crown",
+      "n_pos": 21,
+      "n_neg": 110,
+      "sens": 0.0,
+      "spec": 1.0,
+      "sens_ci": [
+        0.0,
+        0.0
+      ],
+      "spec_ci": [
+        1.0,
+        1.0
+      ],
+      "ece": null,
+      "aurc": null
+    },
+    {
+      "code": "abrasion",
+      "n_pos": 112,
+      "n_neg": 19,
+      "sens": 0.9196428571428571,
+      "spec": 0.05263157894736842,
+      "sens_ci": [
+        0.8737808280325856,
+        0.9626168224299065
+      ],
+      "spec_ci": [
+        0.0,
+        0.2
+      ],
+      "ece": null,
+      "aurc": null
+    },
+    {
+      "code": "gingivitis",
+      "n_pos": 0,
+      "n_neg": 0,
+      "sens": null,
+      "spec": null,
+      "sens_ci": null,
+      "spec_ci": null,
+      "ece": null,
+      "aurc": null
+    }
+  ]
+}
